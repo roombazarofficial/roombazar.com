@@ -1,14 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * NOTE: this file must live at src/middleware.ts — a sibling of src/app.
- * Placed at the project root next to next.config.ts it is silently ignored,
- * with no build error and no warning.
- */
-
 const SESSION_COOKIE = "rb_session";
 
-/** Signed-out users are bounced from these prefixes to /login. */
 const protectedPrefixes = ["/dashboard", "/post", "/admin"];
 
 export function middleware(request: NextRequest) {
@@ -18,22 +11,23 @@ export function middleware(request: NextRequest) {
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
-  if (!needsSession) {
+  if (!needsSession) return NextResponse.next();
+
+  if (request.cookies.has(SESSION_COOKIE)) {
+    /*
+      Presence only. Whether the token is valid, expired or revoked is the
+      API's judgement, and asking it here would put a network call in front of
+      every page. The pages themselves render empty states if it turns out not
+      to be a live session.
+    */
     return NextResponse.next();
   }
 
-  const hasSession = request.cookies.has(SESSION_COOKIE);
+  const url = new URL("/", request.url);
+  url.searchParams.set("signin", "1");
+  url.searchParams.set("next", pathname);
 
-  if (!hasSession) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Presence of the cookie is only a cheap gate. Role checks for /admin and
-  // ownership checks for /dashboard must still happen server-side, because a
-  // cookie being present says nothing about whether it is valid.
-  return NextResponse.next();
+  return NextResponse.redirect(url);
 }
 
 export const config = {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { routes } from "@/lib/constants/routes";
+import { Logo } from "@/components/layout/logo";
 
 const columns = [
   {
@@ -36,12 +37,12 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
-            <p className="text-lg font-semibold tracking-tight text-ink">
-              Room<span className="text-brand-600">Bazar</span>
-            </p>
+            <Logo variant="wide" height={30} href={null} priority={false} />
+
             <p className="mt-2 max-w-xs text-sm text-ink-muted">
               Rooms for rent, direct from owners. No broker fees, no commission.
             </p>
+
           </div>
 
           {columns.map((column) => (
@@ -49,6 +50,7 @@ export function SiteFooter() {
               <h2 className="text-sm font-semibold text-ink">
                 {column.heading}
               </h2>
+
               <ul className="mt-3 space-y-2">
                 {column.links.map((link) => (
                   <li key={link.label}>
@@ -59,29 +61,23 @@ export function SiteFooter() {
                       {link.label}
                     </Link>
                   </li>
+
                 ))}
               </ul>
-            </div>
-          ))}
-        </div>
 
-        {/*
-          The single most effective anti-scam measure we have is making sure
-          every user has internalised this before they ever open a
-          conversation. It costs one line and it belongs on every page.
-        */}
-        <div className="mt-10 rounded-card border border-warning/20 bg-warning-soft px-4 py-3">
-          <p className="text-sm text-warning">
-            <strong className="font-semibold">RoomBazar never collects payments.</strong>{" "}
-            Never pay an advance or deposit before visiting the room in person.
-          </p>
+            </div>
+
+          ))}
         </div>
 
         <p className="mt-8 text-xs text-ink-subtle">
           © {new Date().getFullYear()} RoomBazar. Listings are posted by users;
           we are not a party to any rental agreement.
         </p>
+
       </div>
+
     </footer>
+
   );
 }

@@ -15,22 +15,11 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  // Heights stay at or above 40px. Most of this market taps rather than
-  // clicks, and anything smaller is a miss-prone target on a phone.
   sm: "h-10 px-3 text-sm gap-1.5",
   md: "h-11 px-4 text-sm gap-2",
   lg: "h-12 px-5 text-base gap-2",
 };
 
-/**
- * Shared styles, so an anchor can be made to look like a button without
- * pulling in a Slot polyfill:
- *
- *   <Link className={buttonStyles({ variant: "primary" })}>Post a room</Link>
- *
- * Use a real <a> for navigation and a real <button> for actions — never a
- * button with an onClick that navigates.
- */
 export function buttonStyles({
   variant = "primary",
   size = "md",
@@ -57,8 +46,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
-  /** Shows a spinner and blocks interaction. Width is preserved so the
-   *  button does not resize mid-submit. */
   loading?: boolean;
   fullWidth?: boolean;
 }
@@ -90,9 +77,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             aria-hidden
             className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
           />
+
         )}
         {children}
       </button>
+
     );
   },
 );

@@ -6,5 +6,6 @@ export default function Page() {
       title="Localities"
       subtitle="Curated locality list with alias spellings that must resolve together."
     />
+
   );
 }

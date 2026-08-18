@@ -2,12 +2,12 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/emptystate";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
-import { mockConversations } from "@/lib/api/mockconversations";
+import { getConversations } from "@/lib/api/conversations";
 import { formatRupees } from "@/lib/format/rupees";
 import { routes } from "@/lib/constants/routes";
 
-export default function Page() {
-  const conversations = mockConversations;
+export default async function Page() {
+  const conversations = await getConversations();
 
   return (
     <div>
@@ -22,8 +22,10 @@ export default function Page() {
             <Link href={routes.rooms} className={buttonStyles({ variant: "secondary" })}>
               Browse rooms
             </Link>
+
           }
         />
+
       ) : (
         <ul className="mt-6 divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
           {conversations.map((conversation) => (
@@ -37,19 +39,23 @@ export default function Page() {
                     <p className="truncate text-sm font-medium text-ink">
                       {conversation.counterpartName}
                     </p>
+
                     {conversation.unreadCount > 0 && (
                       <Badge tone="brand">{conversation.unreadCount} new</Badge>
+
                     )}
                   </div>
 
                   <p className="mt-0.5 truncate text-xs text-ink-muted">
                     {conversation.listingTitle} ·{" "}
                     {formatRupees(conversation.listingRentPaise)}/month
+
                   </p>
 
                   <p className="mt-1.5 truncate text-sm text-ink-muted">
                     {conversation.lastMessagePreview}
                   </p>
+
                 </div>
 
                 <time
@@ -58,12 +64,17 @@ export default function Page() {
                 >
                   {relative(conversation.lastMessageAt)}
                 </time>
+
               </Link>
+
             </li>
+
           ))}
         </ul>
+
       )}
     </div>
+
   );
 }
 

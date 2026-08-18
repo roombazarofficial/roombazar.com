@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils/classnames";
 const items = [
   { href: routes.dashboard, label: "Overview" },
   { href: routes.myListings, label: "My listings" },
+  { href: routes.enquiries, label: "Enquiries" },
   { href: routes.inbox, label: "Inbox" },
   { href: routes.saved, label: "Saved" },
   { href: routes.verification, label: "Verification" },
@@ -41,10 +42,14 @@ export function DashboardSidebar() {
               >
                 {item.label}
               </Link>
+
             </li>
+
           );
         })}
       </ul>
+
     </nav>
+
   );
 }

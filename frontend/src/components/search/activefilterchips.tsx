@@ -12,11 +12,6 @@ interface Chip {
   remove: Partial<SearchFilters>;
 }
 
-/**
- * Makes the active filters visible above the results and removable in one
- * tap. On mobile the filter UI is behind a drawer, so without this a seeker
- * can end up staring at three results with no idea which filter caused it.
- */
 export function ActiveFilterChips({
   filters,
   localities,
@@ -92,10 +87,15 @@ export function ActiveFilterChips({
           >
             {chip.label}
             <span aria-hidden className="text-base leading-none">×</span>
+
             <span className="sr-only">Remove filter</span>
+
           </button>
+
         </li>
+
       ))}
     </ul>
+
   );
 }

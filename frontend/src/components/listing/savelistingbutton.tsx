@@ -3,11 +3,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Sits on top of the listing card, above the stretched link that makes the
- * whole card clickable. It needs its own stacking context and a stopped
- * propagation, or tapping save navigates to the listing instead.
- */
 export function SaveListingButton({
   listingId,
   initialSaved = false,
@@ -47,6 +42,8 @@ export function SaveListingButton({
       >
         <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21.2l7.7-7.8 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
       </svg>
+
     </button>
+
   );
 }

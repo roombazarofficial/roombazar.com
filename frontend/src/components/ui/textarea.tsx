@@ -6,7 +6,6 @@ export interface TextareaProps
   label?: string;
   hint?: string;
   error?: string;
-  /** Shows a live "n / max" counter. Pair with maxLength. */
   showCount?: boolean;
 }
 
@@ -29,6 +28,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           >
             {label}
           </label>
+
         )}
 
         <textarea
@@ -61,6 +61,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             >
               {error ?? hint}
             </p>
+
           ) : (
             <span />
           )}
@@ -68,10 +69,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {showCount && maxLength && (
             <span className="shrink-0 text-xs tabular-nums text-ink-subtle">
               {length} / {maxLength}
+
             </span>
+
           )}
         </div>
+
       </div>
+
     );
   },
 );

@@ -21,25 +21,34 @@ export default function Page() {
               className="block p-4 transition-colors hover:bg-surface-muted"
             >
               <p className="text-sm font-medium text-ink">{section.title}</p>
+
               <p className="mt-0.5 text-sm text-ink-muted">
                 {section.description}
               </p>
+
             </Link>
+
           </li>
+
         ))}
       </ul>
 
       <div className="mt-8 rounded-card border border-danger/20 bg-danger-soft p-4">
         <h2 className="text-sm font-semibold text-danger">Delete account</h2>
+
         <p className="mt-1 text-sm text-danger">
           Removes your account, listings and photos within 30 days. Messages
           that are evidence in an open report are anonymised rather than
           deleted.
         </p>
+
         <button className="mt-3 rounded-control border border-danger/30 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10">
           Delete my account
         </button>
+
       </div>
+
     </div>
+
   );
 }

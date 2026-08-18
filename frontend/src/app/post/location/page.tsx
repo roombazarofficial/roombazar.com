@@ -4,38 +4,84 @@ import { StepShell } from "@/components/listingform/stepshell";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useListingDraft } from "@/store/listingdraftstore";
-import { localities } from "@/lib/api/mockdata";
+import { useLocalities } from "@/hooks/uselocalities";
 
 export default function Page() {
   const { draft, update } = useListingDraft();
+  const {
+    localities,
+    cities,
+    loadingCities,
+    loadingLocalities,
+    error,
+    retry,
+  } = useLocalities(draft.citySlug);
+
+  const cityPlaceholder = loadingCities
+    ? "Loading cities…"
+    : cities.length === 0
+      ? "No cities available"
+      : "Select a city";
+
+  const localityPlaceholder = !draft.citySlug
+    ? "Choose a city first"
+    : loadingLocalities
+      ? "Loading localities…"
+      : localities.length === 0
+        ? "No localities available"
+        : "Select a locality";
 
   return (
     <StepShell
       step="location"
       title="Where is the room?"
       description="Seekers search by locality, so this is the field that decides whether you are found."
-      canContinue={Boolean(draft.localitySlug)}
+      canContinue={Boolean(draft.citySlug && draft.localitySlug)}
     >
+      {error && (
+        <div
+          role="alert"
+          className="rounded-card border border-danger/30 bg-danger-soft px-4 py-3"
+        >
+          <p className="text-sm text-danger">{error}</p>
+
+          <button
+            type="button"
+            onClick={retry}
+            className="mt-1 text-sm font-medium text-danger underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
       <Select
         label="City"
-        options={[{ value: "bengaluru", label: "Bengaluru" }]}
+        placeholder={cityPlaceholder}
+        options={cities.map((city) => ({ value: city.slug, label: city.name }))}
         value={draft.citySlug ?? ""}
-        onChange={(event) => update({ citySlug: event.target.value })}
+        disabled={loadingCities || cities.length === 0}
+        /*
+          Changing the city clears the locality, because the previous choice
+          belongs to a different city and would otherwise be submitted as
+          though it were valid here.
+        */
+        onChange={(event) =>
+          update({ citySlug: event.target.value, localitySlug: null })
+        }
       />
 
-      {/*
-        Picked from a list, never typed free-form. Free-text localities
-        fragment search ("Indiranagar" / "Indira Nagar") and both sides of the
-        market stop finding each other. See docs/01-data-model.md.
-      */}
       <Select
         label="Locality"
-        placeholder="Select a locality"
+        placeholder={localityPlaceholder}
         options={localities.map((locality) => ({
           value: locality.slug,
           label: locality.name,
         }))}
         value={draft.localitySlug ?? ""}
+        disabled={
+          !draft.citySlug || loadingLocalities || localities.length === 0
+        }
         onChange={(event) => update({ localitySlug: event.target.value })}
         hint="Cannot find yours? Ask us to add it from the help page."
       />

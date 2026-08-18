@@ -20,7 +20,6 @@ export function FilterPanel({
   filters: SearchFilters;
   localities: Locality[];
   citySlug: string;
-  /** The drawer supplies its own clear action in a pinned footer. */
   showClearButton?: boolean;
 }) {
   const router = useRouter();
@@ -39,11 +38,7 @@ export function FilterPanel({
 
   return (
     <div className="space-y-7">
-      {/*
-        Owner-only sits at the top and on its own. It is the filter people
-        come to this site for, and burying it under room type would waste the
-        clearest reason to choose us over an incumbent portal.
-      */}
+      {}
       <Section title="Posted by">
         {(Object.keys(postedByLabels) as PostedBy[]).map((value) => (
           <Checkbox
@@ -52,6 +47,7 @@ export function FilterPanel({
             checked={filters.postedBy.includes(value)}
             onChange={() => apply({ postedBy: toggle(filters.postedBy, value) })}
           />
+
         ))}
       </Section>
 
@@ -73,7 +69,9 @@ export function FilterPanel({
               })
             }
           />
+
           <span className="text-ink-subtle">–</span>
+
           <Input
             type="number"
             inputMode="numeric"
@@ -90,7 +88,9 @@ export function FilterPanel({
               })
             }
           />
+
         </div>
+
       </Section>
 
       <Section title="Locality">
@@ -106,6 +106,7 @@ export function FilterPanel({
               })
             }
           />
+
         ))}
       </Section>
 
@@ -117,6 +118,7 @@ export function FilterPanel({
             checked={filters.roomTypes.includes(value)}
             onChange={() => apply({ roomTypes: toggle(filters.roomTypes, value) })}
           />
+
         ))}
       </Section>
 
@@ -130,6 +132,7 @@ export function FilterPanel({
               apply({ furnishing: toggle(filters.furnishing, value) })
             }
           />
+
         ))}
       </Section>
 
@@ -141,8 +144,10 @@ export function FilterPanel({
         >
           Clear all filters
         </Button>
+
       )}
     </div>
+
   );
 }
 
@@ -156,7 +161,10 @@ function Section({
   return (
     <section>
       <h2 className="mb-1.5 px-2 text-sm font-semibold text-ink">{title}</h2>
+
       <div className="space-y-0.5">{children}</div>
+
     </section>
+
   );
 }

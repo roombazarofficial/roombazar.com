@@ -1,14 +1,5 @@
 import { EmptyState } from "@/components/ui/emptystate";
 
-/**
- * Frame for the admin record screens that are structurally identical:
- * heading, description, and a table that will be populated once the backend
- * exposes the corresponding endpoint.
- *
- * These are intentionally thin. Building filter and pagination behaviour
- * against mock data would be work thrown away the moment real query
- * parameters exist.
- */
 export function AdminTablePlaceholder({
   title,
   subtitle,
@@ -22,7 +13,9 @@ export function AdminTablePlaceholder({
         <h1 className="text-2xl font-semibold tracking-tight text-ink">
           {title}
         </h1>
+
         <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
+
       </header>
 
       <EmptyState
@@ -30,6 +23,8 @@ export function AdminTablePlaceholder({
         title="Waiting on the backend"
         description="This table renders once the admin endpoints exist. The screen it belongs to, and where it sits in the navigation, are settled."
       />
+
     </div>
+
   );
 }

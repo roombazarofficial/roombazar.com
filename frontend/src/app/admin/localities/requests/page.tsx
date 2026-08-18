@@ -6,5 +6,6 @@ export default function Page() {
       title="Locality requests"
       subtitle="Localities listers asked for that do not exist yet."
     />
+
   );
 }

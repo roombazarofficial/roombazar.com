@@ -8,6 +8,7 @@ export default function Page() {
       <h1 className="text-3xl font-semibold tracking-tight text-ink">
         Post your room
       </h1>
+
       <p className="mt-3 text-base text-ink-muted">
         It takes about three minutes and costs nothing. You keep full control
         of who contacts you, and your phone number stays private until you
@@ -24,6 +25,7 @@ export default function Page() {
             <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-600" />
             {item}
           </li>
+
         ))}
       </ul>
 
@@ -33,6 +35,8 @@ export default function Page() {
       >
         Start
       </Link>
+
     </div>
+
   );
 }

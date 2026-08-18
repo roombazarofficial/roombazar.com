@@ -1,17 +1,40 @@
+"use client";
+
 import Link from "next/link";
-import { buttonStyles } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Logo } from "@/components/layout/logo";
+import { Button, buttonStyles } from "@/components/ui/button";
+import { useAuthUi } from "@/store/authuistore";
+import { logout } from "@/lib/api/auth";
 import { routes } from "@/lib/constants/routes";
 
 export function SiteHeader() {
+  const router = useRouter();
+  const { user, loaded, openSignIn, setUser } = useAuthUi();
+
+  function postRoom() {
+    if (user) {
+      router.push(routes.post);
+      return;
+    }
+
+    openSignIn({
+      intent: "Sign in to post your room. It takes about a minute.",
+      next: routes.post,
+    });
+  }
+
+  async function signOut() {
+    await logout().catch(() => undefined);
+    setUser(null);
+    router.push(routes.home);
+    router.refresh();
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
-        <Link
-          href={routes.home}
-          className="text-lg font-semibold tracking-tight text-ink"
-        >
-          Room<span className="text-brand-600">Bazar</span>
-        </Link>
+        <Logo variant="wide" height={30} href={routes.home} />
 
         <nav className="ml-4 hidden items-center gap-1 md:flex">
           <Link
@@ -29,28 +52,45 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          {/*
-            "Post a room" stays visible at every breakpoint. Supply is the
-            harder side of this marketplace to grow, so the action that adds
-            it is never the one that collapses into a menu.
-          */}
-          <Link
-            href={routes.post}
-            className={buttonStyles({ variant: "primary", size: "sm" })}
-          >
+          <Button variant="primary" size="sm" onClick={postRoom}>
             Post a room
-          </Link>
+          </Button>
 
-          <Link
-            href={routes.login}
-            className={buttonStyles({
-              variant: "ghost",
-              size: "sm",
-              className: "hidden sm:inline-flex",
-            })}
-          >
-            Sign in
-          </Link>
+          {!loaded ? (
+            <span
+              aria-hidden
+              className="hidden h-9 w-20 animate-pulse rounded-control bg-surface-sunken sm:block"
+            />
+          ) : user ? (
+            <>
+              <Link
+                href={routes.dashboard}
+                className={buttonStyles({
+                  variant: "ghost",
+                  size: "sm",
+                  className: "hidden sm:inline-flex",
+                })}
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="hidden rounded-control px-3 py-2 text-sm text-ink-muted hover:bg-surface-muted hover:text-ink sm:block"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => openSignIn()}
+            >
+              Sign in
+            </Button>
+          )}
         </div>
       </div>
     </header>

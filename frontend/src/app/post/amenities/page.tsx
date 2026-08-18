@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useListingDraft } from "@/store/listingdraftstore";
-import { amenities } from "@/lib/api/mockdata";
+import { useAmenities } from "@/hooks/useamenities";
 import { furnishingLabels } from "@/lib/constants/roomtypes";
 import type { AmenityCategory } from "@/types/amenity";
 import type { Furnishing } from "@/types/listing";
@@ -18,6 +18,7 @@ const groups: { category: AmenityCategory; heading: string }[] = [
 
 export default function Page() {
   const { draft, update, toggleAmenity } = useListingDraft();
+  const amenities = useAmenities();
 
   return (
     <StepShell
@@ -48,6 +49,7 @@ export default function Page() {
             update({ areaSqft: event.target.value ? Number(event.target.value) : null })
           }
         />
+
         <Input
           label="Floor"
           type="number"
@@ -57,6 +59,7 @@ export default function Page() {
             update({ floor: event.target.value ? Number(event.target.value) : null })
           }
         />
+
         <Input
           label="Total floors"
           type="number"
@@ -68,6 +71,7 @@ export default function Page() {
             })
           }
         />
+
       </div>
 
       {groups.map((group) => (
@@ -75,6 +79,7 @@ export default function Page() {
           <legend className="mb-1 text-sm font-medium text-ink">
             {group.heading}
           </legend>
+
           <div className="grid sm:grid-cols-2">
             {amenities
               .filter((amenity) => amenity.category === group.category)
@@ -85,10 +90,14 @@ export default function Page() {
                   checked={draft.amenitySlugs.includes(amenity.slug)}
                   onChange={() => toggleAmenity(amenity.slug)}
                 />
+
               ))}
           </div>
+
         </fieldset>
+
       ))}
     </StepShell>
+
   );
 }

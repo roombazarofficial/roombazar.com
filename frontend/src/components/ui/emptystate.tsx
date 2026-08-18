@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Shown when a list has nothing in it. Every empty state should offer a way
- * out — an empty search with no suggested action is a dead end, and this
- * marketplace will have plenty of thin localities early on.
- */
 export function EmptyState({
   title,
   description,
@@ -33,9 +28,12 @@ export function EmptyState({
 
       {description && (
         <p className="mt-1.5 max-w-sm text-sm text-ink-muted">{description}</p>
+
       )}
 
       {action && <div className="mt-5">{action}</div>}
+
     </div>
+
   );
 }

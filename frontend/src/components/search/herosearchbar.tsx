@@ -6,18 +6,13 @@ import { buildSearchQuery } from "@/lib/utils/querystring";
 import { routes } from "@/lib/constants/routes";
 import type { Locality } from "@/types/locality";
 
-/**
- * The hero search bar.
- *
- * Follows the segmented-pill pattern people already know from travel sites,
- * but with the fields this product actually has. There is no check-out date:
- * these are monthly rentals on 11-month agreements, not stays, so a date
- * range would be a field nobody could fill. One move-in date instead.
- *
- * "People" is not decorative either — one person versus two sharing changes
- * which room types are worth showing.
- */
-export function HeroSearchBar({ localities }: { localities: Locality[] }) {
+export function HeroSearchBar({
+  localities,
+  citySlug,
+}: {
+  localities: Locality[];
+  citySlug: string;
+}) {
   const router = useRouter();
 
   const [localitySlug, setLocalitySlug] = useState("");
@@ -33,7 +28,7 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
       occupancy: people ? Number(people) : null,
     });
 
-    router.push(`${routes.city("bengaluru")}${query}`);
+    router.push(`${routes.city(citySlug)}${query}`);
   }
 
   return (
@@ -49,13 +44,16 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
             onChange={(event) => setLocalitySlug(event.target.value)}
             className="w-full cursor-pointer bg-transparent text-sm text-ink outline-none"
           >
-            <option value="">Anywhere in Bengaluru</option>
+            <option value="">Anywhere in the city</option>
+
             {localities.map((locality) => (
               <option key={locality.id} value={locality.slug}>
                 {locality.name}
               </option>
+
             ))}
           </select>
+
         </Segment>
 
         <Divider />
@@ -68,6 +66,7 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
             onChange={(event) => setMoveIn(event.target.value)}
             className="w-full bg-transparent text-sm text-ink outline-none"
           />
+
         </Segment>
 
         <Divider />
@@ -80,11 +79,17 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
             className="w-full cursor-pointer bg-transparent text-sm text-ink outline-none"
           >
             <option value="">Any</option>
+
             <option value="1">1 person</option>
+
             <option value="2">2 people</option>
+
             <option value="3">3 people</option>
+
             <option value="4">4 or more</option>
+
           </select>
+
         </Segment>
 
         <div className="p-2 sm:pr-2">
@@ -104,11 +109,17 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
+
             <span className="sm:sr-only">Search rooms</span>
+
           </button>
+
         </div>
+
       </div>
+
     </form>
+
   );
 }
 
@@ -129,17 +140,20 @@ function Segment({
       >
         {label}
       </label>
+
       <div className="mt-0.5">{children}</div>
+
     </div>
+
   );
 }
 
-/** Horizontal rule between stacked segments, vertical between inline ones. */
 function Divider() {
   return (
     <span
       aria-hidden
       className="h-px w-full bg-line sm:h-8 sm:w-px sm:shrink-0"
     />
+
   );
 }

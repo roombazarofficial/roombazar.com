@@ -67,12 +67,16 @@ export default function Page() {
           checked={draft.billsIncluded}
           onChange={(event) => update({ billsIncluded: event.target.checked })}
         />
+
         <Checkbox
           label="Rent is negotiable"
           checked={draft.negotiable}
           onChange={(event) => update({ negotiable: event.target.checked })}
         />
+
       </div>
+
     </StepShell>
+
   );
 }

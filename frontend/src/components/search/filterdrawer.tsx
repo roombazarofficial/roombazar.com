@@ -9,14 +9,6 @@ import { routes } from "@/lib/constants/routes";
 import type { SearchFilters } from "@/types/searchfilters";
 import type { Locality } from "@/types/locality";
 
-/**
- * Filters on a phone.
- *
- * The sidebar is hidden below `lg`, so without this a mobile seeker cannot
- * narrow results at all — and mobile is the majority of this market. The
- * trigger sits in the results toolbar and shows how many filters are active,
- * because a filter you have forgotten about is worse than no filter.
- */
 export function FilterDrawer({
   filters,
   localities,
@@ -51,6 +43,7 @@ export function FilterDrawer({
           <span className="ml-1.5 rounded-full bg-brand-600 px-1.5 py-0.5 text-2xs font-semibold text-ink-inverse">
             {activeCount}
           </span>
+
         )}
       </Button>
 
@@ -70,23 +63,26 @@ export function FilterDrawer({
             >
               Clear all
             </Button>
+
             <Button fullWidth onClick={() => setOpen(false)}>
               Show results
             </Button>
+
           </div>
+
         }
       >
-        {/*
-          The same FilterPanel the sidebar uses. One implementation means a
-          filter added later cannot appear on desktop but go missing on mobile.
-        */}
+        {}
         <FilterPanel
           filters={filters}
           localities={localities}
           citySlug={citySlug}
           showClearButton={false}
         />
+
       </Drawer>
+
     </>
+
   );
 }

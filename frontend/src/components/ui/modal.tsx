@@ -3,10 +3,6 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Centred dialog. Same native <dialog> foundation as the drawer — focus
- * trap, escape handling and inert background come from the platform.
- */
 export function Modal({
   open,
   onClose,
@@ -49,14 +45,18 @@ export function Modal({
 
         {description && (
           <p className="mt-1.5 text-sm text-ink-muted">{description}</p>
+
         )}
 
         {children && <div className="mt-4">{children}</div>}
 
         {footer && (
           <div className="mt-5 flex justify-end gap-2">{footer}</div>
+
         )}
       </div>
+
     </dialog>
+
   );
 }

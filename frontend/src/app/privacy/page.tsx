@@ -17,22 +17,28 @@ export default function Page() {
           the platform. Under the Digital Personal Data Protection Act 2023 we
           are a Data Fiduciary for that information.
         </p>
+
         <p>
           Your phone number is never shown publicly. It is shared with another
           user only when you and that person have both agreed to share numbers
           inside a conversation.
         </p>
+
         <p>
           We read message content only for automated safety scanning and when
           investigating a specific report. Deleting your account removes your
           listings, photos and personal fields within 30 days; messages that
           are evidence in an open report are anonymised instead.
         </p>
+
         <p>
           This is placeholder wording and must be reviewed by a lawyer before
           launch.
         </p>
+
       </LegalPage>
+
     </SiteShell>
+
   );
 }

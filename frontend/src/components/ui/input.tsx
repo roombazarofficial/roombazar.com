@@ -2,14 +2,10 @@ import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils/classnames";
 
 export interface InputProps
-  // "prefix" is a global RDFa attribute in React's types and is typed as
-  // string, so it has to be dropped before being redeclared as ReactNode.
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   label?: string;
-  /** Shown under the field in muted text. Hidden while an error is showing. */
   hint?: string;
   error?: string;
-  /** Rendered inside the field, e.g. "₹" on a rent input. */
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
 }
@@ -31,6 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         >
           {label}
         </label>
+
       )}
 
       <div
@@ -43,6 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       >
         {prefix && (
           <span className="shrink-0 text-sm text-ink-muted">{prefix}</span>
+
         )}
 
         <input
@@ -61,6 +59,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
         {suffix && (
           <span className="shrink-0 text-sm text-ink-muted">{suffix}</span>
+
         )}
       </div>
 
@@ -74,7 +73,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         >
           {error ?? hint}
         </p>
+
       )}
     </div>
+
   );
 });

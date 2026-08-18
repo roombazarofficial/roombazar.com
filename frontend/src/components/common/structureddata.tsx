@@ -3,18 +3,6 @@ import type { Locality } from "@/types/locality";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://roombazar.com";
 
-/**
- * JSON-LD for listing and locality pages.
- *
- * Organic search is the primary acquisition channel, so this is not optional
- * polish — it is what lets a listing appear as a rich result rather than a
- * plain blue link. See docs/02-architecture.md.
- *
- * Note what is deliberately absent: no aggregateRating (we do not rate
- * people), and no precise geo coordinates. Emitting the exact latitude of a
- * room someone lives in would undo the location fuzzing the rest of the
- * product is careful about.
- */
 export function ListingStructuredData({ listing }: { listing: Listing }) {
   const data = {
     "@context": "https://schema.org",
@@ -93,10 +81,9 @@ function JsonLd({ data }: { data: unknown }) {
   return (
     <script
       type="application/ld+json"
-      // JSON.stringify drops undefined keys, so optional fields simply vanish
-      // rather than emitting nulls that validators complain about.
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
+
   );
 }
 
@@ -111,13 +98,6 @@ function roomCount(roomType: Listing["roomType"]): number {
   }
 }
 
-/**
- * Site-level identity, emitted once from the root layout.
- *
- * The SearchAction is what can earn a sitelinks search box in Google results —
- * for a marketplace whose entire acquisition channel is organic search, that
- * is worth the twenty lines.
- */
 export function SiteStructuredData() {
   const data = {
     "@context": "https://schema.org",
@@ -152,11 +132,6 @@ export function SiteStructuredData() {
   return <JsonLd data={data} />;
 }
 
-/**
- * Breadcrumbs for listing and locality pages. Google renders these in place
- * of the raw URL, so a result reads "Bengaluru › Koramangala" rather than a
- * slug trail.
- */
 export function BreadcrumbStructuredData({
   trail,
 }: {

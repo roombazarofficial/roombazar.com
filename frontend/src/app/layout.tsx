@@ -1,19 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { SiteStructuredData } from "@/components/common/structureddata";
+import { SignInLauncher } from "@/components/auth/signinlauncher";
+import { AuthModal } from "@/components/auth/authmodal";
+import { AuthProvider } from "@/providers/authprovider";
 import { siteUrl, siteName, siteDescription } from "@/lib/seo/site";
 import "./globals.css";
 
-/**
- * The root layout is deliberately neutral: html, body, providers, nothing else.
- *
- * Without route groups, every layout below this one nests inside it, so putting
- * the public header here would leak it into /dashboard and /admin. Public pages
- * therefore opt in to the public chrome by wrapping their content in
- * <SiteShell>, while /dashboard and /admin render their own shells.
- */
 export const metadata: Metadata = {
-  // Required for relative OG image paths to resolve to absolute URLs. Without
-  // it, shared links render with no preview image at all.
   metadataBase: new URL(siteUrl),
   title: {
     default: `${siteName} — rooms for rent, direct from owners`,
@@ -41,8 +34,6 @@ export const viewport: Viewport = {
   themeColor: "#2551eb",
   width: "device-width",
   initialScale: 1,
-  // Never lock zoom. Pinching to read a rent figure or a photo is exactly
-  // what people do on a small screen.
   maximumScale: 5,
 };
 
@@ -52,23 +43,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-IN">
-      <body>
-        {/*
-          First focusable element on the page. Sighted keyboard users would
-          otherwise tab through the entire header on every navigation.
-        */}
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-ink-inverse"
-        >
-          Skip to content
-        </a>
+    <AuthProvider>
+      <html lang="en-IN">
+        <body>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-ink-inverse"
+          >
+            Skip to content
+          </a>
 
-        <SiteStructuredData />
+          <SiteStructuredData />
+          <SignInLauncher />
+          <AuthModal />
 
-        {children}
-      </body>
-    </html>
+          {children}
+        </body>
+      </html>
+    </AuthProvider>
   );
 }

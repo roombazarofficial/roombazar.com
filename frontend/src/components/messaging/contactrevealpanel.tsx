@@ -4,20 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Mutual contact reveal — the mechanism the whole trust model rests on.
- *
- * Three rules, all enforced here and again on the server:
- *   1. Sharing is opt-in per conversation, never account-wide.
- *   2. It is mutual. Revealing yours does not reveal theirs, and you see
- *      nothing until both sides have agreed.
- *   3. It cannot be triggered from a public page — only inside a conversation
- *      that the lister has already replied to.
- *
- * Without all three, a listing page becomes a scrapeable phone directory,
- * which is the exact complaint listers have about the incumbent portals.
- * See docs/03-trust-and-safety.md.
- */
 export function ContactRevealPanel({
   youRevealed,
   theyRevealed,
@@ -28,7 +14,6 @@ export function ContactRevealPanel({
   youRevealed: boolean;
   theyRevealed: boolean;
   theirName: string;
-  /** Only ever sent by the server once both sides have agreed. */
   theirPhone: string | null;
   className?: string;
 }) {
@@ -46,16 +31,20 @@ export function ContactRevealPanel({
         <p className="text-xs font-medium uppercase tracking-wide text-success">
           Contact shared
         </p>
+
         <a
           href={`tel:+91${theirPhone}`}
           className="mt-1 block text-lg font-semibold text-ink"
         >
           +91 {theirPhone}
         </a>
+
         <p className="mt-1 text-xs text-ink-muted">
           {theirName} can see your number too.
         </p>
+
       </div>
+
     );
   }
 
@@ -80,17 +69,21 @@ export function ContactRevealPanel({
         >
           Share my number
         </Button>
+
       )}
 
       {youRevealed && (
         <p className="mt-3 rounded-control bg-surface-muted px-3 py-2 text-center text-sm text-ink-muted">
           You have shared your number
         </p>
+
       )}
 
       <p className="mt-3 text-xs text-ink-subtle">
         Meet at the room before paying anything. RoomBazar never handles money.
       </p>
+
     </div>
+
   );
 }

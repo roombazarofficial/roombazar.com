@@ -10,46 +10,40 @@ import { SortSelect } from "@/components/search/sortselect";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/emptystate";
 import { buttonStyles } from "@/components/ui/button";
-import { searchListings } from "@/lib/api/listings";
-import { bengaluru, localities } from "@/lib/api/mockdata";
-import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
-import { formatRupees } from "@/lib/format/rupees";
-import { routes } from "@/lib/constants/routes";
 import {
   LocalityStructuredData,
   BreadcrumbStructuredData,
 } from "@/components/common/structureddata";
+import { searchListings } from "@/lib/api/listings";
+import { getCityBySlug, getLocalities } from "@/lib/api/geography";
+import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
+import { formatRupees } from "@/lib/format/rupees";
+import { routes } from "@/lib/constants/routes";
 
 type Params = Promise<{ city: string; locality: string }>;
 type Search = Promise<Record<string, string | string[] | undefined>>;
-
-function findLocality(citySlug: string, localitySlug: string) {
-  if (citySlug !== bengaluru.slug) return null;
-  return localities.find((item) => item.slug === localitySlug) ?? null;
-}
 
 export async function generateMetadata({
   params,
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const { city, locality: localitySlug } = await params;
-  const locality = findLocality(city, localitySlug);
-  if (!locality) return {};
+  const { city, locality } = await params;
+  const [foundCity, localities] = await Promise.all([
+    getCityBySlug(city),
+    getLocalities(city),
+  ]);
+
+  const found = localities.find((item) => item.slug === locality);
+  if (!foundCity || !found) return {};
 
   return {
-    title: `Rooms for rent in ${locality.name}, ${bengaluru.name}`,
-    description: `${locality.activeListingCount} rooms and PGs for rent in ${locality.name}, ${bengaluru.name}, posted directly by owners. No broker fees.`,
-    alternates: { canonical: routes.locality(city, localitySlug) },
+    title: `Rooms for rent in ${found.name}, ${foundCity.name}`,
+    description: `Rooms and PGs for rent in ${found.name}, ${foundCity.name}, posted directly by owners. No broker fees.`,
+    alternates: { canonical: routes.locality(city, locality) },
   };
 }
 
-/**
- * The locality page is the main organic entry point — most seekers arrive
- * from a query like "single room in Koramangala under 15000" rather than from
- * the homepage. It carries real content (counts, median rent, nearby links)
- * so it is not a thin duplicate of every other locality page.
- */
 export default async function Page({
   params,
   searchParams,
@@ -58,12 +52,18 @@ export default async function Page({
   searchParams: Search;
 }) {
   const { city, locality: localitySlug } = await params;
-  const locality = findLocality(city, localitySlug);
-  if (!locality) notFound();
+
+  const [foundCity, localities] = await Promise.all([
+    getCityBySlug(city),
+    getLocalities(city),
+  ]);
+
+  const locality = localities.find((item) => item.slug === localitySlug);
+  if (!foundCity || !locality) notFound();
 
   const parsed = parseSearchParams(await searchParams, city);
   const filters = { ...parsed, localitySlugs: [localitySlug] };
-  const results = await searchListings(filters);
+  const results = await searchListings({ ...filters, citySlug: city });
 
   const nearby = localities.filter((item) => item.slug !== localitySlug);
 
@@ -71,12 +71,13 @@ export default async function Page({
     <SiteShell>
       <LocalityStructuredData
         locality={locality}
-        cityName={bengaluru.name}
+        cityName={foundCity.name}
         listingCount={results.totalItems}
       />
+
       <BreadcrumbStructuredData
         trail={[
-          { name: bengaluru.name, path: routes.city(city) },
+          { name: foundCity.name, path: routes.city(city) },
           { name: locality.name, path: routes.locality(city, localitySlug) },
         ]}
       />
@@ -84,23 +85,27 @@ export default async function Page({
       <div className="mx-auto max-w-7xl px-4 py-8">
         <nav aria-label="Breadcrumb" className="mb-3 text-sm text-ink-muted">
           <Link href={routes.city(city)} className="hover:text-ink">
-            {bengaluru.name}
+            {foundCity.name}
           </Link>
+
           <span className="mx-1.5">/</span>
           <span className="text-ink">{locality.name}</span>
+
         </nav>
 
         <header>
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
             Rooms for rent in {locality.name}
           </h1>
+
           <p className="mt-1.5 text-sm text-ink-muted">
             {results.totalItems} {results.totalItems === 1 ? "room" : "rooms"}{" "}
-            available in {locality.name}, {bengaluru.name}
+            available in {locality.name}, {foundCity.name}
             {locality.medianRentPaise
               ? ` · median rent ${formatRupees(locality.medianRentPaise)}/month`
               : ""}
           </p>
+
         </header>
 
         <div className="mt-8 flex gap-8">
@@ -110,6 +115,7 @@ export default async function Page({
               localities={localities}
               citySlug={city}
             />
+
           </aside>
 
           <div className="min-w-0 flex-1">
@@ -124,8 +130,11 @@ export default async function Page({
                   localities={localities}
                   citySlug={city}
                 />
+
                 <SortSelect current={filters.sort} />
+
               </div>
+
             </div>
 
             <ActiveFilterChips filters={filters} localities={localities} />
@@ -133,6 +142,7 @@ export default async function Page({
             {results.items.length > 0 ? (
               <>
                 <ListingGrid listings={results.items} />
+
                 <Pagination
                   page={results.page}
                   totalPages={results.totalPages}
@@ -140,7 +150,9 @@ export default async function Page({
                     `${routes.locality(city, localitySlug)}${buildSearchQuery({ ...filters, page })}`
                   }
                 />
+
               </>
+
             ) : (
               <EmptyState
                 title={`No rooms in ${locality.name} match these filters`}
@@ -150,34 +162,42 @@ export default async function Page({
                     href={routes.city(city)}
                     className={buttonStyles({ variant: "secondary" })}
                   >
-                    Search all of {bengaluru.name}
+                    Search all of {foundCity.name}
                   </Link>
+
                 }
               />
+
             )}
           </div>
+
         </div>
 
-        <section className="mt-14 border-t border-line pt-8">
-          <h2 className="text-base font-semibold text-ink">
-            Nearby localities
-          </h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {nearby.map((item) => (
-              <Link
-                key={item.id}
-                href={routes.locality(city, item.slug)}
-                className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink-muted hover:border-line-strong hover:text-ink"
-              >
-                {item.name}
-                <span className="ml-1.5 text-xs text-ink-subtle">
-                  {item.activeListingCount}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {nearby.length > 0 && (
+          <section className="mt-14 border-t border-line pt-8">
+            <h2 className="text-base font-semibold text-ink">
+              Nearby localities
+            </h2>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {nearby.map((item) => (
+                <Link
+                  key={item.id}
+                  href={routes.locality(city, item.slug)}
+                  className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink-muted hover:border-line-strong hover:text-ink"
+                >
+                  {item.name}
+                </Link>
+
+              ))}
+            </div>
+
+          </section>
+
+        )}
       </div>
+
     </SiteShell>
+
   );
 }

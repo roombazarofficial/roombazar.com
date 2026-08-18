@@ -6,5 +6,6 @@ export default function Page() {
       title="Users"
       subtitle="Accounts with their trust level, verification state and report history."
     />
+
   );
 }

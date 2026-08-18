@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import type { UploadedMedia } from "@/lib/api/uploads";
 import type {
   Furnishing,
   PostedBy,
@@ -7,14 +7,6 @@ import type {
   TenantPreference,
 } from "@/types/listing";
 
-/**
- * The post wizard's working state.
- *
- * Persisted to localStorage on purpose: a lister filling this on a phone will
- * take a call, lose the tab, or run out of data halfway through. Losing eight
- * steps of work is the fastest way to lose a listing, and supply is the
- * harder side of this marketplace to grow.
- */
 export interface ListingDraft {
   roomType: RoomType | null;
   postedBy: PostedBy | null;
@@ -42,7 +34,12 @@ export interface ListingDraft {
   availableFrom: string | null;
   minStayMonths: number | null;
 
-  photoIds: string[];
+  /*
+    Finished uploads, not pending ones. A file still in flight lives in the
+    photos step's local state, so a half-finished upload cannot be restored
+    from storage as though it had completed.
+  */
+  media: UploadedMedia[];
 }
 
 const emptyDraft: ListingDraft = {
@@ -50,7 +47,12 @@ const emptyDraft: ListingDraft = {
   postedBy: null,
   title: "",
   description: "",
-  citySlug: "bengaluru",
+  /*
+    No default city. Pre-selecting one that the API may not return leaves the
+    control showing a blank box, because a select whose value matches no option
+    renders as empty rather than falling back to the placeholder.
+  */
+  citySlug: null,
   localitySlug: null,
   addressLine: "",
   rentRupees: null,
@@ -66,51 +68,163 @@ const emptyDraft: ListingDraft = {
   preferredTenant: [],
   availableFrom: null,
   minStayMonths: null,
-  photoIds: [],
+  media: [],
 };
 
 interface DraftStore {
   draft: ListingDraft;
+  /*
+    False until the saved draft has been fetched from the API.
+
+    The server renders an empty draft, so the first client render has to match
+    it exactly, and nothing may be autosaved before this turns true — saving
+    early would overwrite the stored draft with a blank one.
+  */
+  hydrated: boolean;
+  setHydrated: (value: boolean) => void;
+  replace: (data: Partial<ListingDraft>) => void;
   update: (patch: Partial<ListingDraft>) => void;
   toggleAmenity: (slug: string) => void;
+  addMedia: (item: UploadedMedia) => void;
+  removeMedia: (publicId: string) => void;
   reset: () => void;
 }
 
-export const useListingDraft = create<DraftStore>()(
-  persist(
-    (set) => ({
-      draft: emptyDraft,
+/*
+  A draft loaded from the API is merged over the empty one, and its three array
+  fields are checked rather than trusted. The row is JSON written by an older
+  build of the wizard, so a field this build expects may simply not be there.
+*/
+export function normaliseDraft(data: Partial<ListingDraft>): ListingDraft {
+  const merged = { ...emptyDraft, ...data };
 
-      update: (patch) =>
-        set((state) => ({ draft: { ...state.draft, ...patch } })),
+  return {
+    ...merged,
+    media: Array.isArray(merged.media) ? merged.media : [],
+    amenitySlugs: Array.isArray(merged.amenitySlugs) ? merged.amenitySlugs : [],
+    preferredTenant: Array.isArray(merged.preferredTenant)
+      ? merged.preferredTenant
+      : [],
+  };
+}
 
-      toggleAmenity: (slug) =>
-        set((state) => ({
-          draft: {
-            ...state.draft,
-            amenitySlugs: state.draft.amenitySlugs.includes(slug)
-              ? state.draft.amenitySlugs.filter((item) => item !== slug)
-              : [...state.draft.amenitySlugs, slug],
-          },
-        })),
+export const useListingDraft = create<DraftStore>()((set) => ({
+  draft: emptyDraft,
+  hydrated: false,
 
-      reset: () => set({ draft: emptyDraft }),
-    }),
-    { name: "roombazar-listing-draft" },
-  ),
-);
+  setHydrated: (value) => set({ hydrated: value }),
 
-/**
- * Only these five make a listing publishable. Everything else is optional by
- * design — each required field is paid for in lost supply, so the wizard has
- * to stay finishable in about three minutes. See docs/04-roadmap.md.
- */
+  replace: (data) => set({ draft: normaliseDraft(data) }),
+
+  update: (patch) => set((state) => ({ draft: { ...state.draft, ...patch } })),
+
+  toggleAmenity: (slug) =>
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        amenitySlugs: state.draft.amenitySlugs.includes(slug)
+          ? state.draft.amenitySlugs.filter((item) => item !== slug)
+          : [...state.draft.amenitySlugs, slug],
+      },
+    })),
+
+  addMedia: (item) =>
+    set((state) => ({
+      draft: { ...state.draft, media: [...state.draft.media, item] },
+    })),
+
+  removeMedia: (publicId) =>
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        media: state.draft.media.filter((entry) => entry.publicId !== publicId),
+      },
+    })),
+
+  reset: () => set({ draft: emptyDraft }),
+}));
+
+/*
+  One source of truth for what a listing still needs. The preview step used to
+  keep its own copy of this list, so a field could be required by one and not
+  the other — and availableFrom was in neither, even though the API rejects a
+  listing without it.
+*/
+export function missingFields(draft: ListingDraft): string[] {
+  return [
+    !draft.roomType && "room type",
+    !draft.postedBy && "who is posting",
+    !draft.citySlug && "city",
+    !draft.localitySlug && "locality",
+    !draft.rentRupees && "monthly rent",
+    !draft.availableFrom && "available from date",
+    draft.media.length === 0 && "at least one photo",
+  ].filter(Boolean) as string[];
+}
+
 export function isPublishable(draft: ListingDraft): boolean {
-  return Boolean(
-    draft.roomType &&
-      draft.postedBy &&
-      draft.localitySlug &&
-      draft.rentRupees &&
-      draft.photoIds.length > 0,
-  );
+  return missingFields(draft).length === 0;
+}
+
+export interface CreateListingPayload {
+  roomType: RoomType;
+  postedBy: PostedBy;
+  citySlug: string;
+  localitySlug: string;
+  rentPaise: number;
+  depositPaise: number;
+  maintenancePaise: number | null;
+  billsIncluded: boolean;
+  negotiable: boolean;
+  media: UploadedMedia[];
+  title?: string;
+  description: string;
+  furnishing: Furnishing;
+  areaSqft: number | null;
+  floor: number | null;
+  totalFloors: number | null;
+  addressLine: string | null;
+  availableFrom: string;
+  minStayMonths: number | null;
+  preferredTenant: TenantPreference[];
+  amenitySlugs: string[];
+}
+
+/*
+  Rupees are converted to paise here, at the one boundary where the draft
+  becomes an API request. Money is integer paise everywhere server-side, so
+  rounding once at the edge keeps a fractional rupee from ever reaching it.
+*/
+export function draftToPayload(draft: ListingDraft): CreateListingPayload {
+  const gaps = missingFields(draft);
+  if (gaps.length > 0) {
+    throw new Error(`Draft is missing ${gaps.join(", ")}.`);
+  }
+
+  return {
+    roomType: draft.roomType as RoomType,
+    postedBy: draft.postedBy as PostedBy,
+    citySlug: draft.citySlug as string,
+    localitySlug: draft.localitySlug as string,
+    rentPaise: Math.round((draft.rentRupees as number) * 100),
+    depositPaise: Math.round((draft.depositRupees ?? 0) * 100),
+    maintenancePaise:
+      draft.maintenanceRupees == null
+        ? null
+        : Math.round(draft.maintenanceRupees * 100),
+    billsIncluded: draft.billsIncluded,
+    negotiable: draft.negotiable,
+    media: draft.media,
+    title: draft.title.trim() || undefined,
+    description: draft.description.trim(),
+    furnishing: draft.furnishing ?? "unfurnished",
+    areaSqft: draft.areaSqft,
+    floor: draft.floor,
+    totalFloors: draft.totalFloors,
+    addressLine: draft.addressLine.trim() || null,
+    availableFrom: draft.availableFrom as string,
+    minStayMonths: draft.minStayMonths,
+    preferredTenant: draft.preferredTenant,
+    amenitySlugs: draft.amenitySlugs,
+  };
 }

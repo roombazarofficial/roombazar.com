@@ -6,5 +6,6 @@ export default function Page() {
       title="Listings"
       subtitle="Every listing on the platform, searchable by status, city and lister."
     />
+
   );
 }

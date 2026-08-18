@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * How recently a listing was posted. Staleness is the metric this whole
- * marketplace is judged on, so freshness is surfaced on every card rather
- * than buried on the detail page.
- */
 export function FreshnessLabel({
   publishedAt,
   className,
@@ -39,5 +34,6 @@ export function FreshnessLabel({
     >
       {label}
     </span>
+
   );
 }

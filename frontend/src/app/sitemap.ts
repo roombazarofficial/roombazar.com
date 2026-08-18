@@ -1,18 +1,8 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo/site";
-import { bengaluru, localities, mockListings } from "@/lib/api/mockdata";
+import { getCities, getLocalities } from "@/lib/api/geography";
+import { searchListings } from "@/lib/api/listings";
 
-/**
- * Locality pages are the main organic entry point, so they belong here
- * alongside listings rather than only the static marketing pages.
- *
- * Only ACTIVE listings are included. Taken and expired listings keep their
- * URLs and inbound links but carry a noindex tag, and submitting a URL we are
- * simultaneously asking not to index wastes crawl budget.
- *
- * Past roughly 50k URLs this needs splitting into a sitemap index — see
- * docs/02-architecture.md.
- */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
@@ -29,37 +19,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ] satisfies MetadataRoute.Sitemap
   ).map((entry) => ({ ...entry, lastModified: now }));
 
-  const cityRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${siteUrl}/rooms/${bengaluru.slug}`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-  ];
+  const cities = await getCities();
 
-  const localityRoutes: MetadataRoute.Sitemap = localities.map((locality) => ({
-    url: `${siteUrl}/rooms/${locality.citySlug}/${locality.slug}`,
+  const cityRoutes: MetadataRoute.Sitemap = cities.map((city) => ({
+    url: `${siteUrl}/rooms/${city.slug}`,
     lastModified: now,
     changeFrequency: "daily",
-    // Localities with real supply are worth crawling more often than empty
-    // ones, and priority is the only lever the protocol gives us.
-    priority: locality.activeListingCount > 2 ? 0.8 : 0.6,
+    priority: 0.9,
   }));
 
-  const listingRoutes: MetadataRoute.Sitemap = mockListings
-    .filter((listing) => listing.status === "active")
-    .map((listing) => ({
-      url: `${siteUrl}/room/${listing.slug}`,
-      lastModified: new Date(listing.updatedAt),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }));
+  const localityRoutes: MetadataRoute.Sitemap = [];
+  const listingRoutes: MetadataRoute.Sitemap = [];
 
-  return [
-    ...staticRoutes,
-    ...cityRoutes,
-    ...localityRoutes,
-    ...listingRoutes,
-  ];
+  for (const city of cities) {
+    const localities = await getLocalities(city.slug);
+
+    for (const locality of localities) {
+      localityRoutes.push({
+        url: `${siteUrl}/rooms/${city.slug}/${locality.slug}`,
+        lastModified: now,
+        changeFrequency: "daily",
+        priority: 0.8,
+      });
+    }
+
+    const page = await searchListings({ citySlug: city.slug, page: 1 });
+
+    for (const listing of page.items) {
+      listingRoutes.push({
+        url: `${siteUrl}/room/${listing.slug}`,
+        lastModified: new Date(listing.publishedAt),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
+    }
+  }
+
+  return [...staticRoutes, ...cityRoutes, ...localityRoutes, ...listingRoutes];
 }

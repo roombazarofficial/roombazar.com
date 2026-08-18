@@ -16,9 +16,11 @@ export default function Page() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Profile
         </h1>
+
         <p className="mt-1 text-sm text-ink-muted">
           This is what seekers see when they open one of your rooms.
         </p>
+
       </header>
 
       <form className="mt-6 space-y-5">
@@ -38,27 +40,34 @@ export default function Page() {
         />
 
         <Button>Save changes</Button>
+
       </form>
 
-      {/*
-        Stated plainly so nobody has to guess. The absence of a rating is a
-        deliberate position, not a missing feature: a public star rating on a
-        private landlord is trivially weaponised.
-      */}
+      {}
       <section className="mt-8 rounded-card border border-line bg-surface-muted p-4">
         <h2 className="text-sm font-semibold text-ink">
           What your profile never shows
         </h2>
+
         <ul className="mt-2 space-y-1.5 text-sm text-ink-muted">
           <li>Your phone number or email address</li>
+
           <li>Your address, or the exact location of your rooms</li>
+
           <li>A star rating — we do not rate people</li>
+
         </ul>
+
         <div className="mt-3 flex flex-wrap gap-1.5">
           <Badge tone="success">ID verified</Badge>
+
           <Badge tone="neutral">Phone verified</Badge>
+
         </div>
+
       </section>
+
     </div>
+
   );
 }

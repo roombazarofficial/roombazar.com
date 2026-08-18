@@ -30,6 +30,7 @@ export default function Page() {
             other person. We never touch the money, which also means we are
             never a reason for the price to go up.
           </p>
+
         </Section>
 
         <Section title="Owners are labelled, agents are not hidden">
@@ -40,6 +41,7 @@ export default function Page() {
             push them into lying — but you always know which you are talking
             to.
           </p>
+
         </Section>
 
         <Section title="Your phone number stays yours">
@@ -49,6 +51,7 @@ export default function Page() {
             inside that conversation. Listers do not get cold-called by brokers,
             and seekers do not get their number scraped.
           </p>
+
         </Section>
 
         <Section title="How we plan to make money">
@@ -58,26 +61,33 @@ export default function Page() {
             filter you set, a paid verification badge at cost, and accounts for
             PG operators managing many rooms.
           </p>
+
           <p>
             What we will not do is charge seekers to see contact details. It is
             the standard model of the incumbents, and it inverts the entire
             reason this exists.
           </p>
+
         </Section>
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href={routes.post} className={buttonStyles()}>
             Post a room
           </Link>
+
           <Link
             href={routes.city("bengaluru")}
             className={buttonStyles({ variant: "secondary" })}
           >
             Find a room
           </Link>
+
         </div>
+
       </article>
+
     </SiteShell>
+
   );
 }
 
@@ -85,9 +95,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section className="mt-10">
       <h2 className="text-lg font-semibold text-ink">{title}</h2>
+
       <div className="mt-2 space-y-3 text-sm leading-relaxed text-ink-muted">
         {children}
       </div>
+
     </section>
+
   );
 }

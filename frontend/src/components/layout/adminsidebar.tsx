@@ -43,6 +43,7 @@ export function AdminSidebar() {
             <h2 className="mb-1.5 px-3 text-xs font-medium uppercase tracking-wide text-ink-subtle">
               {group.heading}
             </h2>
+
             <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const active = pathname.startsWith(item.href);
@@ -60,13 +61,19 @@ export function AdminSidebar() {
                     >
                       {item.label}
                     </Link>
+
                   </li>
+
                 );
               })}
             </ul>
+
           </div>
+
         ))}
       </div>
+
     </nav>
+
   );
 }
