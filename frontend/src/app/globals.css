@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Tailwind v4 is configured here rather than in a JS config
+  file, so this block is the single source of truth for the visual system.
+  Components reference tokens (bg-brand-600, text-ink-muted) and never
+  hardcode a hex value.
+
+  Direction: clean and trustworthy. White surfaces, one confident blue, plenty
+  of breathing room. The product's main risk is a seeker suspecting a scam, so
+  the interface should feel calm and legible rather than loud.
+*/
+@theme {
+  /* Brand: Official RoomBazar Red palette. Used as an accent for primary actions, badges, active states. */
+  --color-brand-50: #fff9f7;
+  --color-brand-100: #fce9e6;
+  --color-brand-200: #f8cfc8;
+  --color-brand-300: #f1a99d;
+  --color-brand-400: #e87765;
+  --color-brand-500: #df4934;
+  --color-brand-600: #d13421;
+  --color-brand-700: #a92517;
+  --color-brand-800: #8b1e13;
+  --color-brand-900: #721c13;
+
+  /* Surfaces and text. */
+  --color-surface: #ffffff;
+  --color-surface-muted: #fff9f7;
+  --color-surface-sunken: #f5eeeb;
+
+  --color-ink: #171717;
+  --color-ink-muted: #666666;
+  --color-ink-subtle: #8a8a8a;
+  --color-ink-inverse: #ffffff;
+
+  --color-line: #e7e1df;
+  --color-line-strong: #d0c9c6;
+
+  /* Status. */
+  --color-success: #067647;
+  --color-success-soft: #ecfdf3;
+  --color-warning: #b54708;
+  --color-warning-soft: #fffaeb;
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-info: #175cd3;
+  --color-info-soft: #eff8ff;
+
+  /* Type. */
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --text-2xs: 0.6875rem;
+
+  /* Radius. Moderate and consistent. */
+  --radius-control: 0.5rem;
+  --radius-card: 0.625rem;
+  --radius-sheet: 0.875rem;
+
+  /* Elevation. Subtle. */
+  --shadow-card: 0 1px 3px 0 rgb(23 23 23 / 0.04), 0 1px 2px -1px rgb(23 23 23 / 0.04);
+  --shadow-raised: 0 4px 6px -1px rgb(23 23 23 / 0.07), 0 2px 4px -2px rgb(23 23 23 / 0.05);
+  --shadow-overlay: 0 20px 25px -5px rgb(23 23 23 / 0.1), 0 8px 10px -6px rgb(23 23 23 / 0.05);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Listing photos arrive over slow connections. Images always declare their
+   own box so the page never jumps as they load. */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* One focus style everywhere. Visible, never removed — a lot of listers will
+   fill the post wizard by keyboard on a laptop. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background-color: var(--color-brand-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
