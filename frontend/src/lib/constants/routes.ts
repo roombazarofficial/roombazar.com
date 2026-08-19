@@ -11,6 +11,13 @@ export const routes = {
 
   signInRedirect: (next: string) =>
     `/?signin=1&next=${encodeURIComponent(next)}`,
+  login: "/signin",
+  signin: "/signin",
+  register: "/register",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  verify: "/verify",
+  onboarding: "/onboarding",
 
   dashboard: "/dashboard",
   myListings: "/dashboard/listings",

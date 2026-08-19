@@ -11,6 +11,10 @@ const config: NextConfig = {
         protocol: "https",
         hostname: process.env.NEXT_PUBLIC_IMAGE_HOST ?? "images.roombazar.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },
