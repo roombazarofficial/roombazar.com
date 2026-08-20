@@ -20,7 +20,12 @@ export type ModerationActionKind =
   | "approvelisting" | "suspendlisting" | "requestfix"
   | "restrictuser" | "unrestrictuser"
   | "striptext" | "rejectphoto"
-  | "upholdreport" | "dismissreport";
+  | "upholdreport" | "dismissreport" | "rejectlisting"
+  | "reinstatelisting" | "editlisting" | "deletelisting"
+  | "updateuser" | "changerole" | "deleteuser"
+  | "createcity" | "updatecity" | "deletecity"
+  | "createlocality" | "updatelocality" | "deletelocality"
+  | "createamenity" | "updateamenity" | "deleteamenity";
 
 export interface ModerationAction {
   id: string;

@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/constants/routes";
+import { confirmPasswordReset } from "@/lib/api/auth";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const phone = searchParams.get("phone") ?? "";
+  const email = searchParams.get("email") ?? "";
 
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +29,7 @@ export default function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
 
     if (code.length < 6) {
@@ -34,25 +44,35 @@ export default function ResetPasswordPage() {
       setError("Passwords do not match.");
       return;
     }
+    if (!email) {
+      setError("Request a new recovery code first.");
+      return;
+    }
 
     setError(null);
     setSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await confirmPasswordReset({ email, code, password });
       setSubmitting(false);
       setSuccess(true);
       setTimeout(() => {
         router.push(routes.login);
-      }, 2000);
-    }, 800);
+      }, 1200);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not reset the password.");
+      setSubmitting(false);
+    }
   }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
       <Link href={routes.home} className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
-        <img
+        <Image
           src="/logo/rb-logo.png"
           alt="RoomBazar"
+          width={32}
+          height={32}
           className="h-8 w-8 rounded-full"
         />
         <span>
@@ -64,7 +84,7 @@ export default function ResetPasswordPage() {
         Reset Account Password
       </h1>
       <p className="mt-2 text-sm text-ink-muted">
-        {phone ? `Enter the 6-digit code sent to +91 ${phone}` : "Enter your recovery code and choose a new password."}
+        {email ? `Enter the 6-digit code sent to ${email}` : "Enter your recovery code and choose a new password."}
       </p>
 
       {success ? (

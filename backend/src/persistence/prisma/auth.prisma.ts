@@ -81,6 +81,10 @@ export class PrismaAuthRepository implements AuthRepository {
     return toCode(row);
   }
 
+  async deleteEmailCode(id: string): Promise<void> {
+    await this.prisma.emailVerification.deleteMany({ where: { id } });
+  }
+
   async findLatestEmailCode(
     email: string,
     purpose: EmailCodeRecord["purpose"],

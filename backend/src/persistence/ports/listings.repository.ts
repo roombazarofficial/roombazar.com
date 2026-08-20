@@ -26,12 +26,24 @@ export interface Page<T> {
   totalPages: number;
 }
 
+export interface ListingAdminCriteria {
+  statuses?: ListingStatus[];
+  ownerId?: string;
+  citySlug?: string;
+  query?: string;
+  sort: "newest" | "oldest" | "rentlow" | "renthigh";
+  page: number;
+  pageSize: number;
+}
+
 export interface ListingsRepository {
   findById(id: string): Promise<Listing | null>;
   findBySlug(slug: string): Promise<Listing | null>;
   findByOwner(ownerId: string): Promise<Listing[]>;
 
   search(criteria: ListingSearchCriteria): Promise<Page<Listing>>;
+  findForAdmin(criteria: ListingAdminCriteria): Promise<Page<Listing>>;
+  countByStatus(): Promise<Record<string, number>>;
 
   findSimilar(listing: Listing, limit: number): Promise<Listing[]>;
 

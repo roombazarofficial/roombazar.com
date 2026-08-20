@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { NotFound } from "src/common/errors/domain.errors";
 import type { TrustLevel, User } from "src/domain/user.entity";
 import type { UsersRepository } from "src/persistence/ports/users.repository";
+import type { UserAdminCriteria, UserPage } from "src/persistence/ports/users.repository";
 
 @Injectable()
 export class MemoryUsersRepository implements UsersRepository {
@@ -34,6 +35,35 @@ export class MemoryUsersRepository implements UsersRepository {
     }
 
     return found;
+  }
+
+  async findForAdmin(criteria: UserAdminCriteria): Promise<UserPage> {
+    let users = [...this.rows.values()];
+    if (criteria.role) users = users.filter((user) => user.role === criteria.role);
+    if (criteria.trustLevel) {
+      users = users.filter((user) => user.trustLevel === criteria.trustLevel);
+    }
+    if (criteria.query) {
+      const query = criteria.query.toLowerCase();
+      users = users.filter((user) =>
+        `${user.name} ${user.email} ${user.phone ?? ""}`
+          .toLowerCase()
+          .includes(query),
+      );
+    }
+    users.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const start = (criteria.page - 1) * criteria.pageSize;
+    return {
+      items: users.slice(start, start + criteria.pageSize),
+      page: criteria.page,
+      pageSize: criteria.pageSize,
+      totalItems: users.length,
+      totalPages: Math.max(1, Math.ceil(users.length / criteria.pageSize)),
+    };
+  }
+
+  async countByRole(role: User["role"]): Promise<number> {
+    return [...this.rows.values()].filter((user) => user.role === role).length;
   }
 
   async create(user: User): Promise<User> {

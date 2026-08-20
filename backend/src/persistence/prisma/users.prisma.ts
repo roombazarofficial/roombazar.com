@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { TrustLevel, User } from "src/domain/user.entity";
 import type { UsersRepository } from "src/persistence/ports/users.repository";
+import type { UserAdminCriteria, UserPage } from "src/persistence/ports/users.repository";
 import { PrismaService } from "./prisma.service";
 import { toDomainUser, userInclude } from "./mappers";
 
@@ -44,6 +45,43 @@ export class PrismaUsersRepository implements UsersRepository {
     });
 
     return new Map(rows.map((row) => [row.id, toDomainUser(row)]));
+  }
+
+  async findForAdmin(criteria: UserAdminCriteria): Promise<UserPage> {
+    const where = {
+      ...(criteria.role && { platformRole: criteria.role }),
+      ...(criteria.trustLevel && { trustLevel: criteria.trustLevel }),
+      ...(criteria.query && {
+        OR: [
+          { name: { contains: criteria.query, mode: "insensitive" as const } },
+          { email: { contains: criteria.query, mode: "insensitive" as const } },
+          { phone: { contains: criteria.query, mode: "insensitive" as const } },
+        ],
+      }),
+    };
+
+    const [totalItems, rows] = await this.prisma.$transaction([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
+        where,
+        include: userInclude,
+        orderBy: { createdAt: "desc" },
+        skip: (criteria.page - 1) * criteria.pageSize,
+        take: criteria.pageSize,
+      }),
+    ]);
+
+    return {
+      items: rows.map(toDomainUser),
+      page: criteria.page,
+      pageSize: criteria.pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / criteria.pageSize)),
+    };
+  }
+
+  async countByRole(role: User["role"]): Promise<number> {
+    return this.prisma.user.count({ where: { platformRole: role } });
   }
 
   async create(user: User): Promise<User> {

@@ -17,18 +17,23 @@ import {
 } from "@/store/listingdraftstore";
 import { roomTypeLabels, furnishingLabels, postedByLabels } from "@/lib/constants/roomtypes";
 import { tenantPreferenceLabels } from "@/lib/constants/tenantpreferences";
-import { useLocalities } from "@/hooks/uselocalities";
+import { useIndiaLocations } from "@/hooks/useindialocations";
 import { routes } from "@/lib/constants/routes";
 
 export default function Page() {
   const router = useRouter();
   const { draft, reset } = useListingDraft();
-  const { localities } = useLocalities(draft.citySlug);
+  const { states, districts, cities } = useIndiaLocations(
+    draft.stateCode,
+    draft.districtSlug,
+  );
 
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const locality = localities.find((item) => item.slug === draft.localitySlug);
+  const locality = cities.find((item) => item.slug === draft.localitySlug);
+  const district = districts.find((item) => item.slug === draft.districtSlug);
+  const state = states.find((item) => item.code === draft.stateCode);
   const ready = isPublishable(draft);
   const missing = missingFields(draft);
 
@@ -41,22 +46,10 @@ export default function Page() {
     try {
       const listing = await createListing(draftToPayload(draft));
 
-      /*
-        Cleared only after the API confirms. Resetting first would lose the
-        user's work if the request failed, leaving them with nothing to retry.
-      */
       reset();
-      await discardDraft().catch(() => {
-        // The listing exists either way; a stale draft row is not worth
-        // blocking the redirect over.
-      });
-      router.push(routes.listing(listing.slug));
+      await discardDraft().catch(() => undefined);
+      router.push(routes.myListing(listing.id));
     } catch (cause) {
-      /*
-        Field-level messages matter more than the summary. The API answers a
-        rejected listing with "Some details need fixing" plus a fields map, and
-        showing only the summary left no way to know which value was wrong.
-      */
       if (cause instanceof ApiRequestError) {
         const fields = cause.body.fields ?? {};
         const detail = Object.entries(fields)
@@ -142,7 +135,9 @@ export default function Page() {
 
         {locality && (
           <p className="mt-1 text-sm text-ink-muted">
-            {locality.name}, Bengaluru
+            {[locality.name, district?.name, state?.name]
+              .filter(Boolean)
+              .join(", ")}
           </p>
 
         )}
@@ -199,9 +194,9 @@ export default function Page() {
       </div>
 
       <p className="text-xs text-ink-muted">
-        Your listing goes live straight away and is reviewed shortly after. By
-        publishing you confirm the room is genuinely available and the details
-        are accurate. See our{" "}
+        Your listing will be reviewed before it goes live. By submitting you
+        confirm the room is genuinely available and the details are accurate.
+        See our{" "}
         <Link href={routes.terms} className="underline hover:text-ink">
           terms
         </Link>

@@ -26,8 +26,6 @@ async function bootstrap(): Promise<void> {
 
   app.use(compression());
 
-  // The session token arrives as an httpOnly cookie, so it has to be parsed
-  // before any guard can read it.
   app.use(cookieParser());
 
   app.getHttpAdapter().getInstance().disable("x-powered-by");
@@ -35,7 +33,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: config.getOrThrow<string[]>("CORS_ORIGINS"),
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     maxAge: 86_400,
   });

@@ -20,6 +20,8 @@ export type PostedBy = "owner" | "tenant" | "agent";
 
 export type ListingStatus =
   | "draft"
+  | "pendingapproval"
+  | "rejected"
   | "active"
   | "paused"
   | "taken"

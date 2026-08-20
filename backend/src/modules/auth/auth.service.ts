@@ -237,7 +237,7 @@ export class AuthService {
       Date.now() + CODE_TTL_MINUTES * 60 * 1000,
     ).toISOString();
 
-    await this.auth.createEmailCode({
+    const record: EmailCodeRecord = {
       id: randomUUID(),
       email,
       codeHash: hashCode(code),
@@ -246,7 +246,9 @@ export class AuthService {
       expiresAt,
       consumedAt: null,
       createdAt: new Date().toISOString(),
-    });
+    };
+
+    await this.auth.createEmailCode(record);
 
     try {
       await this.mail.send(
@@ -255,6 +257,8 @@ export class AuthService {
           : passwordResetEmail(email, code, CODE_TTL_MINUTES),
       );
     } catch (error) {
+      await this.auth.deleteEmailCode(record.id);
+
       this.logger.error(
         `Mail delivery failed: ${
           error instanceof Error ? error.message : "unknown error"

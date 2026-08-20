@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Logo } from "@/components/layout/logo";
 import { useAuthUi } from "@/store/authuistore";
 import { routes } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils/classnames";
@@ -280,8 +279,6 @@ export function AuthModal() {
       <div className="space-y-4">
         {step === "email" && (
           <>
-            <Logo variant="wide" height={26} href={null} priority={false} />
-
             <Input
               label="Email address"
               type="email"

@@ -18,6 +18,7 @@ const NEVER_SERIALISE = new Set([
 ]);
 
 const EXPLICIT_PREFIX = "public";
+const LITERAL_PUBLIC_FIELDS = new Set(["publicId"]);
 
 @Injectable()
 export class SerializeInterceptor implements NestInterceptor {
@@ -37,6 +38,11 @@ function strip(value: unknown): unknown {
 
   for (const [key, nested] of Object.entries(value)) {
     if (NEVER_SERIALISE.has(key)) continue;
+
+    if (LITERAL_PUBLIC_FIELDS.has(key)) {
+      output[key] = strip(nested);
+      continue;
+    }
 
     if (key.startsWith(EXPLICIT_PREFIX) && key.length > EXPLICIT_PREFIX.length) {
       const rest = key.slice(EXPLICIT_PREFIX.length);

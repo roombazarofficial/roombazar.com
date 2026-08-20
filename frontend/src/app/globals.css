@@ -96,6 +96,11 @@ video {
   border-radius: 2px;
 }
 
+/* Input already draws focus on its outer control; suppress the nested outline. */
+input[data-input-control]:focus-visible {
+  outline: none;
+}
+
 ::selection {
   background-color: var(--color-brand-100);
 }

@@ -65,7 +65,12 @@ export default async function Page({
   const filters = { ...parsed, localitySlugs: [localitySlug] };
   const results = await searchListings({ ...filters, citySlug: city });
 
-  const nearby = localities.filter((item) => item.slug !== localitySlug);
+  const nearby = localities
+    .filter(
+      (item) =>
+        item.slug !== localitySlug && item.activeListingCount > 0,
+    )
+    .slice(0, 20);
 
   return (
     <SiteShell>
@@ -112,8 +117,9 @@ export default async function Page({
           <aside className="hidden w-64 shrink-0 lg:block">
             <FilterPanel
               filters={filters}
-              localities={localities}
               citySlug={city}
+              stateName={foundCity.state}
+              selectedCitySlug={localitySlug}
             />
 
           </aside>
@@ -127,8 +133,9 @@ export default async function Page({
               <div className="flex items-center gap-2">
                 <FilterDrawer
                   filters={filters}
-                  localities={localities}
                   citySlug={city}
+                  stateName={foundCity.state}
+                  selectedCitySlug={localitySlug}
                 />
 
                 <SortSelect current={filters.sort} />

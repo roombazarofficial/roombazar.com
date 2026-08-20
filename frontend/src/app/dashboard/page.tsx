@@ -39,7 +39,7 @@ export default async function Page() {
         </h1>
 
         <Link href={routes.post} className={buttonStyles()}>
-          Post a room
+          Host a room
         </Link>
 
       </header>

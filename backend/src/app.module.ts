@@ -21,6 +21,7 @@ import { ReportsModule } from "./modules/reports/reports.module";
 import { ModerationModule } from "./modules/moderation/moderation.module";
 import { VerificationModule } from "./modules/verification/verification.module";
 import { UploadsModule } from "./modules/uploads/uploads.module";
+import { SuperAdminModule } from "./modules/superadmin/superadmin.module";
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { UploadsModule } from "./modules/uploads/uploads.module";
     ModerationModule,
     VerificationModule,
     UploadsModule,
+    SuperAdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

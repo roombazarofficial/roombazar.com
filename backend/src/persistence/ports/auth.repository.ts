@@ -33,6 +33,7 @@ export interface AuthRepository {
   listSessionsForUser(userId: string): Promise<SessionRecord[]>;
 
   createEmailCode(record: EmailCodeRecord): Promise<EmailCodeRecord>;
+  deleteEmailCode(id: string): Promise<void>;
   /** The newest unconsumed code for this address and purpose. */
   findLatestEmailCode(
     email: string,

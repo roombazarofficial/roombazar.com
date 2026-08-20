@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const searchQuerySchema = z.object({
-  city: z.string().min(1),
+  city: z.string().min(1).optional(),
   locality: z.union([z.string(), z.array(z.string())]).optional(),
   type: z.union([z.string(), z.array(z.string())]).optional(),
   furnishing: z.union([z.string(), z.array(z.string())]).optional(),

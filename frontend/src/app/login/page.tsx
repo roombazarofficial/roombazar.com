@@ -1,5 +1,6 @@
-import SignInPage from "@/app/signin/page";
+import { redirect } from "next/navigation";
+import { routes } from "@/lib/constants/routes";
 
 export default function Page() {
-  return <SignInPage />;
+  redirect(routes.signInRedirect(routes.home));
 }

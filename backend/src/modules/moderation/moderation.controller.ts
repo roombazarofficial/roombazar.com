@@ -18,7 +18,7 @@ const resolveSchema = z.object({
 
 @Controller("moderation")
 @UseGuards(RolesGuard)
-@Roles("moderator", "admin")
+@Roles("moderator", "admin", "superadmin")
 export class ModerationController {
   constructor(private readonly moderation: ModerationService) {}
 

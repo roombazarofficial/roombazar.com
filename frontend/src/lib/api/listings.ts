@@ -12,13 +12,13 @@ const EMPTY_PAGE: Paginated<ListingSummary> = {
   totalPages: 1,
 };
 
-const SEARCH_TTL = 60;
+const SEARCH_TTL = 0;
 
 export function searchListings(
-  filters: Partial<SearchFilters> & { citySlug: string },
+  filters: Partial<SearchFilters> & { citySlug?: string },
 ): Promise<Paginated<ListingSummary>> {
   const query = new URLSearchParams();
-  query.set("city", filters.citySlug);
+  if (filters.citySlug) query.set("city", filters.citySlug);
 
   filters.localitySlugs?.forEach((value) => query.append("locality", value));
   filters.roomTypes?.forEach((value) => query.append("type", value));
@@ -64,10 +64,14 @@ export async function getSimilarListings(
 }
 
 export async function getRecentListings(
-  citySlug: string,
   limit = 8,
+  citySlug?: string,
 ): Promise<ListingSummary[]> {
-  const page = await searchListings({ citySlug, sort: "newest", page: 1 });
+  const page = await searchListings({
+    citySlug,
+    sort: "newest",
+    page: 1,
+  });
   return page.items.slice(0, limit);
 }
 

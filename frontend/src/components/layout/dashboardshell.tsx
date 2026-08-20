@@ -15,7 +15,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             href={routes.post}
             className="ml-auto text-sm font-medium text-brand-700 hover:text-brand-800"
           >
-            Post a room
+            Host a room
           </Link>
 
         </div>

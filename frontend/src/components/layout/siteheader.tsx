@@ -1,8 +1,34 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { routes } from "@/lib/constants/routes";
+import { useAuthUi } from "@/store/authuistore";
 
 export function SiteHeader() {
+  const router = useRouter();
+  const user = useAuthUi((state) => state.user);
+  const loaded = useAuthUi((state) => state.loaded);
+  const openSignIn = useAuthUi((state) => state.openSignIn);
+
+  function hostRoom() {
+    if (!loaded) {
+      router.push(routes.post);
+      return;
+    }
+
+    if (user) {
+      router.push(routes.post);
+      return;
+    }
+
+    openSignIn({
+      intent: "Sign in or create an account to host your room.",
+      next: routes.post,
+    });
+  }
+
   return (
     <header className="w-full border-b border-line bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -28,8 +54,9 @@ export function SiteHeader() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href={routes.post}
+          <button
+            type="button"
+            onClick={hostRoom}
             className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-brand-600 px-5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-brand-700 active:scale-[0.98]"
           >
             <svg
@@ -44,15 +71,25 @@ export function SiteHeader() {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <span>Room</span>
-          </Link>
+            <span>Host a room</span>
+          </button>
 
-          <Link
-            href={routes.login}
+          {user ? (
+            <Link
+              href={routes.dashboard}
+              className="px-2 py-1.5 text-sm font-medium text-ink transition-colors hover:text-brand-600"
+            >
+              Dashboard
+            </Link>
+          ) : (
+          <button
+            type="button"
+            onClick={() => openSignIn()}
             className="text-sm font-medium text-ink transition-colors hover:text-brand-600 px-2 py-1.5"
           >
             Sign in
-          </Link>
+          </button>
+          )}
         </div>
       </div>
     </header>

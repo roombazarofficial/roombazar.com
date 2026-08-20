@@ -67,6 +67,10 @@ export class MemoryAuthRepository implements AuthRepository {
     return record;
   }
 
+  async deleteEmailCode(id: string): Promise<void> {
+    this.codes.delete(id);
+  }
+
   async findLatestEmailCode(
     email: string,
     purpose: EmailCodeRecord["purpose"],

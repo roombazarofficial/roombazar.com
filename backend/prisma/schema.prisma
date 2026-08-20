@@ -30,6 +30,7 @@ enum PlatformRole {
   user
   moderator
   admin
+  superadmin
 }
 
 /// Drives rate limits, ranking weight and whether listings skip pre-moderation.
@@ -628,6 +629,8 @@ model BedPrice {
 
 enum ListingStatus {
   draft
+  pendingapproval
+  rejected
   active
   paused
   taken
@@ -687,6 +690,12 @@ model Listing {
   bedId  String? @map("bed_id") @db.Uuid
 
   status       ListingStatus       @default(draft)
+  submittedAt       DateTime? @map("submitted_at") @db.Timestamptz
+  approvedAt        DateTime? @map("approved_at") @db.Timestamptz
+  approvedByUserId  String?   @map("approved_by_user_id") @db.Uuid
+  rejectedAt        DateTime? @map("rejected_at") @db.Timestamptz
+  rejectedByUserId  String?   @map("rejected_by_user_id") @db.Uuid
+  rejectionReason   String?   @map("rejection_reason")
   postedBy     PostedBy            @map("posted_by")
   roomCategory ListingRoomCategory @map("room_category")
 
@@ -1147,6 +1156,22 @@ enum ModerationActionKind {
   rejectphoto
   upholdreport
   dismissreport
+  rejectlisting
+  reinstatelisting
+  editlisting
+  deletelisting
+  updateuser
+  changerole
+  deleteuser
+  createcity
+  updatecity
+  deletecity
+  createlocality
+  updatelocality
+  deletelocality
+  createamenity
+  updateamenity
+  deleteamenity
 }
 
 /// Append-only. Every moderator state change writes a row, so nothing about a

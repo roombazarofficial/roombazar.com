@@ -22,10 +22,10 @@ export function OwnerListingCard({ listing }: { listing: Listing }) {
     isActive && daysUntilExpiry !== null && daysUntilExpiry <= 10;
 
   const missing = [
-    listing.photos.length < 3 && "more photos",
-    listing.amenities.length === 0 && "amenities",
+    (listing.photos?.length ?? 0) < 3 && "more photos",
+    (listing.amenities?.length ?? 0) === 0 && "amenities",
     !listing.areaSqft && "area in sq ft",
-    listing.description.trim().length < 120 && "a fuller description",
+    (listing.description?.trim().length ?? 0) < 120 && "a fuller description",
   ].filter(Boolean) as string[];
 
   return (
@@ -42,7 +42,7 @@ export function OwnerListingCard({ listing }: { listing: Listing }) {
           <p className="mt-0.5 text-xs text-ink-muted">
             {formatRupees(listing.rentPaise)}/month · {listing.locality.name} ·{" "}
 
-            {listing.photos.length} photo{listing.photos.length === 1 ? "" : "s"}
+            {listing.photos?.length ?? 0} photo{listing.photos?.length === 1 ? "" : "s"}
           </p>
 
         </div>
@@ -115,12 +115,14 @@ export function OwnerListingCard({ listing }: { listing: Listing }) {
           Edit
         </Link>
 
-        <Link
-          href={routes.listing(listing.slug)}
-          className={buttonStyles({ variant: "ghost", size: "sm" })}
-        >
-          View public page
-        </Link>
+        {isActive && (
+          <Link
+            href={routes.listing(listing.slug)}
+            className={buttonStyles({ variant: "ghost", size: "sm" })}
+          >
+            View public page
+          </Link>
+        )}
 
       </div>
 
@@ -145,6 +147,12 @@ function StatusBadge({ status }: { status: Listing["status"] }) {
 
     case "suspended":
       return <Badge tone="danger">Suspended</Badge>;
+
+    case "pendingapproval":
+      return <Badge tone="warning">Pending approval</Badge>;
+
+    case "rejected":
+      return <Badge tone="danger">Needs changes</Badge>;
 
     default:
       return <Badge tone="neutral">Draft</Badge>;

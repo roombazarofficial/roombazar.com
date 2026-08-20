@@ -3,6 +3,7 @@ import { NotFound } from "src/common/errors/domain.errors";
 import type { Listing, ListingStatus, RoomType } from "src/domain/listing.entity";
 import type {
   ListingSearchCriteria,
+  ListingAdminCriteria,
   ListingsRepository,
   Page,
 } from "src/persistence/ports/listings.repository";
@@ -123,6 +124,56 @@ export class MemoryListingsRepository implements ListingsRepository {
     );
 
     return [...sameLocality, ...sameCity].slice(0, limit);
+  }
+
+  async findForAdmin(criteria: ListingAdminCriteria): Promise<Page<Listing>> {
+    let results = [...this.rows.values()].filter((listing) => !listing.deletedAt);
+    if (criteria.statuses?.length) {
+      results = results.filter((listing) =>
+        criteria.statuses!.includes(listing.status),
+      );
+    }
+    if (criteria.ownerId) {
+      results = results.filter((listing) => listing.ownerId === criteria.ownerId);
+    }
+    if (criteria.citySlug) {
+      const city = seedCities.find((item) => item.slug === criteria.citySlug);
+      results = city ? results.filter((listing) => listing.cityId === city.id) : [];
+    }
+    if (criteria.query) {
+      const query = criteria.query.toLowerCase();
+      results = results.filter((listing) =>
+        `${listing.title} ${listing.description} ${listing.slug}`
+          .toLowerCase()
+          .includes(query),
+      );
+    }
+
+    results =
+      criteria.sort === "oldest"
+        ? results.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        : criteria.sort === "rentlow"
+          ? results.sort((a, b) => a.rentPaise - b.rentPaise)
+          : criteria.sort === "renthigh"
+            ? results.sort((a, b) => b.rentPaise - a.rentPaise)
+            : results.sort(byNewest);
+
+    const start = (criteria.page - 1) * criteria.pageSize;
+    return {
+      items: results.slice(start, start + criteria.pageSize),
+      page: criteria.page,
+      pageSize: criteria.pageSize,
+      totalItems: results.length,
+      totalPages: Math.max(1, Math.ceil(results.length / criteria.pageSize)),
+    };
+  }
+
+  async countByStatus(): Promise<Record<string, number>> {
+    const counts: Record<string, number> = {};
+    for (const listing of this.rows.values()) {
+      if (!listing.deletedAt) counts[listing.status] = (counts[listing.status] ?? 0) + 1;
+    }
+    return counts;
   }
 
   async create(listing: Listing): Promise<Listing> {

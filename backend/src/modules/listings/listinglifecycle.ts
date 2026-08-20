@@ -2,7 +2,9 @@ import type { Listing, ListingStatus } from "src/domain/listing.entity";
 import { InvalidTransition } from "src/common/errors/domain.errors";
 
 const allowed: Record<ListingStatus, ListingStatus[]> = {
-  draft: ["active"],
+  draft: ["pendingapproval", "active"],
+  pendingapproval: ["active", "rejected"],
+  rejected: ["pendingapproval"],
   active: ["taken", "expired", "paused", "suspended"],
   paused: ["active", "taken", "expired", "suspended"],
   taken: ["active", "suspended"],

@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Inject,
-  UsePipes,
 } from "@nestjs/common";
 import { z } from "zod";
 import { Public } from "src/common/decorators/public.decorator";
@@ -61,19 +60,14 @@ export class ListingsController {
 
     void this.listings.recordView(listing.id, viewer);
 
-    return listing;
+    return this.listings.getDetailBySlug(slug);
   }
 
   @Get("mine")
   async mine(@CurrentUser() user: User) {
-    return this.listings.listMine(user);
+    return this.listings.listMineDetails(user);
   }
 
-  /*
-    The three draft routes are declared above the ":id" routes on purpose. Nest
-    matches in declaration order, so moving them below would make "draft" read
-    as a listing id and answer 404.
-  */
   @Get("draft")
   async draft(@CurrentUser() user: User) {
     return (await this.drafts.find(user.id)) ?? { data: null, updatedAt: null };
@@ -95,13 +89,15 @@ export class ListingsController {
 
   @Get(":id")
   async byId(@Param("id") id: string, @CurrentUser() user: User) {
-    return this.listings.getOwned(id, user);
+    return this.listings.getOwnedDetail(id, user);
   }
 
   @ThrottleListingCreate()
   @Post()
-  @UsePipes(new ZodValidationPipe(createListingSchema))
-  async create(@Body() dto: CreateListingDto, @CurrentUser() user: User) {
+  async create(
+    @Body(new ZodValidationPipe(createListingSchema)) dto: CreateListingDto,
+    @CurrentUser() user: User,
+  ) {
     return this.listings.create(dto, user);
   }
 

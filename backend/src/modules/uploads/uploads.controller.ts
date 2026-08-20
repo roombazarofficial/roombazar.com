@@ -46,13 +46,18 @@ const LIMITS = {
  */
 @Controller("uploads")
 export class UploadsController {
+  private readonly credentials: CloudinaryCredentials | null;
+
   constructor(private readonly config: ConfigService) {
-    cloudinary.config({
-      cloud_name: this.config.get<string>("CLOUDINARY_CLOUD_NAME"),
-      api_key: this.config.get<string>("CLOUDINARY_API_KEY"),
-      api_secret: this.config.get<string>("CLOUDINARY_API_SECRET"),
-      secure: true,
-    });
+    this.credentials = readCloudinaryCredentials(this.config);
+    if (this.credentials) {
+      cloudinary.config({
+        cloud_name: this.credentials.cloudName,
+        api_key: this.credentials.apiKey,
+        api_secret: this.credentials.apiSecret,
+        secure: true,
+      });
+    }
   }
 
   @ThrottleUpload()
@@ -65,15 +70,13 @@ export class UploadsController {
       throw new TrustLevelTooLow("Your account cannot upload files right now.");
     }
 
-    const cloudName = this.config.get<string>("CLOUDINARY_CLOUD_NAME");
-    const apiKey = this.config.get<string>("CLOUDINARY_API_KEY");
-    const apiSecret = this.config.get<string>("CLOUDINARY_API_SECRET");
-
-    if (!cloudName || !apiKey || !apiSecret) {
+    if (!this.credentials) {
       throw new ValidationFailed(
-        "File uploads are not configured on this server.",
+        "Cloudinary is not configured. Add CLOUDINARY_URL or all three CLOUDINARY credential variables to backend/.env, then restart the backend.",
       );
     }
+
+    const { cloudName, apiKey, apiSecret } = this.credentials;
 
     const limits = LIMITS[dto.kind];
     const timestamp = Math.round(Date.now() / 1000);
@@ -122,5 +125,41 @@ export class UploadsController {
       maxBytes: limits.maxBytes,
       uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/${dto.kind}/upload`,
     };
+  }
+}
+
+interface CloudinaryCredentials {
+  cloudName: string;
+  apiKey: string;
+  apiSecret: string;
+}
+
+function readCloudinaryCredentials(
+  config: ConfigService,
+): CloudinaryCredentials | null {
+  const cloudName = config.get<string>("CLOUDINARY_CLOUD_NAME")?.trim();
+  const apiKey = config.get<string>("CLOUDINARY_API_KEY")?.trim();
+  const apiSecret = config.get<string>("CLOUDINARY_API_SECRET")?.trim();
+
+  if (cloudName && apiKey && apiSecret) {
+    return { cloudName, apiKey, apiSecret };
+  }
+
+  const rawUrl = config.get<string>("CLOUDINARY_URL")?.trim();
+  if (!rawUrl) return null;
+
+  try {
+    const url = new URL(rawUrl);
+    if (url.protocol !== "cloudinary:" || !url.username || !url.password || !url.hostname) {
+      return null;
+    }
+
+    return {
+      cloudName: decodeURIComponent(url.hostname),
+      apiKey: decodeURIComponent(url.username),
+      apiSecret: decodeURIComponent(url.password),
+    };
+  } catch {
+    return null;
   }
 }

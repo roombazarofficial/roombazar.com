@@ -4,6 +4,7 @@ import { NotFound } from "src/common/errors/domain.errors";
 import type { Listing, ListingStatus, RoomType } from "src/domain/listing.entity";
 import type {
   ListingSearchCriteria,
+  ListingAdminCriteria,
   ListingsRepository,
   Page,
 } from "src/persistence/ports/listings.repository";
@@ -63,6 +64,62 @@ export class PrismaListingsRepository implements ListingsRepository {
       totalItems,
       totalPages: Math.max(1, Math.ceil(totalItems / criteria.pageSize)),
     };
+  }
+
+  async findForAdmin(criteria: ListingAdminCriteria): Promise<Page<Listing>> {
+    const where: Prisma.ListingWhereInput = {
+      deletedAt: null,
+      ...(criteria.statuses?.length && { status: { in: criteria.statuses } }),
+      ...(criteria.ownerId && { createdById: criteria.ownerId }),
+      ...(criteria.citySlug && { city: { slug: criteria.citySlug } }),
+      ...(criteria.query && {
+        OR: [
+          { title: { contains: criteria.query, mode: "insensitive" } },
+          { description: { contains: criteria.query, mode: "insensitive" } },
+          { slug: { contains: criteria.query, mode: "insensitive" } },
+        ],
+      }),
+    };
+
+    const orderBy: Prisma.ListingOrderByWithRelationInput[] =
+      criteria.sort === "oldest"
+        ? [{ submittedAt: "asc" }, { createdAt: "asc" }]
+        : criteria.sort === "rentlow"
+          ? [{ rentPaise: "asc" }]
+          : criteria.sort === "renthigh"
+            ? [{ rentPaise: "desc" }]
+            : [{ createdAt: "desc" }];
+
+    const [totalItems, rows] = await Promise.all([
+      this.prisma.listing.count({ where }),
+      this.prisma.listing.findMany({
+        where,
+        include: listingInclude,
+        orderBy,
+        skip: (criteria.page - 1) * criteria.pageSize,
+        take: criteria.pageSize,
+      }),
+    ]);
+
+    return {
+      items: rows.map(toDomainListing),
+      page: criteria.page,
+      pageSize: criteria.pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / criteria.pageSize)),
+    };
+  }
+
+  async countByStatus(): Promise<Record<string, number>> {
+    const rows = await this.prisma.listing.groupBy({
+      by: ["status"],
+      where: { deletedAt: null },
+      _count: { _all: true },
+    });
+
+    return Object.fromEntries(
+      rows.map((row) => [row.status, row._count._all]),
+    );
   }
 
   private buildWhere(
@@ -227,17 +284,17 @@ export class PrismaListingsRepository implements ListingsRepository {
           minStayMonths: listing.minStayMonths,
           preferredTenant: listing.preferredTenant,
           rankScore: listing.rankScore,
+          submittedAt: listing.submittedAt ? new Date(listing.submittedAt) : null,
+          approvedAt: listing.approvedAt ? new Date(listing.approvedAt) : null,
+          approvedByUserId: listing.approvedByUserId,
+          rejectedAt: listing.rejectedAt ? new Date(listing.rejectedAt) : null,
+          rejectedByUserId: listing.rejectedByUserId,
+          rejectionReason: listing.rejectionReason,
           publishedAt: listing.publishedAt ? new Date(listing.publishedAt) : null,
           expiresAt: listing.expiresAt ? new Date(listing.expiresAt) : null,
           amenities: {
             create: amenityIds.map((amenityId) => ({ amenityId })),
           },
-          /*
-            Media rows are created alongside the listing and linked in one go.
-            The upload already happened directly against Cloudinary; this only
-            records what came back, so a failure here cannot orphan a file the
-            user waited on.
-          */
           media: {
             create: listing.photos.map((photo) => ({
               position: photo.position,
@@ -327,6 +384,24 @@ export class PrismaListingsRepository implements ListingsRepository {
             preferredTenant: patch.preferredTenant,
           }),
           ...(patch.rankScore !== undefined && { rankScore: patch.rankScore }),
+          ...(patch.submittedAt !== undefined && {
+            submittedAt: patch.submittedAt ? new Date(patch.submittedAt) : null,
+          }),
+          ...(patch.approvedAt !== undefined && {
+            approvedAt: patch.approvedAt ? new Date(patch.approvedAt) : null,
+          }),
+          ...(patch.approvedByUserId !== undefined && {
+            approvedByUserId: patch.approvedByUserId,
+          }),
+          ...(patch.rejectedAt !== undefined && {
+            rejectedAt: patch.rejectedAt ? new Date(patch.rejectedAt) : null,
+          }),
+          ...(patch.rejectedByUserId !== undefined && {
+            rejectedByUserId: patch.rejectedByUserId,
+          }),
+          ...(patch.rejectionReason !== undefined && {
+            rejectionReason: patch.rejectionReason,
+          }),
           ...(patch.publishedAt !== undefined && {
             publishedAt: patch.publishedAt ? new Date(patch.publishedAt) : null,
           }),

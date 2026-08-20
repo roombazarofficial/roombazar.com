@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/layout/siteshell";
 import { ListingGrid } from "@/components/listing/listinggrid";
+import { FilterPanel } from "@/components/search/filterpanel";
+import { FilterDrawer } from "@/components/search/filterdrawer";
+import { ActiveFilterChips } from "@/components/search/activefilterchips";
+import { SortSelect } from "@/components/search/sortselect";
+import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/emptystate";
 import { buttonStyles } from "@/components/ui/button";
-import { getRecentListings } from "@/lib/api/listings";
-import { getCities, getLocalities } from "@/lib/api/geography";
-import { formatRupeesCompact } from "@/lib/format/rupees";
+import { searchListings } from "@/lib/api/listings";
+import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
 import { routes } from "@/lib/constants/routes";
 
 export const metadata: Metadata = {
@@ -15,104 +19,71 @@ export const metadata: Metadata = {
     "Rooms, PGs, flats and hostel beds for rent across India, posted directly by owners.",
 };
 
-export default async function Page() {
-  const cities = await getCities();
-  const primary = cities[0];
+type Search = Promise<Record<string, string | string[] | undefined>>;
 
-  const [recent, localities] = primary
-    ? await Promise.all([
-        getRecentListings(primary.slug, 8),
-        getLocalities(primary.slug),
-      ])
-    : [[], []];
+export default async function Page({ searchParams }: { searchParams: Search }) {
+  const filters = parseSearchParams(await searchParams, "");
+  const results = await searchListings(filters);
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-7xl px-4 py-10">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Browse rooms
-        </h1>
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <header>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            Rooms for rent across India
+          </h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            {results.totalItems} {results.totalItems === 1 ? "room" : "rooms"}{" "}
+            available now
+          </p>
+        </header>
 
-        <section className="mt-8">
-          <h2 className="text-base font-semibold text-ink">Cities</h2>
+        <div className="mt-8 flex gap-8">
+          <aside className="hidden w-64 shrink-0 lg:block">
+            <FilterPanel filters={filters} citySlug="" />
+          </aside>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {cities.map((city) => (
-              <Link
-                key={city.id}
-                href={routes.city(city.slug)}
-                className="rounded-card border border-line bg-surface px-4 py-3 text-sm hover:shadow-raised"
-              >
-                <span className="font-medium text-ink">{city.name}</span>
-
-                <span className="ml-2 text-xs text-ink-muted">{city.state}</span>
-
-              </Link>
-
-            ))}
-            <span className="rounded-card border border-dashed border-line-strong px-4 py-3 text-sm text-ink-subtle">
-              More cities coming soon
-            </span>
-
-          </div>
-
-        </section>
-
-        {localities.length > 0 && primary && (
-          <section className="mt-8">
-            <h2 className="text-base font-semibold text-ink">
-              Popular localities
-            </h2>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {localities.map((locality) => (
-                <Link
-                  key={locality.id}
-                  href={routes.locality(primary.slug, locality.slug)}
-                  className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink-muted hover:border-line-strong hover:text-ink"
-                >
-                  {locality.name}
-                  {locality.medianRentPaise ? (
-                    <span className="ml-1.5 text-xs text-ink-subtle">
-                      from {formatRupeesCompact(locality.medianRentPaise)}
-                    </span>
-
-                  ) : null}
-                </Link>
-
-              ))}
+          <div className="min-w-0 flex-1">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <p className="hidden text-sm text-ink-muted sm:block">
+                Showing {results.items.length} of {results.totalItems}
+              </p>
+              <div className="flex items-center gap-2">
+                <FilterDrawer filters={filters} citySlug="" />
+                <SortSelect current={filters.sort} />
+              </div>
             </div>
 
-          </section>
+            <ActiveFilterChips filters={filters} localities={[]} />
 
-        )}
-
-        <section className="mt-10">
-          <h2 className="mb-4 text-base font-semibold text-ink">
-            Recently posted
-          </h2>
-
-          {recent.length > 0 ? (
-            <ListingGrid listings={recent} />
-
-          ) : (
-            <EmptyState
-              title="No rooms listed yet"
-              description="Posting is free and takes about three minutes."
-              action={
-                <Link href={routes.post} className={buttonStyles()}>
-                  Post your room
-                </Link>
-
-              }
-            />
-
-          )}
-        </section>
-
+            {results.items.length > 0 ? (
+              <>
+                <ListingGrid listings={results.items} />
+                <Pagination
+                  page={results.page}
+                  totalPages={results.totalPages}
+                  buildHref={(page) =>
+                    `${routes.rooms}${buildSearchQuery({ ...filters, page })}`
+                  }
+                />
+              </>
+            ) : (
+              <EmptyState
+                title="No rooms match these filters"
+                description="Try clearing a filter. New rooms are posted every day."
+                action={
+                  <Link
+                    href={routes.rooms}
+                    className={buttonStyles({ variant: "secondary" })}
+                  >
+                    Clear all filters
+                  </Link>
+                }
+              />
+            )}
+          </div>
+        </div>
       </div>
-
     </SiteShell>
-
   );
 }

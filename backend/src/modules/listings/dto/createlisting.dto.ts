@@ -28,16 +28,32 @@ export const createListingSchema = z.object({
   */
   media: z
     .array(
-      z.object({
-        publicId: z.string().min(1),
-        secureUrl: z.string().url(),
-        kind: z.enum(["image", "video"]).default("image"),
-        format: z.string().default(""),
-        width: z.number().int().min(1),
-        height: z.number().int().min(1),
-        sizeBytes: z.number().int().min(1),
-        durationSeconds: z.number().nullable().default(null),
-      }),
+      z.preprocess(
+        (value) => {
+          if (
+            value === null ||
+            typeof value !== "object" ||
+            Array.isArray(value)
+          ) {
+            return value;
+          }
+
+          const media = value as Record<string, unknown>;
+          return media.publicId || !media.id
+            ? media
+            : { ...media, publicId: media.id };
+        },
+        z.object({
+          publicId: z.string().min(1),
+          secureUrl: z.string().url(),
+          kind: z.enum(["image", "video"]).default("image"),
+          format: z.string().default(""),
+          width: z.number().int().min(1),
+          height: z.number().int().min(1),
+          sizeBytes: z.number().int().min(1),
+          durationSeconds: z.number().nullable().default(null),
+        }),
+      ),
     )
     .min(1)
     .max(12),

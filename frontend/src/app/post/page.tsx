@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-semibold tracking-tight text-ink">
-        Post your room
+        Host your room
       </h1>
 
       <p className="mt-3 text-base text-ink-muted">

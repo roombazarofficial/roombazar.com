@@ -24,6 +24,7 @@ import type { User } from "src/domain/user.entity";
 import { assertTransition, expiryFrom } from "./listinglifecycle";
 import { computeRankScore } from "./ranking";
 import type { CreateListingDto, UpdateListingDto } from "./dto/createlisting.dto";
+import { presentDetail } from "./listings.presenter";
 
 @Injectable()
 export class ListingsService {
@@ -38,7 +39,7 @@ export class ListingsService {
 
     if (!listing || listing.deletedAt) throw new NotFound("Listing");
 
-    if (listing.status === "suspended") throw new NotFound("Listing");
+    if (listing.status !== "active") throw new NotFound("Listing");
 
     return listing;
   }
@@ -57,6 +58,20 @@ export class ListingsService {
 
   async listMine(owner: User): Promise<Listing[]> {
     return this.listings.findByOwner(owner.id);
+  }
+
+  async getDetailBySlug(slug: string) {
+    const listing = await this.getBySlug(slug);
+    return (await this.presentListings([listing]))[0];
+  }
+
+  async getOwnedDetail(id: string, owner: User) {
+    const listing = await this.getOwned(id, owner);
+    return (await this.presentListings([listing]))[0];
+  }
+
+  async listMineDetails(owner: User) {
+    return this.presentListings(await this.listMine(owner));
   }
 
   async create(dto: CreateListingDto, owner: User): Promise<Listing> {
@@ -123,7 +138,13 @@ export class ListingsService {
       id: randomUUID(),
       slug: buildSlug(title, locality.slug),
       ownerId: owner.id,
-      status: "active",
+      status: "pendingapproval",
+      submittedAt: nowIso,
+      approvedAt: null,
+      approvedByUserId: null,
+      rejectedAt: null,
+      rejectedByUserId: null,
+      rejectionReason: null,
       title,
       description: dto.description,
       roomType: dto.roomType,
@@ -149,8 +170,8 @@ export class ListingsService {
       photos,
       viewCount: 0,
       rankScore: 0,
-      publishedAt: nowIso,
-      expiresAt: expiryFrom(now),
+      publishedAt: null,
+      expiresAt: null,
       createdAt: nowIso,
       updatedAt: nowIso,
       deletedAt: null,
@@ -159,6 +180,57 @@ export class ListingsService {
     listing.rankScore = computeRankScore(listing, owner.trustLevel, now);
 
     return this.listings.create(listing);
+  }
+
+  private async presentListings(listings: Listing[]) {
+    if (listings.length === 0) return [];
+
+    const ownerIds = [...new Set(listings.map((listing) => listing.ownerId))];
+    const [cities, localities, amenities, owners, ownerListings] =
+      await Promise.all([
+        this.geography.findCitiesByIds(
+          listings.map((listing) => listing.cityId),
+        ),
+        this.geography.findLocalitiesByIds(
+          listings.map((listing) => listing.localityId),
+        ),
+        this.geography.listAmenities(),
+        this.users.findManyByIds(ownerIds),
+        Promise.all(
+          ownerIds.map(async (ownerId) => [
+            ownerId,
+            await this.listings.findByOwner(ownerId),
+          ] as const),
+        ),
+      ]);
+
+    const activeCountByOwner = new Map(
+      ownerListings.map(([ownerId, owned]) => [
+        ownerId,
+        owned.filter((listing) => listing.status === "active").length,
+      ]),
+    );
+
+    return listings.map((listing) => {
+      const city = cities.get(listing.cityId);
+      const locality = localities.get(listing.localityId);
+      const owner = owners.get(listing.ownerId);
+
+      if (!city || !locality || !owner) throw new NotFound("Listing");
+
+      return presentDetail(
+        listing,
+        city,
+        locality,
+        owner,
+        {
+          activeListingCount: activeCountByOwner.get(owner.id) ?? 0,
+          typicalReplyHours: null,
+        },
+        amenities,
+        "",
+      );
+    });
   }
 
   async update(

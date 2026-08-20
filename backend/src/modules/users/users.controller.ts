@@ -9,7 +9,10 @@ import {
   Patch,
 } from "@nestjs/common";
 import { z } from "zod";
-import { CurrentUser } from "src/common/decorators/currentuser.decorator";
+import {
+  CurrentUser,
+  CurrentUserOptional,
+} from "src/common/decorators/currentuser.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { ZodValidationPipe } from "src/common/pipes/zodvalidation.pipe";
 import { NotFound } from "src/common/errors/domain.errors";
@@ -46,8 +49,11 @@ export class UsersController {
     private readonly conversations: ConversationsRepository,
   ) {}
 
+  @Public()
   @Get("me")
-  async me(@CurrentUser() user: User) {
+  async me(@CurrentUserOptional() user: User | null) {
+    if (!user) return null;
+
     const stats = await this.statsFor(user.id);
 
     return {

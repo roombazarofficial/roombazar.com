@@ -7,7 +7,8 @@ export type Furnishing = "unfurnished" | "semi" | "full";
 export type PostedBy = "owner" | "tenant" | "agent";
 
 export type ListingStatus =
-  | "draft" | "active" | "paused" | "taken" | "expired" | "suspended";
+  | "draft" | "pendingapproval" | "rejected" | "active"
+  | "paused" | "taken" | "expired" | "suspended";
 
 export type TenantPreference =
   | "family" | "bachelormale" | "bachelorfemale"
@@ -17,9 +18,7 @@ export type MediaKind = "image" | "video";
 
 export interface ListingPhoto {
   id: string;
-  /** Cloudinary public_id. */
   objectKey: string;
-  /** Delivery URL as Cloudinary returned it, stored rather than rebuilt. */
   secureUrl: string;
   kind: MediaKind;
   format: string;
@@ -27,7 +26,6 @@ export interface ListingPhoto {
   sizeBytes: number;
   width: number;
   height: number;
-  /** Videos only. */
   durationSeconds: number | null;
   blurhash: string | null;
   position: number;
@@ -39,6 +37,12 @@ export interface Listing {
   slug: string;
   ownerId: string;
   status: ListingStatus;
+  submittedAt: string | null;
+  approvedAt: string | null;
+  approvedByUserId: string | null;
+  rejectedAt: string | null;
+  rejectedByUserId: string | null;
+  rejectionReason: string | null;
 
   title: string;
   description: string;

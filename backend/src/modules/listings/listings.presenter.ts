@@ -98,8 +98,8 @@ export function presentDetail(
     city,
     locality,
 
-    publicApproximateLat: fuzzed.lat,
-    publicApproximateLng: fuzzed.lng,
+    approximateLat: fuzzed.lat,
+    approximateLng: fuzzed.lng,
 
     areaSqft: listing.areaSqft,
     floor: listing.floor,

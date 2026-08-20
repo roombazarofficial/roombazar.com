@@ -46,6 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <input
           ref={ref}
           id={inputId}
+          data-input-control
           aria-invalid={error ? true : undefined}
           aria-describedby={hint || error ? describedById : undefined}
           className={cn(

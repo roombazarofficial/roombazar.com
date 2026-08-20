@@ -35,8 +35,10 @@ export class SearchService {
     viewer: User | null,
     imageHost: string,
   ): Promise<Page<unknown>> {
-    const city = await this.geography.findCityBySlug(query.city);
-    if (!city) throw new NotFound("City");
+    const selectedCity = query.city
+      ? await this.geography.findCityBySlug(query.city)
+      : null;
+    if (query.city && !selectedCity) throw new NotFound("City");
 
     const page = await this.listings.search({
       citySlug: query.city,
@@ -58,10 +60,12 @@ export class SearchService {
       ? new Set(await this.saved.listSavedListingIds(viewer.id))
       : new Set<string>();
 
-    const localities = await this.geography.listLocalities(city.id);
-    const localityById = new Map(
-      localities.map((locality) => [locality.id, locality]),
-    );
+    const [cityById, localityById] = await Promise.all([
+      this.geography.findCitiesByIds(page.items.map((listing) => listing.cityId)),
+      this.geography.findLocalitiesByIds(
+        page.items.map((listing) => listing.localityId),
+      ),
+    ]);
 
     const listers = await this.users.findManyByIds(
       page.items.map((listing) => listing.ownerId),
@@ -70,10 +74,11 @@ export class SearchService {
     const items = [];
 
     for (const listing of page.items) {
+      const city = cityById.get(listing.cityId);
       const locality = localityById.get(listing.localityId);
       const lister = listers.get(listing.ownerId);
 
-      if (!locality || !lister) continue;
+      if (!city || !locality || !lister) continue;
 
       items.push(
         presentSummary(

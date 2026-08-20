@@ -3,40 +3,52 @@
 import { StepShell } from "@/components/listingform/stepshell";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { useIndiaLocations } from "@/hooks/useindialocations";
 import { useListingDraft } from "@/store/listingdraftstore";
-import { useLocalities } from "@/hooks/uselocalities";
 
 export default function Page() {
   const { draft, update } = useListingDraft();
   const {
-    localities,
+    states,
+    districts,
     cities,
+    loadingStates,
+    loadingDistricts,
     loadingCities,
-    loadingLocalities,
     error,
     retry,
-  } = useLocalities(draft.citySlug);
+  } = useIndiaLocations(draft.stateCode, draft.districtSlug);
 
-  const cityPlaceholder = loadingCities
-    ? "Loading cities…"
-    : cities.length === 0
-      ? "No cities available"
-      : "Select a city";
+  const statePlaceholder = loadingStates
+    ? "Loading states..."
+    : states.length === 0
+      ? "No states available"
+      : "Select a state";
 
-  const localityPlaceholder = !draft.citySlug
-    ? "Choose a city first"
-    : loadingLocalities
-      ? "Loading localities…"
-      : localities.length === 0
-        ? "No localities available"
-        : "Select a locality";
+  const districtPlaceholder = !draft.stateCode
+    ? "Choose a state first"
+    : loadingDistricts
+      ? "Loading districts..."
+      : districts.length === 0
+        ? "No districts available"
+        : "Select a district";
+
+  const cityPlaceholder = !draft.districtSlug
+    ? "Choose a district first"
+    : loadingCities
+      ? "Loading cities..."
+      : cities.length === 0
+        ? "No cities available"
+        : "Select a city";
 
   return (
     <StepShell
       step="location"
       title="Where is the room?"
-      description="Seekers search by locality, so this is the field that decides whether you are found."
-      canContinue={Boolean(draft.citySlug && draft.localitySlug)}
+      description="Choose the state, district and city so seekers can find your room."
+      canContinue={Boolean(
+        draft.stateCode && draft.districtSlug && draft.localitySlug,
+      )}
     >
       {error && (
         <div
@@ -44,7 +56,6 @@ export default function Page() {
           className="rounded-card border border-danger/30 bg-danger-soft px-4 py-3"
         >
           <p className="text-sm text-danger">{error}</p>
-
           <button
             type="button"
             onClick={retry}
@@ -56,34 +67,57 @@ export default function Page() {
       )}
 
       <Select
-        label="City"
-        placeholder={cityPlaceholder}
-        options={cities.map((city) => ({ value: city.slug, label: city.name }))}
-        value={draft.citySlug ?? ""}
-        disabled={loadingCities || cities.length === 0}
-        /*
-          Changing the city clears the locality, because the previous choice
-          belongs to a different city and would otherwise be submitted as
-          though it were valid here.
-        */
+        label="State"
+        placeholder={statePlaceholder}
+        options={states.map((state) => ({
+          value: state.code,
+          label: state.name,
+        }))}
+        value={draft.stateCode ?? ""}
+        disabled={loadingStates || states.length === 0}
         onChange={(event) =>
-          update({ citySlug: event.target.value, localitySlug: null })
+          update({
+            stateCode: event.target.value,
+            districtSlug: null,
+            citySlug: null,
+            localitySlug: null,
+          })
         }
       />
 
       <Select
-        label="Locality"
-        placeholder={localityPlaceholder}
-        options={localities.map((locality) => ({
-          value: locality.slug,
-          label: locality.name,
+        label="District"
+        placeholder={districtPlaceholder}
+        options={districts.map((district) => ({
+          value: district.slug,
+          label: district.name,
+        }))}
+        value={draft.districtSlug ?? ""}
+        disabled={
+          !draft.stateCode || loadingDistricts || districts.length === 0
+        }
+        onChange={(event) =>
+          update({
+            districtSlug: event.target.value,
+            citySlug: event.target.value,
+            localitySlug: null,
+          })
+        }
+      />
+
+      <Select
+        label="City"
+        placeholder={cityPlaceholder}
+        options={cities.map((city) => ({
+          value: city.slug,
+          label: city.name,
         }))}
         value={draft.localitySlug ?? ""}
         disabled={
-          !draft.citySlug || loadingLocalities || localities.length === 0
+          !draft.districtSlug || loadingCities || cities.length === 0
         }
         onChange={(event) => update({ localitySlug: event.target.value })}
-        hint="Cannot find yours? Ask us to add it from the help page."
+        hint="Includes cities, towns and local areas covered by India Post."
       />
 
       <Input

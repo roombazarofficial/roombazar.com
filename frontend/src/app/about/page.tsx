@@ -184,7 +184,7 @@ export default function AboutPage() {
                     href={routes.post}
                     className="inline-flex items-center justify-center rounded-lg border border-brand-600 bg-white px-4 py-2.5 text-sm font-semibold text-brand-600 shadow-xs transition-all hover:bg-brand-50 active:scale-[0.98]"
                   >
-                    Post a room
+                    Host a room
                   </Link>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function AboutPage() {
                   href={routes.post}
                   className="inline-flex h-11 items-center justify-center rounded-full border border-line bg-white px-7 text-sm font-semibold text-ink shadow-xs transition-all hover:bg-surface-muted active:scale-[0.98]"
                 >
-                  Post a room
+                  Host a room
                 </Link>
               </div>
             </div>

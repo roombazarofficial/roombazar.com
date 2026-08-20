@@ -13,6 +13,8 @@ export interface ListingDraft {
   title: string;
   description: string;
 
+  stateCode: string | null;
+  districtSlug: string | null;
   citySlug: string | null;
   localitySlug: string | null;
   addressLine: string;
@@ -52,6 +54,8 @@ const emptyDraft: ListingDraft = {
     control showing a blank box, because a select whose value matches no option
     renders as empty rather than falling back to the placeholder.
   */
+  stateCode: null,
+  districtSlug: null,
   citySlug: null,
   localitySlug: null,
   addressLine: "",
@@ -100,12 +104,28 @@ export function normaliseDraft(data: Partial<ListingDraft>): ListingDraft {
 
   return {
     ...merged,
-    media: Array.isArray(merged.media) ? merged.media : [],
+    districtSlug: merged.districtSlug ?? merged.citySlug,
+    media: normaliseMedia(merged.media),
     amenitySlugs: Array.isArray(merged.amenitySlugs) ? merged.amenitySlugs : [],
     preferredTenant: Array.isArray(merged.preferredTenant)
       ? merged.preferredTenant
       : [],
   };
+}
+
+function normaliseMedia(value: unknown): UploadedMedia[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((entry) => {
+    if (entry === null || typeof entry !== "object") return [];
+
+    const media = entry as UploadedMedia & { id?: string };
+    const publicId = media.publicId ?? media.id;
+
+    return publicId && media.secureUrl
+      ? [{ ...media, publicId }]
+      : [];
+  });
 }
 
 export const useListingDraft = create<DraftStore>()((set) => ({
@@ -214,7 +234,7 @@ export function draftToPayload(draft: ListingDraft): CreateListingPayload {
         : Math.round(draft.maintenanceRupees * 100),
     billsIncluded: draft.billsIncluded,
     negotiable: draft.negotiable,
-    media: draft.media,
+    media: normaliseMedia(draft.media),
     title: draft.title.trim() || undefined,
     description: draft.description.trim(),
     furnishing: draft.furnishing ?? "unfurnished",

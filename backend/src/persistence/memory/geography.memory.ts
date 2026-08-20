@@ -1,5 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import type { Amenity, City, Locality } from "src/domain/geography.entity";
+import type {
+  Amenity,
+  City,
+  Locality,
+  State,
+} from "src/domain/geography.entity";
 import type { GeographyRepository } from "src/persistence/ports/geography.repository";
 
 export const seedCities: City[] = [
@@ -12,6 +17,10 @@ export const seedCities: City[] = [
     centroidLat: 12.9716,
     centroidLng: 77.5946,
   },
+];
+
+const seedStates: State[] = [
+  { id: "state-ka", name: "Karnataka", code: "KA" },
 ];
 
 export const seedLocalities: Locality[] = [
@@ -83,12 +92,55 @@ export const seedAmenities: Amenity[] = [
 
 @Injectable()
 export class MemoryGeographyRepository implements GeographyRepository {
+  async listStates(): Promise<State[]> {
+    return seedStates;
+  }
+
+  async listDistricts(stateCode: string): Promise<City[]> {
+    const state = seedStates.find((entry) => entry.code === stateCode);
+    if (!state) return [];
+
+    return seedCities.filter(
+      (city) => city.isActive && city.state === state.name,
+    );
+  }
+
   async listCities(): Promise<City[]> {
     return seedCities.filter((city) => city.isActive);
   }
 
   async findCityBySlug(slug: string): Promise<City | null> {
     return seedCities.find((city) => city.slug === slug) ?? null;
+  }
+
+  async findCityById(id: string): Promise<City | null> {
+    return seedCities.find((city) => city.id === id) ?? null;
+  }
+
+  async createCity(city: City): Promise<City> {
+    seedCities.push(city);
+    return city;
+  }
+
+  async updateCity(id: string, patch: Partial<City>): Promise<City> {
+    const index = seedCities.findIndex((city) => city.id === id);
+    if (index < 0) throw new Error("City not found");
+    seedCities[index] = { ...seedCities[index]!, ...patch };
+    return seedCities[index]!;
+  }
+
+  async deleteCity(id: string): Promise<void> {
+    const index = seedCities.findIndex((city) => city.id === id);
+    if (index >= 0) seedCities.splice(index, 1);
+  }
+
+  async findCitiesByIds(ids: string[]): Promise<Map<string, City>> {
+    const wanted = new Set(ids);
+    return new Map(
+      seedCities
+        .filter((city) => wanted.has(city.id))
+        .map((city) => [city.id, city]),
+    );
   }
 
   async listLocalities(cityId: string): Promise<Locality[]> {
@@ -105,6 +157,39 @@ export class MemoryGeographyRepository implements GeographyRepository {
       seedLocalities.find(
         (locality) => locality.cityId === cityId && locality.slug === slug,
       ) ?? null
+    );
+  }
+
+  async findLocalityById(id: string): Promise<Locality | null> {
+    return seedLocalities.find((locality) => locality.id === id) ?? null;
+  }
+
+  async createLocality(locality: Locality): Promise<Locality> {
+    seedLocalities.push(locality);
+    return locality;
+  }
+
+  async updateLocality(
+    id: string,
+    patch: Partial<Locality>,
+  ): Promise<Locality> {
+    const index = seedLocalities.findIndex((locality) => locality.id === id);
+    if (index < 0) throw new Error("Locality not found");
+    seedLocalities[index] = { ...seedLocalities[index]!, ...patch };
+    return seedLocalities[index]!;
+  }
+
+  async deleteLocality(id: string): Promise<void> {
+    const index = seedLocalities.findIndex((locality) => locality.id === id);
+    if (index >= 0) seedLocalities.splice(index, 1);
+  }
+
+  async findLocalitiesByIds(ids: string[]): Promise<Map<string, Locality>> {
+    const wanted = new Set(ids);
+    return new Map(
+      seedLocalities
+        .filter((locality) => wanted.has(locality.id))
+        .map((locality) => [locality.id, locality]),
     );
   }
 
@@ -126,6 +211,30 @@ export class MemoryGeographyRepository implements GeographyRepository {
 
   async listAmenities(): Promise<Amenity[]> {
     return seedAmenities;
+  }
+
+  async findAmenityById(id: string): Promise<Amenity | null> {
+    return seedAmenities.find((amenity) => amenity.id === id) ?? null;
+  }
+
+  async createAmenity(amenity: Amenity): Promise<Amenity> {
+    seedAmenities.push(amenity);
+    return amenity;
+  }
+
+  async updateAmenity(
+    id: string,
+    patch: Partial<Amenity>,
+  ): Promise<Amenity> {
+    const index = seedAmenities.findIndex((amenity) => amenity.id === id);
+    if (index < 0) throw new Error("Amenity not found");
+    seedAmenities[index] = { ...seedAmenities[index]!, ...patch };
+    return seedAmenities[index]!;
+  }
+
+  async deleteAmenity(id: string): Promise<void> {
+    const index = seedAmenities.findIndex((amenity) => amenity.id === id);
+    if (index >= 0) seedAmenities.splice(index, 1);
   }
 }
 

@@ -24,6 +24,13 @@ export class ValidationFailed extends DomainError {
     readonly fields?: Record<string, string>,
   ) {
     super("validationfailed", message, HttpStatus.BAD_REQUEST);
+
+    if (fields) {
+      const response = this.getResponse();
+      if (typeof response === "object" && response !== null) {
+        Object.assign(response, { fields });
+      }
+    }
   }
 }
 

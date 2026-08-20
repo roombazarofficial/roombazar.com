@@ -7,16 +7,17 @@ import { Button } from "@/components/ui/button";
 import { FilterPanel } from "./filterpanel";
 import { routes } from "@/lib/constants/routes";
 import type { SearchFilters } from "@/types/searchfilters";
-import type { Locality } from "@/types/locality";
 
 export function FilterDrawer({
   filters,
-  localities,
   citySlug,
+  stateName,
+  selectedCitySlug,
 }: {
   filters: SearchFilters;
-  localities: Locality[];
   citySlug: string;
+  stateName?: string;
+  selectedCitySlug?: string;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -57,7 +58,7 @@ export function FilterDrawer({
               variant="ghost"
               fullWidth
               onClick={() => {
-                router.push(routes.city(citySlug));
+                router.push(citySlug ? routes.city(citySlug) : routes.rooms);
                 setOpen(false);
               }}
             >
@@ -75,8 +76,9 @@ export function FilterDrawer({
         {}
         <FilterPanel
           filters={filters}
-          localities={localities}
           citySlug={citySlug}
+          stateName={stateName}
+          selectedCitySlug={selectedCitySlug}
           showClearButton={false}
         />
 

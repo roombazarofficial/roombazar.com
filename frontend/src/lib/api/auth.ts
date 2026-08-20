@@ -44,5 +44,5 @@ export function confirmPasswordReset(input: {
 }
 
 export function fetchCurrentUser(): Promise<CurrentUser | null> {
-  return api.get<CurrentUser>("/users/me").catch(() => null);
+  return api.get<CurrentUser | null>("/users/me").catch(() => null);
 }

@@ -71,8 +71,8 @@ export default async function Page({
           <aside className="hidden w-64 shrink-0 lg:block">
             <FilterPanel
               filters={filters}
-              localities={localities}
               citySlug={city}
+              stateName={found.state}
             />
 
           </aside>
@@ -86,8 +86,8 @@ export default async function Page({
               <div className="flex items-center gap-2">
                 <FilterDrawer
                   filters={filters}
-                  localities={localities}
                   citySlug={city}
+                  stateName={found.state}
                 />
 
                 <SortSelect current={filters.sort} />
@@ -139,7 +139,10 @@ export default async function Page({
             </h2>
 
             <div className="mt-3 flex flex-wrap gap-2">
-              {localities.map((locality) => (
+              {localities
+                .filter((locality) => locality.activeListingCount > 0)
+                .slice(0, 20)
+                .map((locality) => (
                 <Link
                   key={locality.id}
                   href={routes.locality(city, locality.slug)}

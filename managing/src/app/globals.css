@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Tailwind v4 is configured here rather than in a JS config
+  file, so this block is the single source of truth for the visual system.
+  Components reference tokens (bg-brand-600, text-ink-muted) and never
+  hardcode a hex value.
+
+  Direction: clean and trustworthy. White surfaces, one confident blue, plenty
+  of breathing room. The product's main risk is a seeker suspecting a scam, so
+  the interface should feel calm and legible rather than loud.
+*/
+@theme {
+  /* Brand. One accent, used sparingly — primary actions and links only.
+     If everything is blue, nothing reads as the next step. */
+  --color-brand-50: #eff5ff;
+  --color-brand-100: #dbe7fe;
+  --color-brand-200: #bfd4fe;
+  --color-brand-300: #93b4fd;
+  --color-brand-400: #608cfa;
+  --color-brand-500: #3b6bf6;
+  --color-brand-600: #2551eb;
+  --color-brand-700: #1d3fd8;
+  --color-brand-800: #1e36af;
+  --color-brand-900: #1e328a;
+
+  /* Surfaces and text. */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f8fa;
+  --color-surface-sunken: #eef0f4;
+
+  --color-ink: #101828;
+  --color-ink-muted: #667085;
+  --color-ink-subtle: #98a2b3;
+  --color-ink-inverse: #ffffff;
+
+  --color-line: #e4e7ec;
+  --color-line-strong: #d0d5dd;
+
+  /* Status. Each has a solid tone for text/icons and a soft tone for
+     backgrounds, so badges and banners stay consistent. */
+  --color-success: #067647;
+  --color-success-soft: #ecfdf3;
+  --color-warning: #b54708;
+  --color-warning-soft: #fffaeb;
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-info: #175cd3;
+  --color-info-soft: #eff8ff;
+
+  /* Type. A system stack, deliberately — a webfont costs a render-blocking
+     download on the slow mobile connections most of this market browses on. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
+  --text-2xs: 0.6875rem;
+
+  /* Radius. Moderate and consistent: cards and modals share one value,
+     controls share a slightly tighter one. */
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-sheet: 1rem;
+
+  /* Elevation. Subtle — depth should separate layers, not decorate. */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --shadow-raised: 0 4px 8px -2px rgb(16 24 40 / 0.1),
+    0 2px 4px -2px rgb(16 24 40 / 0.06);
+  --shadow-overlay: 0 20px 24px -4px rgb(16 24 40 / 0.08),
+    0 8px 8px -4px rgb(16 24 40 / 0.03);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Listing photos arrive over slow connections. Images always declare their
+   own box so the page never jumps as they load. */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* One focus style everywhere. Visible, never removed — a lot of listers will
+   fill the post wizard by keyboard on a laptop. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background-color: var(--color-brand-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

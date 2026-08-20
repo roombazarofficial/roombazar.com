@@ -32,20 +32,22 @@ export class MailService {
   private readonly primary: Driver;
   private readonly fallbackEnabled: boolean;
   private readonly from: string;
-  private readonly logToConsole: boolean;
+  private readonly smtpFrom: string;
+  private readonly providerConfigured: boolean;
 
   constructor(private readonly config: ConfigService) {
     const resendKey = config.get<string>("RESEND_API_KEY");
     this.resend = resendKey ? new Resend(resendKey) : null;
 
     const host = config.get<string>("SMTP_HOST");
+    const smtpUser = config.get<string>("SMTP_USER");
     this.smtp = host
       ? createTransport({
           host,
           port: config.get<number>("SMTP_PORT") ?? 587,
           secure: (config.get<number>("SMTP_PORT") ?? 587) === 465,
           auth: {
-            user: config.get<string>("SMTP_USER") ?? "",
+            user: smtpUser ?? "",
             pass: config.get<string>("SMTP_PASSWORD") ?? "",
           },
         })
@@ -54,15 +56,18 @@ export class MailService {
     this.primary = (config.get<string>("MAIL_DRIVER") as Driver) ?? "resend";
     this.fallbackEnabled = config.get<string>("MAIL_FALLBACK") !== "off";
     this.from = config.get<string>("MAIL_FROM") ?? "RoomBazar <onboarding@resend.dev>";
+    this.smtpFrom = smtpUser
+      ? `RoomBazar <${smtpUser}>`
+      : this.from;
 
     /*
-      With neither provider configured the code is written to the log instead.
-      That keeps local development working without credentials, and it is
-      refused outright in production below.
+      Never report a successful delivery when no provider exists. The client
+      must stay on the current form and show the delivery error instead of
+      sending someone to an OTP screen for a message that was never sent.
     */
-    this.logToConsole = !this.resend && !this.smtp;
+    this.providerConfigured = Boolean(this.resend || this.smtp);
 
-    if (this.logToConsole) {
+    if (!this.providerConfigured) {
       if (config.get<string>("NODE_ENV") === "production") {
         throw new Error(
           "No mail provider configured. Set RESEND_API_KEY or SMTP_HOST.",
@@ -70,16 +75,14 @@ export class MailService {
       }
 
       this.logger.warn(
-        "No mail provider configured — verification codes will be logged, not sent.",
+        "No mail provider configured. Email requests will fail until RESEND_API_KEY or SMTP settings are added.",
       );
     }
   }
 
   async send(mail: Mail): Promise<void> {
-    if (this.logToConsole) {
-      this.logger.warn(`[dev mail] to=${mail.to} subject="${mail.subject}"`);
-      this.logger.warn(`[dev mail] ${mail.text}`);
-      return;
+    if (!this.providerConfigured) {
+      throw new Error("No mail provider configured");
     }
 
     const order: Driver[] =
@@ -96,13 +99,21 @@ export class MailService {
         }
 
         if (driver === "smtp" && this.smtp) {
-          await this.smtp.sendMail({
-            from: this.from,
+          const result = await this.smtp.sendMail({
+            from: this.smtpFrom,
             to: mail.to,
             subject: mail.subject,
             html: mail.html,
             text: mail.text,
           });
+
+          if (result.rejected.length > 0 || result.accepted.length === 0) {
+            throw new Error(
+              `SMTP rejected the recipient: ${result.response || "not accepted"}`,
+            );
+          }
+
+          this.logger.log(`SMTP accepted message ${result.messageId}`);
           return;
         }
       } catch (error) {

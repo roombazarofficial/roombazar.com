@@ -1,5 +1,5 @@
 export type TrustLevel = "new" | "verified" | "trusted" | "restricted";
-export type UserRole = "user" | "moderator" | "admin";
+export type UserRole = "user" | "moderator" | "admin" | "superadmin";
 export type VerificationKind = "phone" | "email" | "governmentid" | "ownership";
 
 export interface User {
