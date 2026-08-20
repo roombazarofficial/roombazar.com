@@ -23,7 +23,6 @@ import {
   ValidationFailed,
 } from "src/common/errors/domain.errors";
 import { assertTransition, expiryFrom } from "src/modules/listings/listinglifecycle";
-import { isSuspiciouslyCheap } from "src/modules/listings/ranking";
 import type { Listing } from "src/domain/listing.entity";
 import type { User } from "src/domain/user.entity";
 

@@ -48,6 +48,15 @@ function listing(overrides: Partial<Listing> = {}): Listing {
     })),
     viewCount: 0,
     rankScore: 0,
+
+    // Approved and live, which is the state ranking actually applies to.
+    submittedAt: now,
+    approvedByUserId: "admin-1",
+    approvedAt: now,
+    rejectedByUserId: null,
+    rejectedAt: null,
+    rejectionReason: null,
+
     publishedAt: now,
     expiresAt: null,
     createdAt: now,
