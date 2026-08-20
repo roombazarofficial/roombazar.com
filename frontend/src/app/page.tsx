@@ -4,23 +4,33 @@ import { ListingCard } from "@/components/listing/listingcard";
 import { HeroSearchBar } from "@/components/search/herosearchbar";
 import { HeroCityscapePattern } from "@/components/home/herocityscapepattern";
 import { getRecentListings } from "@/lib/api/listings";
-import { localities } from "@/lib/api/mockdata";
-import { formatRupeesCompact } from "@/lib/format/rupees";
+import { getCities } from "@/lib/api/geography";
 import { routes } from "@/lib/constants/routes";
 
 export default async function Page() {
-  const recent = await getRecentListings(4);
+  const [cities, recent] = await Promise.all([
+    getCities(),
+    getRecentListings(4),
+  ]);
+  const popularLocations = Array.from(
+    new Map(
+      recent.map((listing) => [
+        `${listing.citySlug}/${listing.localitySlug}`,
+        {
+          cityName: listing.cityName,
+          citySlug: listing.citySlug,
+          localityName: listing.localityName,
+          localitySlug: listing.localitySlug,
+        },
+      ]),
+    ).values(),
+  ).slice(0, 5);
 
   return (
     <SiteShell>
-      {/* =========================================================================
-          HERO SECTION with Bengaluru Cityscape & Landmark Skyline Illustration
-          ========================================================================= */}
       <section className="relative border-b border-line bg-white">
-        {/* Cityscape Skyline Background Illustration */}
         <HeroCityscapePattern />
 
-        {/* Hero Content Container */}
         <div className="relative z-10 mx-auto max-w-7xl px-4 pt-16 pb-12 text-center sm:pt-20 sm:pb-16">
           <h1 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             Looking for a place? Start here.
@@ -29,32 +39,26 @@ export default async function Page() {
             Browse rooms, talk to owners directly, and arrange a visit.
           </p>
 
-          {/* Search Pill Component */}
-          <HeroSearchBar localities={localities} />
+          <HeroSearchBar cities={cities} />
 
-          {/* Post Room Link */}
           <p className="mt-5 text-sm text-ink-muted">
             Have a room to rent?{" "}
             <Link
               href={routes.post}
               className="font-medium text-brand-600 underline underline-offset-4 transition-colors hover:text-brand-700"
             >
-              Post it free
+              Host a room
             </Link>
           </p>
         </div>
       </section>
 
-      {/* =========================================================================
-          EXPLORE POPULAR LOCATIONS
-          ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-ink sm:text-lg">
             Explore popular locations
           </h2>
 
-          {/* Carousel Pagination Arrows */}
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -77,41 +81,35 @@ export default async function Page() {
           </div>
         </div>
 
-        {/* 5 Locality Cards Grid */}
         <div className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {localities.slice(0, 5).map((locality) => (
+          {popularLocations.map((location) => (
             <Link
-              key={locality.id}
-              href={routes.locality(locality.citySlug, locality.slug)}
+              key={`${location.citySlug}/${location.localitySlug}`}
+              href={routes.locality(location.citySlug, location.localitySlug)}
               className="rounded-xl border border-line bg-white p-3.5 transition-all hover:border-line-strong hover:shadow-xs"
             >
-              <p className="text-xs font-bold text-ink sm:text-sm">{locality.name}</p>
+              <p className="text-xs font-bold text-ink sm:text-sm">
+                {location.localityName}
+              </p>
               <p className="mt-1 text-2xs text-ink-muted">
-                {locality.activeListingCount} rooms
-                {locality.medianRentPaise
-                  ? ` · from ${formatRupeesCompact(locality.medianRentPaise)}`
-                  : ""}
+                {location.cityName}
               </p>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* =========================================================================
-          RECENTLY POSTED ROOMS
-          ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 pt-2 pb-14">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold text-ink sm:text-lg">Recently posted</h2>
           <Link
-            href={routes.city("bengaluru")}
+            href={routes.rooms}
             className="text-xs font-semibold text-brand-600 underline underline-offset-4 transition-colors hover:text-brand-700 sm:text-sm"
           >
             See all rooms
           </Link>
         </div>
 
-        {/* 4 Cards Grid with Next Arrow */}
         <div className="relative">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {recent.map((listing, index) => (
@@ -119,7 +117,6 @@ export default async function Page() {
             ))}
           </div>
 
-          {/* Right Floating Carousel Arrow */}
           <button
             type="button"
             aria-label="Next listings"

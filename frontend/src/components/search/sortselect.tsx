@@ -4,12 +4,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import type { SortOption } from "@/types/searchfilters";
 
-/**
- * "Most relevant" is the default and blends recency with completeness.
- * Cheapest-first is offered but never default — a price-ascending default
- * rewards bait listings, which is exactly the problem this site exists to
- * avoid. See docs/00-product-spec.md.
- */
 const options: { value: SortOption; label: string }[] = [
   { value: "relevance", label: "Most relevant" },
   { value: "newest", label: "Newest first" },
@@ -44,5 +38,6 @@ export function SortSelect({ current }: { current: SortOption }) {
       onChange={(event) => change(event.target.value)}
       className="h-10 w-48"
     />
+
   );
 }

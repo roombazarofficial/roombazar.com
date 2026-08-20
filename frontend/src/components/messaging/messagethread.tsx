@@ -24,15 +24,12 @@ export function MessageThread({ messages }: { messages: Message[] }) {
                 {message.body}
               </div>
 
-              {/*
-                Shown to both sides. The sender needs to know their number did
-                not get through, and the recipient needs to know one was sent
-                rather than silently dropped.
-              */}
+              {}
               {message.redacted && (
                 <p className="mt-1 text-2xs text-ink-subtle">
                   Contact details are hidden until you both agree to share them
                 </p>
+
               )}
 
               <time
@@ -47,10 +44,14 @@ export function MessageThread({ messages }: { messages: Message[] }) {
                   minute: "2-digit",
                 }).format(new Date(message.sentAt))}
               </time>
+
             </div>
+
           </div>
+
         );
       })}
     </div>
+
   );
 }

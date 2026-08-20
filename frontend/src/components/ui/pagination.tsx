@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Page links are real anchors, not buttons, so results stay crawlable and
- * middle-clickable. Deep pages are mostly crawlers anyway, which is why the
- * window stays narrow rather than rendering fifty numbers.
- */
 export function Pagination({
   page,
   totalPages,
@@ -35,6 +30,7 @@ export function Pagination({
         >
           Previous
         </Link>
+
       )}
 
       {pages.map((n, index) => {
@@ -44,6 +40,7 @@ export function Pagination({
         return (
           <span key={n} className="flex items-center gap-1">
             {gap && <span className="px-1 text-ink-subtle">…</span>}
+
             <Link
               href={buildHref(n)}
               aria-current={n === page ? "page" : undefined}
@@ -56,7 +53,9 @@ export function Pagination({
             >
               {n}
             </Link>
+
           </span>
+
         );
       })}
 
@@ -68,7 +67,9 @@ export function Pagination({
         >
           Next
         </Link>
+
       )}
     </nav>
+
   );
 }

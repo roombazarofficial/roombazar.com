@@ -24,7 +24,7 @@ const roomPhotos = [
   "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
 ];
 
-function samplePhoto(id: string, index: number, _label: string): Photo {
+function samplePhoto(id: string, index: number): Photo {
   return {
     id,
     url: roomPhotos[index % roomPhotos.length] ?? roomPhotos[0]!,
@@ -231,9 +231,9 @@ export const mockListings: Listing[] = seeds.map((seed, index) => {
       seed.roomType === "pgbed" ? ["bachelorfemale", "student"] : ["any"],
     amenities: amenities.slice(0, 5 + (index % 6)),
     photos: [
-      samplePhoto(`photo-${index}-1`, index, "Room photo"),
-      samplePhoto(`photo-${index}-2`, index + 1, "Bathroom"),
-      samplePhoto(`photo-${index}-3`, index + 2, "Building"),
+      samplePhoto(`photo-${index}-1`, index),
+      samplePhoto(`photo-${index}-2`, index + 1),
+      samplePhoto(`photo-${index}-3`, index + 2),
     ],
     lister,
     viewCount: 40 + index * 17,

@@ -1,69 +1,56 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonStyles } from "@/components/ui/button";
-import { MarkAsTakenButton } from "@/components/listing/markastakenbutton";
-import { mockListings } from "@/lib/api/mockdata";
-import { formatRupees } from "@/lib/format/rupees";
+import { buttonStyles } from "@/components/ui/button";
+import { OwnerListingCard } from "@/components/dashboard/ownerlistingcard";
+import { EmptyState } from "@/components/ui/emptystate";
+import { getMyListings } from "@/lib/api/listings";
 import { routes } from "@/lib/constants/routes";
 
-export default function Page() {
-  const mine = mockListings.slice(0, 3);
+export default async function Page() {
+  const listings = await getMyListings();
 
   return (
     <div>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          My listings
-        </h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            My listings
+          </h1>
+
+          <p className="mt-1 text-sm text-ink-muted">
+            {listings.length} {listings.length === 1 ? "room" : "rooms"}, all time
+          </p>
+
+        </div>
+
         <Link href={routes.post} className={buttonStyles()}>
-          Post a room
+          Host a room
         </Link>
+
       </header>
 
-      <ul className="mt-6 space-y-3">
-        {mine.map((listing) => (
-          <li
-            key={listing.id}
-            className="rounded-card border border-line bg-surface p-4"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <Link
-                  href={routes.listing(listing.slug)}
-                  className="text-sm font-medium text-ink hover:underline"
-                >
-                  {listing.title}
-                </Link>
-                <p className="mt-0.5 text-xs text-ink-muted">
-                  {formatRupees(listing.rentPaise)}/month · {listing.locality.name}
-                </p>
-              </div>
-              <Badge tone="success" dot>Active</Badge>
-            </div>
+      {listings.length === 0 ? (
+        <EmptyState
+          className="mt-6"
+          title="No rooms listed yet"
+          description="Posting is free and takes about three minutes."
+          action={
+            <Link href={routes.post} className={buttonStyles()}>
+              Post your first room
+            </Link>
 
-            <div className="mt-3 flex flex-wrap gap-4 text-xs text-ink-muted">
-              <span>{listing.viewCount} views</span>
-              <span>Expires in 21 days</span>
-            </div>
+          }
+        />
 
-            {/*
-              "Mark as taken" is the most important maintenance action in the
-              product, so it is a first-class button here rather than an item
-              hidden in an overflow menu. See docs/01-data-model.md.
-            */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <MarkAsTakenButton listingId={listing.id} size="sm" />
-              <Link
-                href={routes.editListing(listing.id)}
-                className={buttonStyles({ variant: "secondary", size: "sm" })}
-              >
-                Edit
-              </Link>
-              <Button size="sm" variant="ghost">Pause</Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      ) : (
+        <div className="mt-6 space-y-3">
+          {listings.map((listing) => (
+            <OwnerListingCard key={listing.id} listing={listing} />
+
+          ))}
+        </div>
+
+      )}
     </div>
+
   );
 }

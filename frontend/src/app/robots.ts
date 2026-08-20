@@ -7,8 +7,6 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Private surfaces. Listing pages that are taken or expired stay
-      // crawlable but carry a noindex tag on the page itself.
       disallow: ["/dashboard", "/admin", "/post", "/login", "/verify"],
     },
     sitemap: `${siteUrl}/sitemap.xml`,

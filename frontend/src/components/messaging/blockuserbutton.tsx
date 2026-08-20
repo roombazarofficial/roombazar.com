@@ -3,10 +3,6 @@
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/common/confirmdialog";
 
-/**
- * Blocking takes effect immediately and is silent to the person blocked —
- * they are not told, which avoids the retaliation that a notification invites.
- */
 export function BlockUserButton({ name }: { name: string }) {
   const [open, setOpen] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -14,6 +10,7 @@ export function BlockUserButton({ name }: { name: string }) {
   if (blocked) {
     return (
       <p className="text-sm text-ink-muted">{name} is blocked</p>
+
     );
   }
 
@@ -36,6 +33,8 @@ export function BlockUserButton({ name }: { name: string }) {
         confirmLabel="Block"
         destructive
       />
+
     </>
+
   );
 }

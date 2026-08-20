@@ -16,11 +16,16 @@ export default function Page() {
           on the listing, profile or conversation — those reach the moderation
           queue directly and are reviewed within four hours.
         </p>
+
         <p>
-          For everything else, email <a href="mailto:roombazar.official@gmail.com" className="font-semibold text-brand-600 underline hover:text-brand-700">roombazar.official@gmail.com</a> and we
+          For everything else, email <strong>hello@roombazar.com</strong> and we
+
           will get back to you within two working days.
         </p>
+
       </LegalPage>
+
     </SiteShell>
+
   );
 }

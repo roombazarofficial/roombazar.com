@@ -3,11 +3,6 @@
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 
-/**
- * Confirmation for actions that are hard or impossible to walk back. The
- * confirm label states the action ("Mark as taken") rather than "OK", so the
- * button still makes sense to someone who skimmed the heading.
- */
 export function ConfirmDialog({
   open,
   onClose,
@@ -36,6 +31,7 @@ export function ConfirmDialog({
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
+
           <Button
             variant={destructive ? "danger" : "primary"}
             onClick={() => {
@@ -45,8 +41,11 @@ export function ConfirmDialog({
           >
             {confirmLabel}
           </Button>
+
         </>
+
       }
     />
+
   );
 }

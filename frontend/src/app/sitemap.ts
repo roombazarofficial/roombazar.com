@@ -1,18 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo/site";
-import { bengaluru, localities, mockListings } from "@/lib/api/mockdata";
+import { searchListings } from "@/lib/api/listings";
 
-/**
- * Locality pages are the main organic entry point, so they belong here
- * alongside listings rather than only the static marketing pages.
- *
- * Only ACTIVE listings are included. Taken and expired listings keep their
- * URLs and inbound links but carry a noindex tag, and submitting a URL we are
- * simultaneously asking not to index wastes crawl budget.
- *
- * Past roughly 50k URLs this needs splitting into a sitemap index — see
- * docs/02-architecture.md.
- */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
@@ -29,37 +18,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ] satisfies MetadataRoute.Sitemap
   ).map((entry) => ({ ...entry, lastModified: now }));
 
-  const cityRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${siteUrl}/rooms/${bengaluru.slug}`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-  ];
-
-  const localityRoutes: MetadataRoute.Sitemap = localities.map((locality) => ({
-    url: `${siteUrl}/rooms/${locality.citySlug}/${locality.slug}`,
+  const page = await searchListings({ sort: "newest", page: 1 });
+  const cityRoutes: MetadataRoute.Sitemap = Array.from(
+    new Map(page.items.map((listing) => [listing.citySlug, listing])).values(),
+  ).map((listing) => ({
+    url: `${siteUrl}/rooms/${listing.citySlug}`,
     lastModified: now,
     changeFrequency: "daily",
-    // Localities with real supply are worth crawling more often than empty
-    // ones, and priority is the only lever the protocol gives us.
-    priority: locality.activeListingCount > 2 ? 0.8 : 0.6,
+    priority: 0.9,
+  }));
+  const localityRoutes: MetadataRoute.Sitemap = Array.from(
+    new Map(
+      page.items.map((listing) => [
+        `${listing.citySlug}/${listing.localitySlug}`,
+        listing,
+      ]),
+    ).values(),
+  ).map((listing) => ({
+    url: `${siteUrl}/rooms/${listing.citySlug}/${listing.localitySlug}`,
+    lastModified: now,
+    changeFrequency: "daily",
+    priority: 0.8,
+  }));
+  const listingRoutes: MetadataRoute.Sitemap = page.items.map((listing) => ({
+    url: `${siteUrl}/room/${listing.slug}`,
+    lastModified: new Date(listing.publishedAt),
+    changeFrequency: "weekly",
+    priority: 0.7,
   }));
 
-  const listingRoutes: MetadataRoute.Sitemap = mockListings
-    .filter((listing) => listing.status === "active")
-    .map((listing) => ({
-      url: `${siteUrl}/room/${listing.slug}`,
-      lastModified: new Date(listing.updatedAt),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }));
-
-  return [
-    ...staticRoutes,
-    ...cityRoutes,
-    ...localityRoutes,
-    ...listingRoutes,
-  ];
+  return [...staticRoutes, ...cityRoutes, ...localityRoutes, ...listingRoutes];
 }

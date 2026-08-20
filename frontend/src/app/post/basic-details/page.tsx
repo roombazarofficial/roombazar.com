@@ -22,6 +22,7 @@ export default function Page() {
         <legend className="mb-2 text-sm font-medium text-ink">
           Type of room
         </legend>
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {roomTypeOrder.map((type) => (
             <button
@@ -38,19 +39,18 @@ export default function Page() {
             >
               {roomTypeLabels[type]}
             </button>
+
           ))}
         </div>
+
       </fieldset>
 
-      {/*
-        Asked plainly, and early. Brokers are not banned — they are labelled,
-        so seekers can filter. Asking this up front, rather than burying it,
-        makes an honest answer the path of least resistance.
-      */}
+      {}
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-ink">
           Who is posting this room?
         </legend>
+
         <div className="grid gap-2 sm:grid-cols-3">
           {(Object.keys(postedByLabels) as PostedBy[]).map((value) => (
             <button
@@ -67,12 +67,15 @@ export default function Page() {
             >
               {postedByLabels[value]}
             </button>
+
           ))}
         </div>
+
         <p className="mt-2 text-xs text-ink-muted">
           Seekers can filter for owner-listed rooms. Misrepresenting this gets
           listings removed.
         </p>
+
       </fieldset>
 
       <Input
@@ -91,6 +94,8 @@ export default function Page() {
         value={draft.description}
         onChange={(event) => update({ description: event.target.value })}
       />
+
     </StepShell>
+
   );
 }

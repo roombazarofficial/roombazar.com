@@ -3,20 +3,11 @@
 import { StepShell } from "@/components/listingform/stepshell";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useListingDraft } from "@/store/listingdraftstore";
-import { amenities } from "@/lib/api/mockdata";
+import { useAmenities } from "@/hooks/useamenities";
 import { tenantPreferenceLabels } from "@/lib/constants/tenantpreferences";
 import { cn } from "@/lib/utils/classnames";
 import type { TenantPreference } from "@/types/listing";
 
-/**
- * Tenant preference is a fixed list, never a text box.
- *
- * Free-text preferences in this market routinely encode caste and religion
- * filters. A closed set makes that impossible to express in structured data,
- * and the description field is scanned separately. The reasoning is in
- * docs/03-trust-and-safety.md — this is a deliberate product position, not an
- * incomplete form.
- */
 const options: TenantPreference[] = [
   "any",
   "family",
@@ -28,10 +19,9 @@ const options: TenantPreference[] = [
 
 export default function Page() {
   const { draft, update, toggleAmenity } = useListingDraft();
+  const amenities = useAmenities();
 
   function togglePreference(value: TenantPreference) {
-    // "Any" is exclusive — selecting it clears the rest, and selecting
-    // anything else clears "any".
     if (value === "any") {
       update({ preferredTenant: draft.preferredTenant.includes("any") ? [] : ["any"] });
       return;
@@ -73,6 +63,7 @@ export default function Page() {
             >
               {tenantPreferenceLabels[value]}
             </button>
+
           ))}
         </div>
 
@@ -81,12 +72,14 @@ export default function Page() {
           removed. Gender preference is available for shared homes and PGs,
           where other residents are affected.
         </p>
+
       </fieldset>
 
       <fieldset>
         <legend className="mb-1 text-sm font-medium text-ink">
           House rules
         </legend>
+
         <div className="grid sm:grid-cols-2">
           {amenities
             .filter((amenity) => amenity.category === "rules")
@@ -97,9 +90,13 @@ export default function Page() {
                 checked={draft.amenitySlugs.includes(amenity.slug)}
                 onChange={() => toggleAmenity(amenity.slug)}
               />
+
             ))}
         </div>
+
       </fieldset>
+
     </StepShell>
+
   );
 }

@@ -38,18 +38,17 @@ export default function Page() {
         }
       />
 
-      {/*
-        Expiry is explained before publishing rather than sprung later. Stale
-        listings are the fastest way to lose seeker trust, so the 30-day clock
-        is part of the deal and is stated as such.
-      */}
+      {}
       <aside className="rounded-card border border-line bg-surface-muted p-4">
         <p className="text-sm text-ink-muted">
           Listings stay live for 30 days. We will remind you before it expires,
           and you can renew in one tap — or mark the room taken the moment it
           goes.
         </p>
+
       </aside>
+
     </StepShell>
+
   );
 }

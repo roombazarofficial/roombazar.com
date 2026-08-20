@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { routes } from "@/lib/constants/routes";
 
 interface FooterSection {
@@ -15,7 +16,7 @@ const exploreSection: FooterSection = {
     { label: "Browse rooms", href: routes.rooms },
     { label: "Popular locations", href: routes.city("bengaluru") },
     { label: "Recently posted", href: `${routes.city("bengaluru")}?sort=newest` },
-    { label: "Post a room", href: routes.post },
+    { label: "Host a room", href: routes.post },
   ],
 };
 
@@ -66,9 +67,11 @@ export function SiteFooter() {
               href={routes.home}
               className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-ink"
             >
-              <img
+              <Image
                 src="/logo/rb-logo.png"
                 alt="RoomBazar logo"
+                width={28}
+                height={28}
                 className="size-7 rounded-full"
               />
               <span>

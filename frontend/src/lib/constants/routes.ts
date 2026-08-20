@@ -1,24 +1,16 @@
-/**
- * Every internal URL is built here. Nothing else in the app should
- * concatenate a path by hand — when a route moves, this file is the only
- * place that changes.
- */
-
 export const routes = {
   home: "/",
 
-  // Public discovery. These are the pages search engines index, so their
-  // shape is fixed by the SEO plan in docs/02-architecture.md.
   rooms: "/rooms",
   city: (city: string) => `/rooms/${city}`,
   locality: (city: string, locality: string) => `/rooms/${city}/${locality}`,
   listing: (slug: string) => `/room/${slug}`,
 
-  // Posting a room.
   post: "/post",
   postStep: (step: PostStep) => `/post/${step}`,
 
-  // Auth.
+  signInRedirect: (next: string) =>
+    `/?signin=1&next=${encodeURIComponent(next)}`,
   login: "/signin",
   signin: "/signin",
   register: "/register",
@@ -32,6 +24,7 @@ export const routes = {
   myListing: (id: string) => `/dashboard/listings/${id}`,
   editListing: (id: string) => `/dashboard/listings/${id}/edit`,
   listingPhotos: (id: string) => `/dashboard/listings/${id}/photos`,
+  enquiries: "/dashboard/enquiries",
   inbox: "/dashboard/inbox",
   conversation: (id: string) => `/dashboard/inbox/${id}`,
   saved: "/dashboard/saved",

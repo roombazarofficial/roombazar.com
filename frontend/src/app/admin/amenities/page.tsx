@@ -6,5 +6,6 @@ export default function Page() {
       title="Amenities"
       subtitle="The fixed amenity set offered in the post wizard and search filters."
     />
+
   );
 }

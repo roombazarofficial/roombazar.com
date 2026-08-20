@@ -16,11 +16,6 @@ const labels: Record<(typeof postSteps)[number], string> = {
   preview: "Preview",
 };
 
-/**
- * Steps after "photos" are optional, and the bar says so. A lister who wants
- * to stop early should be able to see that they can — the alternative is
- * abandoning the wizard entirely because it looks like eight more screens.
- */
 const lastRequiredStep = "photos";
 
 export function WizardProgress() {
@@ -56,7 +51,9 @@ export function WizardProgress() {
                         : "bg-surface-sunken group-hover:bg-line-strong",
                   )}
                 />
+
               </Link>
+
             );
           })}
         </div>
@@ -68,9 +65,13 @@ export function WizardProgress() {
             <span className="ml-1 text-ink-subtle">
               — everything from here is optional
             </span>
+
           )}
         </p>
+
       </div>
+
     </nav>
+
   );
 }

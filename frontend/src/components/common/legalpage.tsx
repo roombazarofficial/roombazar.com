@@ -1,8 +1,3 @@
-/**
- * Shared frame for terms, privacy, help and contact. One narrow column,
- * generous line height — these are pages people actually read, and a
- * full-width block of legal text is a page people bounce from.
- */
 export function LegalPage({
   title,
   lastUpdated,
@@ -17,6 +12,7 @@ export function LegalPage({
       <h1 className="text-3xl font-semibold tracking-tight text-ink">
         {title}
       </h1>
+
       <p className="mt-2 text-xs text-ink-subtle">
         Last updated {lastUpdated}
       </p>
@@ -24,6 +20,8 @@ export function LegalPage({
       <div className="mt-8 space-y-4 text-sm leading-relaxed text-ink-muted">
         {children}
       </div>
+
     </article>
+
   );
 }

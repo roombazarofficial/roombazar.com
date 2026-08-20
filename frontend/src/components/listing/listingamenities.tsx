@@ -15,11 +15,6 @@ const categoryOrder: AmenityCategory[] = [
   "rules",
 ];
 
-/**
- * Grouped rather than a flat list. House rules in particular need to be
- * findable — whether non-veg is allowed or there is a gate-closing time
- * decides the room for a lot of seekers.
- */
 export function ListingAmenities({
   amenities,
   className,
@@ -45,17 +40,23 @@ export function ListingAmenities({
               <h3 className="text-xs font-medium uppercase tracking-wide text-ink-subtle">
                 {categoryLabels[category]}
               </h3>
+
               <ul className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 sm:grid-cols-3">
                 {group.map((amenity) => (
                   <li key={amenity.id} className="text-sm text-ink">
                     {amenity.label}
                   </li>
+
                 ))}
               </ul>
+
             </div>
+
           );
         })}
       </div>
+
     </section>
+
   );
 }

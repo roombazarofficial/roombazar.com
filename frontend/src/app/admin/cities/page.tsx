@@ -6,5 +6,6 @@ export default function Page() {
       title="Cities"
       subtitle="Cities the platform is open in. Adding one requires a seeded locality list."
     />
+
   );
 }

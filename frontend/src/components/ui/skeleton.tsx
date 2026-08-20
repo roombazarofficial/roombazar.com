@@ -1,9 +1,5 @@
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Loading placeholder. Always size it to match the real content — a skeleton
- * that is the wrong height causes the same layout jump it exists to prevent.
- */
 export function Skeleton({
   className,
   ...props
@@ -17,10 +13,10 @@ export function Skeleton({
       )}
       {...props}
     />
+
   );
 }
 
-/** Matches the shape of a listing card in a results grid. */
 export function ListingCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-card border border-line bg-surface">
@@ -30,6 +26,8 @@ export function ListingCardSkeleton() {
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
       </div>
+
     </div>
+
   );
 }

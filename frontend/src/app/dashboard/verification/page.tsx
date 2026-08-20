@@ -1,14 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-/**
- * Verification is optional and incentivised, never mandatory. Requiring KYC
- * before a first listing would halve supply on day one; making the badge
- * worth having gets to the same place without the cliff.
- *
- * Each badge names exactly what was checked. A generic green tick that means
- * nothing in particular trains users to trust it for everything.
- */
 const tiers = [
   {
     id: "phone",
@@ -49,9 +41,11 @@ export default function Page() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Verification
         </h1>
+
         <p className="mt-1 text-sm text-ink-muted">
           Optional, but verified listers get noticeably more enquiries.
         </p>
+
       </header>
 
       <ul className="mt-6 space-y-3">
@@ -63,25 +57,33 @@ export default function Page() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-sm font-medium text-ink">{tier.title}</h2>
+
                 <p className="mt-1 text-sm text-ink-muted">
                   {tier.description}
                 </p>
+
                 <p className="mt-2 text-xs text-ink-subtle">
                   Unlocks: {tier.unlocks}
                 </p>
+
               </div>
 
               {tier.state === "done" ? (
                 <Badge tone="success">Verified</Badge>
+
               ) : tier.state === "locked" ? (
                 <Badge tone="neutral">Needs ID first</Badge>
+
               ) : (
                 <Button size="sm" variant="secondary">
                   Verify
                 </Button>
+
               )}
             </div>
+
           </li>
+
         ))}
       </ul>
 
@@ -90,6 +92,8 @@ export default function Page() {
         number. Holding that number would be a liability with no benefit to
         you or to us.
       </p>
+
     </div>
+
   );
 }

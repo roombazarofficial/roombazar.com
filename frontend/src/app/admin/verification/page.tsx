@@ -6,5 +6,6 @@ export default function Page() {
       title="Verification queue"
       subtitle="Government ID and ownership-proof submissions awaiting manual review."
     />
+
   );
 }

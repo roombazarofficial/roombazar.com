@@ -5,25 +5,24 @@ import { useRouter } from "next/navigation";
 import { LocationPicker } from "./locationpicker";
 import { buildSearchQuery } from "@/lib/utils/querystring";
 import { routes } from "@/lib/constants/routes";
-import type { Locality } from "@/types/locality";
+import type { City } from "@/types/city";
 
-export function HeroSearchBar({ localities }: { localities: Locality[] }) {
+export function HeroSearchBar({ cities }: { cities: City[] }) {
   const router = useRouter();
 
   const [selectedLocationLabel, setSelectedLocationLabel] = useState("");
-  const [localitySlug, setLocalitySlug] = useState("");
-  const [citySlug, setCitySlug] = useState("bengaluru");
+  const [citySlug, setCitySlug] = useState("");
   const [moveIn, setMoveIn] = useState("");
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
 
     const query = buildSearchQuery({
-      localitySlugs: localitySlug ? [localitySlug] : [],
       availableFrom: moveIn || null,
     });
 
-    router.push(`${routes.city(citySlug || "bengaluru")}${query}`);
+    const destination = citySlug ? routes.city(citySlug) : routes.rooms;
+    router.push(`${destination}${query}`);
   }
 
   return (
@@ -48,11 +47,10 @@ export function HeroSearchBar({ localities }: { localities: Locality[] }) {
           <div className="mt-2 flex h-5 w-full items-center text-left">
             <LocationPicker
               selectedLabel={selectedLocationLabel}
-              localities={localities}
-              onSelect={({ label, localitySlug: locSlug, citySlug: cSlug }) => {
+              cities={cities}
+              onSelect={({ label, citySlug: cSlug }) => {
                 setSelectedLocationLabel(label);
-                setLocalitySlug(locSlug || "");
-                setCitySlug(cSlug || "bengaluru");
+                setCitySlug(cSlug || "");
               }}
             />
           </div>

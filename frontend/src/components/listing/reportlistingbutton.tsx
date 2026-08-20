@@ -7,15 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { reportReasons } from "@/lib/constants/reportreasons";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Reporting is one tap from the listing, with the reasons that actually
- * occur in this market rather than a generic "inappropriate content" box.
- *
- * "Already taken" is first because it is the most common and the most useful:
- * enough of those reports auto-transitions the listing to TAKEN pending the
- * lister confirming. Seekers policing staleness works far better than relying
- * on listers to remember. See docs/03-trust-and-safety.md.
- */
 export function ReportListingButton({ listingId }: { listingId: string }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string | null>(null);
@@ -43,15 +34,19 @@ export function ReportListingButton({ listingId }: { listingId: string }) {
         footer={
           sent ? (
             <Button onClick={() => setOpen(false)}>Close</Button>
+
           ) : (
             <>
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
+
               <Button disabled={!reason} onClick={() => setSent(true)}>
                 Send report
               </Button>
+
             </>
+
           )
         }
       >
@@ -73,7 +68,9 @@ export function ReportListingButton({ listingId }: { listingId: string }) {
                   >
                     {item.label}
                   </button>
+
                 </li>
+
               ))}
             </ul>
 
@@ -83,9 +80,13 @@ export function ReportListingButton({ listingId }: { listingId: string }) {
               showCount
               placeholder="Tell us what happened."
             />
+
           </div>
+
         )}
       </Modal>
+
     </>
+
   );
 }

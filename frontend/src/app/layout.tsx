@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { SiteStructuredData } from "@/components/common/structureddata";
+import { AuthModal } from "@/components/auth/authmodal";
+import { SignInLauncher } from "@/components/auth/signinlauncher";
 import { siteUrl, siteName, siteDescription } from "@/lib/seo/site";
+import { AuthProvider } from "@/providers/authprovider";
 import { SmoothScrollProvider } from "@/providers/smoothscroll";
 import "./globals.css";
 
@@ -70,7 +73,8 @@ export default function RootLayout({
   return (
     <html lang="en-IN" className={inter.variable}>
       <body className={inter.className}>
-        <SmoothScrollProvider>
+        <AuthProvider>
+          <SmoothScrollProvider>
           {/*
             First focusable element on the page. Sighted keyboard users would
             otherwise tab through the entire header on every navigation.
@@ -84,8 +88,11 @@ export default function RootLayout({
 
           <SiteStructuredData />
 
-          {children}
-        </SmoothScrollProvider>
+            {children}
+            <SignInLauncher />
+            <AuthModal />
+          </SmoothScrollProvider>
+        </AuthProvider>
       </body>
     </html>
   );

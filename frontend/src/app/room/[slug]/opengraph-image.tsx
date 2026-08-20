@@ -6,18 +6,6 @@ export const alt = "Room listing on RoomBazar";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/**
- * Generated share card for a listing.
- *
- * Listings in this market spread by being forwarded on WhatsApp, and a link
- * with no preview looks like spam next to one that shows the rent and the
- * locality. This is generated at the edge and cached, so it costs nothing per
- * share.
- *
- * Drawn with layout primitives rather than the listing photo: photos are
- * user-supplied and unmoderated at post time, and we do not want an
- * unreviewed image rendering as our branded card.
- */
 export default async function Image({
   params,
 }: {
@@ -43,6 +31,7 @@ export default async function Image({
         >
           RoomBazar
         </div>
+
       ),
       size,
     );
@@ -81,6 +70,7 @@ export default async function Image({
             >
               {listing.postedBy === "agent" ? "Agent" : "Owner"}
             </span>
+
             <span
               style={{
                 background: "#eef0f4",
@@ -93,6 +83,7 @@ export default async function Image({
             >
               {roomTypeLabels[listing.roomType]}
             </span>
+
           </div>
 
           <div
@@ -106,7 +97,9 @@ export default async function Image({
             {rent}
             <span style={{ fontSize: 40, fontWeight: 400, color: "#667085" }}>
               /month
+
             </span>
+
           </div>
 
           <div style={{ fontSize: 38, color: "#344054", lineHeight: 1.25 }}>
@@ -116,6 +109,7 @@ export default async function Image({
           <div style={{ fontSize: 32, color: "#667085" }}>
             {listing.locality.name}, {listing.city.name}
           </div>
+
         </div>
 
         <div
@@ -129,12 +123,17 @@ export default async function Image({
         >
           <div style={{ fontSize: 34, fontWeight: 700, color: "#101828" }}>
             Room<span style={{ color: "#2551eb" }}>Bazar</span>
+
           </div>
+
           <div style={{ fontSize: 26, color: "#667085" }}>
             No broker fees · No commission
           </div>
+
         </div>
+
       </div>
+
     ),
     size,
   );

@@ -4,86 +4,161 @@ import { SiteShell } from "@/components/layout/siteshell";
 import { routes } from "@/lib/constants/routes";
 
 export const metadata: Metadata = {
-  title: "Safety tips",
+  title: "Staying safe",
   description:
-    "Practical safety advice for renting rooms in Indian cities: what to verify, how to avoid scams, and why you should never pay before visiting.",
+    "How to avoid rental scams, what RoomBazar checks, and what we cannot check for you.",
 };
 
 export default function Page() {
   return (
     <SiteShell>
-      <article className="mx-auto max-w-3xl px-4 py-12">
+      <article className="mx-auto max-w-2xl px-4 py-12">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
-          Safety tips
+          Staying safe
         </h1>
-        <p className="mt-3 text-base text-ink-muted">
-          Practical advice for finding and visiting rooms safely in Indian cities.
+
+        <div className="mt-8 rounded-card border border-warning/20 bg-warning-soft p-5">
+          <h2 className="text-base font-semibold text-warning">
+            The one rule that matters most
+          </h2>
+
+          <p className="mt-2 text-sm text-warning">
+            Never pay anyone before visiting the room in person. Not a token
+            advance, not a booking fee, not a deposit to hold it. RoomBazar
+            never collects money and will never ask you to.
+          </p>
+
+        </div>
+
+        <Section title="How the common scam works">
+          <p>
+            Someone posts an attractive room below the going rate. When you ask
+            to visit, they say they are travelling or out of station, and offer
+            to hold it if you send a small advance over UPI. Then they stop
+            replying.
+          </p>
+
+          <p>
+            The listing looks real because the photos are real — they were
+            taken from somewhere else. The only reliable defence is refusing to
+            pay before you have stood in the room.
+          </p>
+
+        </Section>
+
+        <Section title="Signs worth pausing over">
+          <ul className="list-disc space-y-1.5 pl-5">
+            <li>Rent noticeably below other rooms in the same locality</li>
+
+            <li>Any reason given for why you cannot visit before paying</li>
+
+            <li>Pressure to decide immediately because others are interested</li>
+
+            <li>A request to move the conversation off RoomBazar straight away</li>
+
+            <li>An account created within the last few days</li>
+
+          </ul>
+
+          <p>
+            None of these prove anything on its own. Two or three together are
+            worth walking away from.
+          </p>
+
+        </Section>
+
+        <Section title="Visiting a room">
+          <ul className="list-disc space-y-1.5 pl-5">
+            <li>Go during daylight and tell someone where you are going</li>
+
+            <li>Take someone with you if you can</li>
+
+            <li>Meet at the property itself, not somewhere else first</li>
+
+            <li>
+              Ask to see proof of ownership or the existing rental agreement
+              before you commit to anything
+            </li>
+
+          </ul>
+
+        </Section>
+
+        <Section title="What we check">
+          <ul className="list-disc space-y-1.5 pl-5">
+            <li>Every account verifies a working phone number</li>
+
+            <li>
+              Listings are scanned for duplicate photos, prices far below the
+              locality median, and advance-payment language
+            </li>
+
+            <li>New accounts and reported listings are reviewed by a person</li>
+
+            <li>
+              Listers can verify their government ID and prove ownership of the
+              property, shown as badges on the listing
+            </li>
+
+          </ul>
+
+        </Section>
+
+        {}
+        <Section title="What we cannot check">
+          <ul className="list-disc space-y-1.5 pl-5">
+            <li>
+              We cannot confirm a room exists without visiting it. Ownership
+              verification raises the cost of fraud; it does not remove it.
+            </li>
+
+            <li>
+              We cannot guarantee your safety at a viewing. We can give you
+              guidance and a way to report what happened.
+            </li>
+
+            <li>
+              We are not part of any rental agreement, and we do not settle
+              disputes between a landlord and a tenant after they transact.
+            </li>
+
+            <li>
+              We cannot fully stop agents from describing themselves as owners.
+              Detection and reporting make it costly and unreliable, not
+              impossible.
+            </li>
+
+          </ul>
+
+        </Section>
+
+        <Section title="Reporting something">
+          <p>
+            Every listing, profile and conversation has a report option. Scam
+            and harassment reports are reviewed within four hours, everything
+            else within a day, and we tell you what happened either way.
+          </p>
+
+          <p>
+            If you have lost money or feel unsafe, report it to the police as
+            well — we can act on the account, but we cannot act on the person.
+          </p>
+
+        </Section>
+
+        <p className="mt-10 text-sm text-ink-muted">
+          Questions about any of this?{" "}
+          <Link href={routes.contact} className="text-brand-700 underline hover:text-brand-800">
+            Get in touch
+          </Link>
+
+          .
         </p>
 
-        <div className="mt-8 rounded-card border border-brand-200 bg-brand-50 p-5">
-          <h2 className="text-base font-semibold text-brand-800">
-            The #1 golden rule of room renting
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-brand-900">
-            <strong>Never transfer advance money, token amounts, or gate fees before physically visiting the room.</strong>{" "}
-            RoomBazar is a direct discovery platform — we never collect rent or deposits, and we never ask for your bank details or UPI PIN.
-          </p>
-        </div>
-
-        <Section title="1. Before visiting a room">
-          <ul className="list-disc space-y-2 pl-5">
-            <li><strong>Check market rents:</strong> If a 1 BHK in Indiranagar is listed for ₹5,000 when the locality average is ₹20,000+, treat it with high caution.</li>
-            <li><strong>Keep conversations on RoomBazar:</strong> Use the in-app chat first. Do not immediately move to external apps before checking basic details.</li>
-            <li><strong>Schedule daylight visits:</strong> Always plan your site visits during daylight hours so you can inspect natural light, surroundings, and neighbourhood safety.</li>
-            <li><strong>Share your location:</strong> Let a friend or flatmate know the address and time of your scheduled visit.</li>
-          </ul>
-        </Section>
-
-        <Section title="2. During the property visit">
-          <ul className="list-disc space-y-2 pl-5">
-            <li><strong>Inspect essentials:</strong> Check water pressure, geysers, power backup, mobile network reception inside the room, and door/window locks.</li>
-            <li><strong>Confirm bill inclusions:</strong> Ask clearly whether electricity, water, Wi-Fi, and maintenance charges are included in the monthly rent.</li>
-            <li><strong>Meet the actual owner or flatmates:</strong> Verify whether the person showing the room is the property owner, a sub-letting tenant, or an agent.</li>
-            <li><strong>Ask about house rules:</strong> Understand guest policies, notice periods, gate timings, and deposit refund terms upfront.</li>
-          </ul>
-        </Section>
-
-        <Section title="3. Before paying any deposit or advance">
-          <ul className="list-disc space-y-2 pl-5">
-            <li><strong>Verify ownership documents:</strong> Ask for electricity bill or property tax receipt in the owner&apos;s name before signing a rental agreement.</li>
-            <li><strong>Written rental agreement:</strong> Always insist on a written 11-month agreement stating the exact monthly rent, security deposit amount, notice period, and maintenance terms.</li>
-            <li><strong>Always get written receipts:</strong> Pay security deposits via traceable banking channels (NEFT/UPI/IMPS) and collect a signed rent receipt or acknowledgement.</li>
-          </ul>
-        </Section>
-
-        <Section title="4. How to spot common rental scams">
-          <ul className="list-disc space-y-2 pl-5">
-            <li><strong>&quot;Out of town / Army officer&quot; story:</strong> Scammers often claim they are deployed or travelling and ask for a refundable &quot;visiting pass&quot; or token fee via UPI QR code. Legitimate owners never ask for money to let you see a room.</li>
-            <li><strong>Urgency pressure:</strong> Beware of listers claiming 10 other people are transferring right now and demanding an instant deposit.</li>
-            <li><strong>Fake gate pass / security deposit QR:</strong> Never scan a QR code to &quot;receive&quot; a visit pass. Scanning a QR code always debits your account.</li>
-          </ul>
-        </Section>
-
-        <Section title="5. Reporting suspicious listings">
-          <p>
-            If you encounter bait pricing, a broker posing as an owner, harassment, or someone asking for pre-visit payments, use the <strong>Report listing</strong> button immediately.
-          </p>
-          <p className="mt-2">
-            Our moderation team reviews reports daily and suspends fraudulent accounts to keep the marketplace safe for genuine seekers.
-          </p>
-        </Section>
-
-        <div className="mt-12 rounded-card border border-line bg-surface-muted p-5">
-          <p className="text-sm text-ink-muted">
-            Have questions or need assistance?{" "}
-            <Link href={routes.contact} className="font-medium text-brand-600 underline hover:text-brand-700">
-              Contact our team
-            </Link>
-            .
-          </p>
-        </div>
       </article>
+
     </SiteShell>
+
   );
 }
 
@@ -97,9 +172,12 @@ function Section({
   return (
     <section className="mt-10">
       <h2 className="text-lg font-semibold text-ink">{title}</h2>
+
       <div className="mt-2 space-y-3 text-sm leading-relaxed text-ink-muted">
         {children}
       </div>
+
     </section>
+
   );
 }

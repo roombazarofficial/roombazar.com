@@ -6,12 +6,6 @@ import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
 import type { SearchFilters } from "@/types/searchfilters";
 
-/**
- * Saved searches are the main retention loop — a seeker who saves one and
- * gets a matching room the next morning comes back with no paid acquisition
- * behind it. Offering it at the moment someone has just built a filter set is
- * the only time they will care. See docs/01-data-model.md.
- */
 export function SaveSearchButton({ filters }: { filters: SearchFilters }) {
   const [open, setOpen] = useState(false);
   const [frequency, setFrequency] = useState("daily");
@@ -24,8 +18,6 @@ export function SaveSearchButton({ filters }: { filters: SearchFilters }) {
     filters.minRentPaise != null ||
     filters.maxRentPaise != null;
 
-  // Saving an unfiltered city search is just "tell me about every new room",
-  // which is a notification nobody keeps switched on for long.
   if (!hasFilters) return null;
 
   return (
@@ -46,13 +38,17 @@ export function SaveSearchButton({ filters }: { filters: SearchFilters }) {
         footer={
           saved ? (
             <Button onClick={() => setOpen(false)}>Done</Button>
+
           ) : (
             <>
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
+
               <Button onClick={() => setSaved(true)}>Save search</Button>
+
             </>
+
           )
         }
       >
@@ -67,8 +63,11 @@ export function SaveSearchButton({ filters }: { filters: SearchFilters }) {
             value={frequency}
             onChange={(event) => setFrequency(event.target.value)}
           />
+
         )}
       </Modal>
+
     </>
+
   );
 }

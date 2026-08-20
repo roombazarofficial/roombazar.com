@@ -5,10 +5,6 @@ import { usePathname } from "next/navigation";
 import { routes } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils/classnames";
 
-/**
- * Fixed bottom bar on phones. Four destinations only — a bottom bar with
- * seven items is a bottom bar nobody hits accurately.
- */
 const items = [
   { href: routes.dashboard, label: "Home" },
   { href: routes.myListings, label: "Listings" },
@@ -43,10 +39,14 @@ export function DashboardMobileNav() {
               >
                 {item.label}
               </Link>
+
             </li>
+
           );
         })}
       </ul>
+
     </nav>
+
   );
 }

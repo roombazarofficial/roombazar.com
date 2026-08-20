@@ -2,39 +2,48 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/constants/routes";
+import { requestPasswordReset } from "@/lib/api/auth";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const digits = phone.replace(/\D/g, "");
-  const validPhone = /^[6-9]\d{9}$/.test(digits);
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
 
-    if (!validPhone) {
-      setError("Enter your registered 10-digit Indian mobile number.");
+    if (!validEmail) {
+      setError("Enter your registered email address.");
       return;
     }
 
     setError(null);
     setSubmitting(true);
-    router.push(`/reset-password?phone=${encodeURIComponent(digits)}`);
+    try {
+      await requestPasswordReset(email.trim().toLowerCase());
+      router.push(`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not send the recovery code.");
+      setSubmitting(false);
+    }
   }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
       <Link href={routes.home} className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
-        <img
+        <Image
           src="/logo/rb-logo.png"
           alt="RoomBazar"
+          width={32}
+          height={32}
           className="h-8 w-8 rounded-full"
         />
         <span>
@@ -46,22 +55,19 @@ export default function ForgotPasswordPage() {
         Account Recovery
       </h1>
       <p className="mt-2 text-sm text-ink-muted">
-        Enter your registered phone number. We will send a secure verification code to verify your identity.
+        Enter your registered email address. We will send a secure verification code to verify your identity.
       </p>
 
       <form onSubmit={submit} className="mt-8 space-y-4">
         <Input
-          label="Registered Mobile number"
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel"
-          prefix="+91"
-          placeholder="98765 43210"
-          maxLength={11}
-          value={phone}
+          label="Registered email address"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
           error={error ?? undefined}
           onChange={(e) => {
-            setPhone(e.target.value);
+            setEmail(e.target.value);
             if (error) setError(null);
           }}
         />

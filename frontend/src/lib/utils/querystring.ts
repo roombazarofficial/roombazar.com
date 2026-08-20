@@ -5,11 +5,6 @@ type RawParams = Record<string, string | string[] | undefined>;
 
 const sortOptions: SortOption[] = ["relevance", "newest", "rentlow", "renthigh"];
 
-/**
- * Search state lives in the URL, not in a store. That makes every result page
- * shareable and back-button-correct, and it means a saved search is just a
- * stored copy of these filters.
- */
 export function parseSearchParams(
   params: RawParams,
   citySlug: string,
@@ -30,7 +25,6 @@ export function parseSearchParams(
   };
 }
 
-/** Inverse of the parser. Empty values are dropped so URLs stay short. */
 export function buildSearchQuery(filters: Partial<SearchFilters>): string {
   const query = new URLSearchParams();
 
@@ -40,8 +34,6 @@ export function buildSearchQuery(filters: Partial<SearchFilters>): string {
   filters.postedBy?.forEach((v) => query.append("by", v));
   filters.amenitySlugs?.forEach((v) => query.append("amenity", v));
 
-  // Rupees in the URL, paise internally — a shareable link should read
-  // "minrent=8000", not "minrent=800000".
   if (filters.minRentPaise != null) {
     query.set("minrent", String(filters.minRentPaise / 100));
   }
@@ -88,7 +80,6 @@ function toSort(value: string | string[] | undefined): SortOption {
 
 function toOccupancy(value: string | string[] | undefined): number | null {
   const raw = Number(toSingle(value));
-  // Clamped rather than trusted: this comes straight from the URL.
   return Number.isInteger(raw) && raw >= 1 && raw <= 10 ? raw : null;
 }
 

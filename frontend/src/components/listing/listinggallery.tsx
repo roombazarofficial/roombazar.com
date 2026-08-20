@@ -1,10 +1,5 @@
 import type { Photo } from "@/types/photo";
 
-/**
- * A CSS-only gallery: one large photo with the rest alongside. No carousel
- * JavaScript, which keeps the most image-heavy page on the site cheap to
- * load on a mobile connection.
- */
 export function ListingGallery({
   photos,
   title,
@@ -17,6 +12,7 @@ export function ListingGallery({
       <div className="flex aspect-video items-center justify-center rounded-card bg-surface-sunken text-sm text-ink-subtle">
         No photos
       </div>
+
     );
   }
 
@@ -33,6 +29,7 @@ export function ListingGallery({
           height={cover.height}
           className="aspect-4/3 w-full rounded-card object-cover"
         />
+
       )}
 
       {rest.length > 0 && (
@@ -47,9 +44,12 @@ export function ListingGallery({
               height={photo.height}
               className="aspect-4/3 w-full rounded-card object-cover"
             />
+
           ))}
         </div>
+
       )}
     </div>
+
   );
 }
