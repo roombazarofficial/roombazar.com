@@ -46,7 +46,7 @@ export class PrismaListingsRepository implements ListingsRepository {
   async search(criteria: ListingSearchCriteria): Promise<Page<Listing>> {
     const where = this.buildWhere(criteria);
 
-    const [totalItems, rows] = await this.prisma.$transaction([
+    const [totalItems, rows] = await Promise.all([
       this.prisma.listing.count({ where }),
       this.prisma.listing.findMany({
         where,

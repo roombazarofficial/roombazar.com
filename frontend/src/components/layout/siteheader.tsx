@@ -15,8 +15,13 @@ export function SiteHeader() {
   const openSignIn = useAuthUi((state) => state.openSignIn);
   const setUser = useAuthUi((state) => state.setUser);
 
+  const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -34,7 +39,7 @@ export function SiteHeader() {
   }, [isMenuOpen]);
 
   function handleSellClick() {
-    if (!loaded) {
+    if (!mounted || !loaded) {
       router.push(routes.post);
       return;
     }
@@ -83,7 +88,10 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-xs">
+    <header
+      suppressHydrationWarning
+      className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-xs"
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6">
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-6">
@@ -109,12 +117,14 @@ export function SiteHeader() {
         <div className="flex items-center gap-3 sm:gap-5 md:gap-6">
           {/* 1. Wishlist Button */}
           <Link
-            href={user ? routes.saved : "#"}
+            href={mounted && user ? routes.saved : "#"}
             onClick={handleWishlistClick}
             className="group flex flex-col items-center justify-center text-ink hover:text-brand-600 transition-colors px-1 py-0.5"
             title="Wishlist"
           >
             <svg
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -133,13 +143,15 @@ export function SiteHeader() {
 
           {/* 2. Chat Button */}
           <Link
-            href={user ? routes.inbox : "#"}
+            href={mounted && user ? routes.inbox : "#"}
             onClick={handleChatClick}
             className="group relative flex flex-col items-center justify-center text-ink hover:text-brand-600 transition-colors px-1 py-0.5"
             title="Chat"
           >
             <div className="relative">
               <svg
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -151,7 +163,7 @@ export function SiteHeader() {
               >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              {user && (user.unreadMessageCount ?? 0) > 0 && (
+              {mounted && user && (user.unreadMessageCount ?? 0) > 0 && (
                 <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[9px] font-bold text-white shadow-xs">
                   {user.unreadMessageCount > 9 ? "9+" : user.unreadMessageCount}
                 </span>
@@ -163,7 +175,7 @@ export function SiteHeader() {
           </Link>
 
           {/* 3. User Avatar Profile Button & Dropdown */}
-          {user ? (
+          {mounted && user ? (
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
@@ -318,6 +330,7 @@ export function SiteHeader() {
           ) : (
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => openSignIn()}
               className="text-sm font-semibold text-ink transition-colors hover:text-brand-600 px-2 py-1.5"
             >
@@ -328,6 +341,7 @@ export function SiteHeader() {
           {/* 4. + SELL Pill Action Button matching RoomBazar brand palette */}
           <button
             type="button"
+            suppressHydrationWarning
             onClick={handleSellClick}
             className="group relative inline-flex items-center justify-center rounded-full p-[3px] transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] shadow-2xs hover:shadow-md cursor-pointer"
             style={{

@@ -18,7 +18,11 @@ export function ListingGrid({
       )}
     >
       {listings.map((listing, index) => (
-        <ListingCard key={listing.id} listing={listing} priority={index < 4} />
+        <ListingCard
+          key={listing.id || listing.slug || `listing-${index}`}
+          listing={listing}
+          priority={index < 4}
+        />
       ))}
     </div>
   );

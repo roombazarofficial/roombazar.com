@@ -1,4 +1,13 @@
 import { api } from "./client";
+import type { ListingSummary } from "@/types/listing";
+
+export function fetchSavedListingIds(): Promise<string[]> {
+  return api.get<string[]>("/saved/listings/ids");
+}
+
+export function fetchSavedListings(): Promise<ListingSummary[]> {
+  return api.get<ListingSummary[]>("/saved/listings");
+}
 
 export function saveListing(listingId: string) {
   return api.post(`/saved/listings/${listingId}`);
