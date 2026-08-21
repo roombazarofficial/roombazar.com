@@ -1,3 +1,5 @@
+import type { Listing } from "src/domain/listing.entity";
+
 export const SAVED_REPOSITORY = Symbol("SAVED_REPOSITORY");
 
 export interface SavedSearch {
@@ -11,6 +13,7 @@ export interface SavedSearch {
 
 export interface SavedRepository {
   listSavedListingIds(userId: string): Promise<string[]>;
+  listSavedListings(userId: string): Promise<Listing[]>;
   saveListing(userId: string, listingId: string): Promise<void>;
   unsaveListing(userId: string, listingId: string): Promise<void>;
 

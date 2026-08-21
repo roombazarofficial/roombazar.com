@@ -46,3 +46,7 @@ export function confirmPasswordReset(input: {
 export function fetchCurrentUser(): Promise<CurrentUser | null> {
   return api.get<CurrentUser | null>("/users/me").catch(() => null);
 }
+
+export function updateProfile(input: { name?: string; avatarUrl?: string | null }) {
+  return api.patch<CurrentUser>("/users/me", input);
+}

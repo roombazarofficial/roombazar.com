@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/emptystate";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   createAmenity,
   createCity,
@@ -60,7 +61,13 @@ const emptyAmenity = {
  * deleting one can orphan listings, which is why the delete confirmations here
  * say what will break rather than just asking twice.
  */
-export function ReferenceDataTable({ kind }: { kind: Kind }) {
+export function ReferenceDataTable({
+  kind,
+  initialCreate = false,
+}: {
+  kind: Kind;
+  initialCreate?: boolean;
+}) {
   const [rows, setRows] = useState<Row[]>([]);
   const [cities, setCities] = useState<AdminCity[]>([]);
   const [cityId, setCityId] = useState("");
@@ -70,6 +77,7 @@ export function ReferenceDataTable({ kind }: { kind: Kind }) {
   const [deleting, setDeleting] = useState<Row | null>(null);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [busy, setBusy] = useState(false);
+  const [openedInitialCreate, setOpenedInitialCreate] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +108,13 @@ export function ReferenceDataTable({ kind }: { kind: Kind }) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!initialCreate || loading || openedInitialCreate) return;
+
+    openNew();
+    setOpenedInitialCreate(true);
+  }, [initialCreate, loading, openedInitialCreate]);
 
   function openNew() {
     setForm(
@@ -309,11 +324,20 @@ export function ReferenceDataTable({ kind }: { kind: Kind }) {
               />
 
               {kind === "cities" ? (
-                <Input
-                  label="State"
-                  value={String(form.state ?? "")}
-                  onChange={(e) => setForm({ ...form, state: e.target.value })}
-                />
+                <>
+                  <Input
+                    label="State"
+                    value={String(form.state ?? "")}
+                    onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  />
+                  <Checkbox
+                    label="City is active"
+                    checked={Boolean(form.isActive)}
+                    onChange={(e) =>
+                      setForm({ ...form, isActive: e.target.checked })
+                    }
+                  />
+                </>
               ) : (
                 <Input
                   label="Aliases"

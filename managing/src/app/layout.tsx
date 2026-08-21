@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { ConsoleFrame } from "@/components/managing/consoleframe";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 /**
  * Root layout for the management console.
@@ -35,8 +42,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-IN">
-      <body>
+    <html lang="en-IN" className={inter.variable}>
+      <body className={inter.className}>
         <ConsoleFrame>{children}</ConsoleFrame>
       </body>
     </html>

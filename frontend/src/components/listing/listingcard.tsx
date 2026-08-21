@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { PostedByBadge } from "./postedbybadge";
 import { FreshnessLabel } from "./freshnesslabel";
 import { SaveListingButton } from "./savelistingbutton";
 import { formatRupees } from "@/lib/format/rupees";
@@ -63,7 +62,7 @@ export function ListingCard({
       <div className="space-y-2 p-3">
         <div className="flex items-baseline justify-between gap-2">
           <p className="text-lg font-semibold text-ink">
-            {formatRupees(listing.rentPaise)}
+            {formatRupees(listing.rentPaise || 0)}
             <span className="text-sm font-normal text-ink-muted">/month</span>
           </p>
 
@@ -90,8 +89,6 @@ export function ListingCard({
         </p>
 
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <PostedByBadge postedBy={listing.postedBy} />
-
           <FreshnessLabel publishedAt={listing.publishedAt} />
 
         </div>

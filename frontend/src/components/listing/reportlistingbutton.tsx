@@ -6,11 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { reportReasons } from "@/lib/constants/reportreasons";
 import { cn } from "@/lib/utils/classnames";
+import { reportListing } from "@/lib/api/reports";
+import { useAuthUi } from "@/store/authuistore";
 
 export function ReportListingButton({ listingId }: { listingId: string }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [detail, setDetail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const user = useAuthUi((state) => state.user);
+  const openSignIn = useAuthUi((state) => state.openSignIn);
+
+  async function submit() {
+    if (!reason || busy) return;
+    if (!user) {
+      setOpen(false);
+      openSignIn({ intent: "Sign in to report a room.", next: window.location.pathname });
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    try {
+      await reportListing({ listingId, reason, detail: detail.trim() || null });
+      setSent(true);
+    } catch {
+      setError("Could not send the report. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <>
@@ -41,7 +68,7 @@ export function ReportListingButton({ listingId }: { listingId: string }) {
                 Cancel
               </Button>
 
-              <Button disabled={!reason} onClick={() => setSent(true)}>
+              <Button disabled={!reason} loading={busy} onClick={() => void submit()}>
                 Send report
               </Button>
 
@@ -79,7 +106,11 @@ export function ReportListingButton({ listingId }: { listingId: string }) {
               maxLength={500}
               showCount
               placeholder="Tell us what happened."
+              value={detail}
+              onChange={(event) => setDetail(event.target.value)}
             />
+
+            {error && <p className="text-xs text-danger">{error}</p>}
 
           </div>
 

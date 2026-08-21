@@ -12,8 +12,8 @@ import {
   ListingStructuredData,
   BreadcrumbStructuredData,
 } from "@/components/common/structureddata";
-import { PostedByBadge } from "@/components/listing/postedbybadge";
 import { FreshnessLabel } from "@/components/listing/freshnesslabel";
+import { SaveListingButton } from "@/components/listing/savelistingbutton";
 import { ListingGrid } from "@/components/listing/listinggrid";
 import { Badge } from "@/components/ui/badge";
 import { getListingBySlug, getSimilarListings } from "@/lib/api/listings";
@@ -105,19 +105,23 @@ export default async function Page({ params }: { params: Params }) {
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
           <div className="min-w-0">
             <header>
-              <div className="flex flex-wrap items-center gap-2">
-                <PostedByBadge postedBy={listing.postedBy} />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone="neutral">
+                    {roomTypeLabels[listing.roomType]}
+                  </Badge>
 
-                <Badge tone="neutral">
-                  {roomTypeLabels[listing.roomType]}
-                </Badge>
+                  <Badge tone="neutral">
+                    {furnishingLabels[listing.furnishing]}
+                  </Badge>
 
-                <Badge tone="neutral">
-                  {furnishingLabels[listing.furnishing]}
-                </Badge>
+                  {listing.negotiable && <Badge tone="info">Negotiable</Badge>}
+                </div>
 
-                {listing.negotiable && <Badge tone="info">Negotiable</Badge>}
-
+                <SaveListingButton
+                  listingId={listing.id}
+                  className="border border-line shadow-xs hover:border-brand-300"
+                />
               </div>
 
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">

@@ -15,7 +15,7 @@ import {
   missingFields,
   draftToPayload,
 } from "@/store/listingdraftstore";
-import { roomTypeLabels, furnishingLabels, postedByLabels } from "@/lib/constants/roomtypes";
+import { roomTypeLabels, furnishingLabels } from "@/lib/constants/roomtypes";
 import { tenantPreferenceLabels } from "@/lib/constants/tenantpreferences";
 import { useIndiaLocations } from "@/hooks/useindialocations";
 import { routes } from "@/lib/constants/routes";
@@ -111,15 +111,8 @@ export default function Page() {
 
       <div className="rounded-card border border-line bg-surface p-5">
         <div className="flex flex-wrap gap-1.5">
-          {draft.postedBy && (
-            <Badge tone={draft.postedBy === "agent" ? "neutral" : "success"} dot>
-              {postedByLabels[draft.postedBy]}
-            </Badge>
-
-          )}
           {draft.roomType && (
             <Badge tone="neutral">{roomTypeLabels[draft.roomType]}</Badge>
-
           )}
           {draft.furnishing && (
             <Badge tone="neutral">{furnishingLabels[draft.furnishing]}</Badge>

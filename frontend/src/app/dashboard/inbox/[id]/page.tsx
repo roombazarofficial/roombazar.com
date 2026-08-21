@@ -52,6 +52,7 @@ export default async function Page({ params }: { params: Params }) {
 
       <aside className="space-y-4">
         <ContactRevealPanel
+          conversationId={conversation.id}
           youRevealed={Boolean(conversation.youRevealedAt)}
           theyRevealed={Boolean(conversation.theyRevealedAt)}
           theirName={conversation.counterpartName}

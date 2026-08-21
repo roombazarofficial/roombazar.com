@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirmdialog";
+import { markListingTaken } from "@/lib/api/listings";
 
 export function MarkAsTakenButton({
   listingId,
@@ -13,6 +14,7 @@ export function MarkAsTakenButton({
 }) {
   const [open, setOpen] = useState(false);
   const [taken, setTaken] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (taken) {
     return (
@@ -32,11 +34,18 @@ export function MarkAsTakenButton({
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}
-        onConfirm={() => setTaken(true)}
+        onConfirm={() => {
+          setError(null);
+          void markListingTaken(listingId)
+            .then(() => setTaken(true))
+            .catch(() => setError("Could not update this room. Try again."));
+        }}
         title="Mark this room as taken?"
         description="It will stop appearing in search straight away and seekers will no longer be able to message you about it. You can reopen it later if the tenant falls through."
         confirmLabel="Mark as taken"
       />
+
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
 
     </>
 

@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LocationHierarchyFilter } from "./locationhierarchyfilter";
 import { buildSearchQuery } from "@/lib/utils/querystring";
-import { roomTypeLabels, roomTypeOrder, furnishingLabels, postedByLabels } from "@/lib/constants/roomtypes";
+import { roomTypeLabels, roomTypeOrder, furnishingLabels } from "@/lib/constants/roomtypes";
 import { routes } from "@/lib/constants/routes";
 import type { SearchFilters } from "@/types/searchfilters";
-import type { Furnishing, PostedBy, RoomType } from "@/types/listing";
+import type { Furnishing, RoomType } from "@/types/listing";
 
 export function FilterPanel({
   filters,
@@ -47,17 +47,6 @@ export function FilterPanel({
         initialCitySlug={selectedCitySlug}
       />
 
-      <Section title="Posted by">
-        {(Object.keys(postedByLabels) as PostedBy[]).map((value) => (
-          <Checkbox
-            key={value}
-            label={postedByLabels[value]}
-            checked={filters.postedBy.includes(value)}
-            onChange={() => apply({ postedBy: toggle(filters.postedBy, value) })}
-          />
-
-        ))}
-      </Section>
 
       <Section title="Monthly rent">
         <div className="flex items-center gap-2 px-2">

@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/layout/siteshell";
 import { ListingCard } from "@/components/listing/listingcard";
 import { HeroSearchBar } from "@/components/search/herosearchbar";
 import { HeroCityscapePattern } from "@/components/home/herocityscapepattern";
+import { PopularLocations } from "@/components/home/popularlocations";
 import { getRecentListings } from "@/lib/api/listings";
 import { getCities } from "@/lib/api/geography";
 import { routes } from "@/lib/constants/routes";
@@ -59,44 +60,8 @@ export default async function Page() {
             Explore popular locations
           </h2>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="Previous localities"
-              className="flex size-7 items-center justify-center rounded-full border border-line bg-white text-xs text-ink-muted transition-colors hover:border-ink hover:text-ink"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5">
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Next localities"
-              className="flex size-7 items-center justify-center rounded-full border border-line bg-white text-xs text-ink-muted transition-colors hover:border-ink hover:text-ink"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5">
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          </div>
         </div>
-
-        <div className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {popularLocations.map((location) => (
-            <Link
-              key={`${location.citySlug}/${location.localitySlug}`}
-              href={routes.locality(location.citySlug, location.localitySlug)}
-              className="rounded-xl border border-line bg-white p-3.5 transition-all hover:border-line-strong hover:shadow-xs"
-            >
-              <p className="text-xs font-bold text-ink sm:text-sm">
-                {location.localityName}
-              </p>
-              <p className="mt-1 text-2xs text-ink-muted">
-                {location.cityName}
-              </p>
-            </Link>
-          ))}
-        </div>
+        <PopularLocations locations={popularLocations} />
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pt-2 pb-14">

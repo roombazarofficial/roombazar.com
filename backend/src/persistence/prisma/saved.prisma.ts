@@ -3,7 +3,9 @@ import type {
   SavedRepository,
   SavedSearch,
 } from "src/persistence/ports/saved.repository";
+import type { Listing } from "src/domain/listing.entity";
 import { PrismaService } from "./prisma.service";
+import { listingInclude, toDomainListing } from "./mappers";
 
 @Injectable()
 export class PrismaSavedRepository implements SavedRepository {
@@ -17,6 +19,16 @@ export class PrismaSavedRepository implements SavedRepository {
     });
 
     return rows.map((row) => row.listingId);
+  }
+
+  async listSavedListings(userId: string): Promise<Listing[]> {
+    const rows = await this.prisma.savedListing.findMany({
+      where: { userId, listing: { deletedAt: null } },
+      include: { listing: { include: listingInclude } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return rows.map((row) => toDomainListing(row.listing));
   }
 
   async saveListing(userId: string, listingId: string): Promise<void> {

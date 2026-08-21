@@ -2,7 +2,11 @@ import { ReferenceDataTable } from "@/components/managing/referencedatatable";
 
 export const metadata = { title: "Amenities" };
 
-export default function Page() {
+type Search = Promise<{ new?: string }>;
+
+export default async function Page({ searchParams }: { searchParams: Search }) {
+  const { new: create } = await searchParams;
+
   return (
     <div>
       <header className="mb-6">
@@ -14,7 +18,7 @@ export default function Page() {
         </p>
       </header>
 
-      <ReferenceDataTable kind="amenities" />
+      <ReferenceDataTable kind="amenities" initialCreate={create === "1"} />
     </div>
   );
 }

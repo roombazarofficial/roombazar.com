@@ -3,6 +3,7 @@ import type {
   SavedRepository,
   SavedSearch,
 } from "src/persistence/ports/saved.repository";
+import type { Listing } from "src/domain/listing.entity";
 
 @Injectable()
 export class MemorySavedRepository implements SavedRepository {
@@ -11,6 +12,10 @@ export class MemorySavedRepository implements SavedRepository {
 
   async listSavedListingIds(userId: string): Promise<string[]> {
     return [...(this.listings.get(userId) ?? [])];
+  }
+
+  async listSavedListings(_userId: string): Promise<Listing[]> {
+    return [];
   }
 
   async saveListing(userId: string, listingId: string): Promise<void> {

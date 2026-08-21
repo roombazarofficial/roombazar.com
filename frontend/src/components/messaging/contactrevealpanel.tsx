@@ -3,21 +3,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/classnames";
+import { revealContact } from "@/lib/api/conversations";
 
 export function ContactRevealPanel({
   youRevealed,
   theyRevealed,
   theirName,
   theirPhone,
+  conversationId,
   className,
 }: {
   youRevealed: boolean;
   theyRevealed: boolean;
   theirName: string;
   theirPhone: string | null;
+  conversationId: string;
   className?: string;
 }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const bothAgreed = youRevealed && theyRevealed;
 
   if (bothAgreed && theirPhone) {
@@ -65,12 +69,20 @@ export function ContactRevealPanel({
           className="mt-3"
           fullWidth
           loading={pending}
-          onClick={() => setPending(true)}
+          onClick={() => {
+            setPending(true);
+            setError(null);
+            void revealContact(conversationId)
+              .catch(() => setError("Could not share your number. Try again."))
+              .finally(() => setPending(false));
+          }}
         >
           Share my number
         </Button>
 
       )}
+
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
 
       {youRevealed && (
         <p className="mt-3 rounded-control bg-surface-muted px-3 py-2 text-center text-sm text-ink-muted">
