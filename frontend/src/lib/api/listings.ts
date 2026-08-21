@@ -1,4 +1,4 @@
-import { api, tryGet } from "./client";
+import { tryGet } from "./client";
 import { serverTryGet } from "./serverclient";
 import type { Listing, ListingSummary } from "@/types/listing";
 import type { SearchFilters } from "@/types/searchfilters";
@@ -81,23 +81,4 @@ export function getMyListings(): Promise<Listing[]> {
 
 export function getMyListing(id: string): Promise<Listing | null> {
   return serverTryGet<Listing | null>(`/listings/${id}`, null);
-}
-
-export function markListingTaken(id: string) {
-  return api.post(`/listings/${id}/taken`);
-}
-
-export function pauseListing(id: string) {
-  return api.post(`/listings/${id}/paused`);
-}
-
-export function renewListing(
-  id: string,
-  confirmation: { rentPaise: number; availableFrom: string },
-) {
-  return api.post(`/listings/${id}/renew`, confirmation);
-}
-
-export function deleteListing(id: string) {
-  return api.delete(`/listings/${id}`);
 }

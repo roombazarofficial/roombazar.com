@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirmdialog";
-import { markListingTaken } from "@/lib/api/listings";
+import { markListingTaken } from "@/lib/api/listings.client";
 
 export function MarkAsTakenButton({
   listingId,
