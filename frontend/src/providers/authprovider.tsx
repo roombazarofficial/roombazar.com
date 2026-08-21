@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthUi } from "@/store/authuistore";
+import { useSavedStore } from "@/store/savedstore";
 import { fetchCurrentUser } from "@/lib/api/auth";
 
 /**
@@ -17,7 +18,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let active = true;
 
     fetchCurrentUser().then((user) => {
-      if (active) setUser(user);
+      if (active) {
+        setUser(user);
+        if (user) {
+          useSavedStore.getState().fetchSavedIds();
+        } else {
+          useSavedStore.getState().reset();
+        }
+      }
     });
 
     return () => {

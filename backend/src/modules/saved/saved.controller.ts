@@ -53,7 +53,8 @@ export class SavedController {
   @Get("listings")
   async listings(@CurrentUser() user: User) {
     const listings = await this.saved.listSavedListings(user.id);
-    const imageHost = this.config.get<string>("PUBLIC_IMAGE_HOST") ?? "";
+    const imageHost =
+      this.config.get<string>("R2_PUBLIC_HOST") ?? "images.roombazar.com";
 
     const [cityById, localityById] = await Promise.all([
       this.geography.findCitiesByIds(listings.map((l) => l.cityId)),

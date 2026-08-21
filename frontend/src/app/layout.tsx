@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { SiteStructuredData } from "@/components/common/structureddata";
 import { AuthModal } from "@/components/auth/authmodal";
 import { SignInLauncher } from "@/components/auth/signinlauncher";
+import { WelcomeOfferPopup } from "@/components/common/welcomeofferpopup";
 import { siteUrl, siteName, siteDescription } from "@/lib/seo/site";
 import { AuthProvider } from "@/providers/authprovider";
 import { SmoothScrollProvider } from "@/providers/smoothscroll";
@@ -91,6 +92,7 @@ export default function RootLayout({
             {children}
             <SignInLauncher />
             <AuthModal />
+            <WelcomeOfferPopup />
           </SmoothScrollProvider>
         </AuthProvider>
       </body>

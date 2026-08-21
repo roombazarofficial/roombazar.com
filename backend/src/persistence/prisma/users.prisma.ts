@@ -60,7 +60,7 @@ export class PrismaUsersRepository implements UsersRepository {
       }),
     };
 
-    const [totalItems, rows] = await this.prisma.$transaction([
+    const [totalItems, rows] = await Promise.all([
       this.prisma.user.count({ where }),
       this.prisma.user.findMany({
         where,

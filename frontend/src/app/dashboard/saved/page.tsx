@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ListingGrid } from "@/components/listing/listinggrid";
-import { EmptyState } from "@/components/ui/emptystate";
+import { SavedListingsView } from "@/components/saved/savedlistingsview";
 import { buttonStyles } from "@/components/ui/button";
 import { getSavedListings } from "@/lib/api/saved";
 import { routes } from "@/lib/constants/routes";
@@ -28,27 +27,7 @@ export default async function Page() {
         </Link>
       </header>
 
-      {savedListings.length === 0 ? (
-        <EmptyState
-          className="mt-6"
-          title="Nothing saved yet"
-          description="Tap the heart icon on any room to keep it in your wishlist while you compare."
-          action={
-            <Link href={routes.rooms} className={buttonStyles()}>
-              Browse rooms
-            </Link>
-          }
-        />
-      ) : (
-        <div className="mt-6 space-y-6">
-          <ListingGrid listings={savedListings} />
-
-          <p className="mt-4 text-sm text-ink-muted">
-            {savedListings.length} saved{" "}
-            {savedListings.length === 1 ? "room" : "rooms"}.
-          </p>
-        </div>
-      )}
+      <SavedListingsView initialListings={savedListings} />
     </div>
   );
 }

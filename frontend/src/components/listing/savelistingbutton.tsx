@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuthUi } from "@/store/authuistore";
-import { saveListing, unsaveListing } from "@/lib/api/saved.client";
+import { useSavedStore } from "@/store/savedstore";
 import { cn } from "@/lib/utils/classnames";
 
 export function SaveListingButton({
@@ -14,10 +14,14 @@ export function SaveListingButton({
   initialSaved?: boolean;
   className?: string;
 }) {
-  const [saved, setSaved] = useState(initialSaved);
-  const [loading, setLoading] = useState(false);
   const user = useAuthUi((state) => state.user);
   const openSignIn = useAuthUi((state) => state.openSignIn);
+  const loaded = useSavedStore((state) => state.loaded);
+  const isStoreSaved = useSavedStore((state) => state.savedIds.has(listingId));
+  const [loading, setLoading] = useState(false);
+
+  // If store is loaded, rely on live store state; otherwise fallback to initialSaved
+  const saved = loaded ? isStoreSaved : (isStoreSaved || initialSaved);
 
   async function handleToggle(event: React.MouseEvent) {
     event.preventDefault();
@@ -31,19 +35,11 @@ export function SaveListingButton({
     }
 
     if (loading) return;
-
-    const nextSaved = !saved;
-    setSaved(nextSaved);
     setLoading(true);
 
     try {
-      if (nextSaved) {
-        await saveListing(listingId);
-      } else {
-        await unsaveListing(listingId);
-      }
+      await useSavedStore.getState().toggleSave(listingId);
     } catch (err) {
-      setSaved(!nextSaved);
       console.error("Failed to update saved listing", err);
     } finally {
       setLoading(false);
@@ -59,14 +55,17 @@ export function SaveListingButton({
       onClick={handleToggle}
       className={cn(
         "group relative z-10 flex size-9 items-center justify-center rounded-full",
-        "bg-surface/90 backdrop-blur transition-all hover:bg-surface active:scale-90 shadow-2xs hover:shadow-xs cursor-pointer",
+        "bg-white/90 backdrop-blur transition-all hover:bg-white active:scale-90 shadow-2xs hover:shadow-xs cursor-pointer",
         saved ? "text-danger" : "text-ink-muted hover:text-danger",
         className,
       )}
     >
       <svg
         viewBox="0 0 24 24"
-        className="size-5 transition-transform group-hover:scale-110"
+        className={cn(
+          "size-5 transition-transform group-hover:scale-110",
+          saved && "fill-rose-600 text-rose-600",
+        )}
         fill={saved ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth="2"
