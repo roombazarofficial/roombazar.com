@@ -67,54 +67,60 @@ export default async function Page({ params }: { params: Params }) {
         ]}
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-6">
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-ink-muted">
+      <div className="mx-auto max-w-6xl px-3 sm:px-6 py-4 sm:py-6">
+        {/* Breadcrumbs Navigation (OLX Style) */}
+        <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-ink-muted">
+          <Link href="/" className="hover:text-ink">
+            Home
+          </Link>
+          <span>›</span>
           <Link href={routes.city(listing.city.slug)} className="hover:text-ink">
             {listing.city.name}
           </Link>
-
-          <span className="mx-1.5">/</span>
+          <span>›</span>
           <Link
             href={routes.locality(listing.city.slug, listing.locality.slug)}
             className="hover:text-ink"
           >
             {listing.locality.name}
           </Link>
-
+          <span>›</span>
+          <span className="text-ink font-medium truncate max-w-[200px] sm:max-w-xs">
+            {listing.title}
+          </span>
         </nav>
 
         {!isLive && (
-          <div className="mb-5 rounded-card border border-line-strong bg-surface-muted px-4 py-3">
-            <p className="text-sm font-medium text-ink">
+          <div className="mb-5 rounded-xl border border-line-strong bg-surface-muted px-4 py-3.5 shadow-2xs">
+            <p className="text-sm font-semibold text-ink">
               This room is no longer available.
             </p>
-
             <Link
               href={routes.locality(listing.city.slug, listing.locality.slug)}
-              className="mt-1 inline-block text-sm text-brand-700 hover:text-brand-800"
+              className="mt-1 inline-block text-xs sm:text-sm font-medium text-brand-600 hover:text-brand-700 underline"
             >
-              See other rooms in {listing.locality.name}
+              See other available rooms in {listing.locality.name}
             </Link>
-
           </div>
-
         )}
 
-        <ListingGallery photos={listing.photos} title={listing.title} />
+        {/* 1. Full-Width Interactive Hero Image Gallery with 'roombazar' Watermark */}
+        <ListingGallery photos={listing.photos} title={listing.title} listingId={listing.id} />
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0">
-            <header>
+        {/* 2. OLX-Style 2-Column Content Layout */}
+        <div className="mt-6 sm:mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
+          {/* Left Column: Title, Overview, Description, Amenities, Map */}
+          <div className="min-w-0 space-y-6">
+            {/* Ad Header Title Card */}
+            <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone="neutral">
                     {roomTypeLabels[listing.roomType]}
                   </Badge>
-
                   <Badge tone="neutral">
                     {furnishingLabels[listing.furnishing]}
                   </Badge>
-
                   {listing.negotiable && <Badge tone="info">Negotiable</Badge>}
                 </div>
 
@@ -124,83 +130,117 @@ export default async function Page({ params }: { params: Params }) {
                 />
               </div>
 
-              <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
+              <h1 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-ink">
                 {listing.title}
               </h1>
 
-              <p className="mt-1.5 text-sm text-ink-muted">
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm text-ink-muted">
+                <svg className="size-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 {listing.locality.name}, {listing.city.name}
               </p>
 
               <FreshnessLabel
                 publishedAt={listing.publishedAt ?? listing.createdAt}
-                className="mt-2 block"
+                className="mt-2.5 block text-xs"
               />
+            </div>
 
-            </header>
-
-            <ListingRent listing={listing} className="mt-6" />
-
-            <section className="mt-8">
-              <h2 className="text-base font-semibold text-ink">
-                About this room
+            {/* OLX-Style Overview Card */}
+            <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6 shadow-sm">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-ink border-b border-line pb-3">
+                Overview
               </h2>
 
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink-muted">
-                {listing.description}
-              </p>
-
-            </section>
-
-            <section className="mt-8">
-              <h2 className="text-base font-semibold text-ink">Details</h2>
-
-              <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
-                <Detail label="Available from" value={formatDate(listing.availableFrom)} />
-
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <OverviewBox
+                  icon="🏠"
+                  label="Type"
+                  value={roomTypeLabels[listing.roomType] || "Room"}
+                />
+                <OverviewBox
+                  icon="🛋️"
+                  label="Furnishing"
+                  value={furnishingLabels[listing.furnishing] || "Unfurnished"}
+                />
+                <OverviewBox
+                  icon="📍"
+                  label="Location"
+                  value={listing.locality.name}
+                />
+                <OverviewBox
+                  icon="📅"
+                  label="Available From"
+                  value={formatDate(listing.availableFrom)}
+                />
                 {listing.areaSqft && (
-                  <Detail label="Area" value={`${listing.areaSqft} sq ft`} />
-
+                  <OverviewBox
+                    icon="📐"
+                    label="Super Area"
+                    value={`${listing.areaSqft} sq ft`}
+                  />
                 )}
                 {listing.floor != null && (
-                  <Detail
+                  <OverviewBox
+                    icon="🏢"
                     label="Floor"
                     value={`${listing.floor} of ${listing.totalFloors ?? "?"}`}
                   />
-
                 )}
                 {listing.minStayMonths && (
-                  <Detail
-                    label="Minimum stay"
-                    value={`${listing.minStayMonths} months`}
+                  <OverviewBox
+                    icon="⏳"
+                    label="Min. Stay"
+                    value={`${listing.minStayMonths} mo`}
                   />
-
                 )}
-              </dl>
+                <OverviewBox
+                  icon="⚡"
+                  label="Bills Included"
+                  value={listing.billsIncluded ? "Yes" : "No"}
+                />
+              </div>
+            </div>
 
-            </section>
+            {/* Description Card */}
+            {listing.description && (
+              <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6 shadow-sm">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-ink border-b border-line pb-3">
+                  Description
+                </h2>
+                <p className="mt-3.5 whitespace-pre-line text-xs sm:text-sm leading-relaxed text-ink-muted">
+                  {listing.description}
+                </p>
+              </div>
+            )}
 
-            <ListingAmenities amenities={listing.amenities} className="mt-8" />
+            {/* Pricing & Deposit Details */}
+            <ListingRent listing={listing} />
 
-            <ListingLocalityMap listing={listing} className="mt-8" />
+            {/* Amenities & Rules */}
+            <ListingAmenities amenities={listing.amenities} />
 
-            <PaymentSafetyNotice className="mt-8" />
+            {/* Approximate Location Map */}
+            <ListingLocalityMap listing={listing} />
+
+            {/* Safety & Anti-Fraud Notice (OLX Style) */}
+            <PaymentSafetyNotice />
           </div>
 
-          {}
-          <aside className="lg:sticky lg:top-24 lg:self-start">
+          {/* Right Column: Sticky Price & Lister Panel */}
+          <aside className="lg:sticky lg:top-20 lg:self-start space-y-4">
             <ListingListerPanel listing={listing} />
-
           </aside>
-
         </div>
 
+        {/* Similar Listings Grid */}
         {similar.length > 0 && (
-          <section className="mt-16 border-t border-line pt-8">
-            <h2 className="mb-5 text-xl font-semibold text-ink">
-              Similar rooms in {listing.city.name}
+          <section className="mt-12 sm:mt-16 border-t border-line pt-8">
+            <h2 className="mb-5 text-lg sm:text-xl font-bold tracking-tight text-ink">
+              Similar listings in {listing.city.name}
             </h2>
-
             <ListingGrid listings={similar} />
           </section>
         )}
@@ -209,22 +249,29 @@ export default async function Page({ params }: { params: Params }) {
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function OverviewBox({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div>
-      <dt className="text-xs text-ink-subtle">{label}</dt>
-
-      <dd className="mt-0.5 text-sm text-ink">{value}</dd>
-
+    <div className="flex items-start gap-2.5 rounded-xl bg-surface-muted/60 p-3 border border-line/60">
+      <span className="text-base sm:text-lg select-none">{icon}</span>
+      <div>
+        <span className="block text-[11px] font-medium text-ink-muted">{label}</span>
+        <span className="block text-xs sm:text-sm font-semibold text-ink mt-0.5">{value}</span>
+      </div>
     </div>
-
   );
 }
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(iso));
+function formatDate(iso?: string | null): string {
+  if (!iso) return "Immediately";
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "Immediately";
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "Immediately";
+  }
 }

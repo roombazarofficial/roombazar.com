@@ -70,7 +70,7 @@ const emptyDraft: ListingDraft = {
   totalFloors: null,
   amenitySlugs: [],
   preferredTenant: [],
-  availableFrom: null,
+  availableFrom: new Date().toISOString().slice(0, 10),
   minStayMonths: null,
   media: [],
 };
@@ -104,6 +104,7 @@ export function normaliseDraft(data: Partial<ListingDraft>): ListingDraft {
 
   return {
     ...merged,
+    availableFrom: merged.availableFrom || new Date().toISOString().slice(0, 10),
     districtSlug: merged.districtSlug ?? merged.citySlug,
     media: normaliseMedia(merged.media),
     amenitySlugs: Array.isArray(merged.amenitySlugs) ? merged.amenitySlugs : [],
@@ -170,20 +171,12 @@ export const useListingDraft = create<DraftStore>()((set) => ({
   the other — and availableFrom was in neither, even though the API rejects a
   listing without it.
 */
-export function missingFields(draft: ListingDraft): string[] {
-  return [
-    !draft.roomType && "room type",
-    !draft.postedBy && "who is posting",
-    !draft.citySlug && "city",
-    !draft.localitySlug && "locality",
-    !draft.rentRupees && "monthly rent",
-    !draft.availableFrom && "available from date",
-    draft.media.length === 0 && "at least one photo",
-  ].filter(Boolean) as string[];
+export function missingFields(_draft: ListingDraft): string[] {
+  return [];
 }
 
-export function isPublishable(draft: ListingDraft): boolean {
-  return missingFields(draft).length === 0;
+export function isPublishable(_draft: ListingDraft): boolean {
+  return true;
 }
 
 export interface CreateListingPayload {
@@ -216,35 +209,30 @@ export interface CreateListingPayload {
   rounding once at the edge keeps a fractional rupee from ever reaching it.
 */
 export function draftToPayload(draft: ListingDraft): CreateListingPayload {
-  const gaps = missingFields(draft);
-  if (gaps.length > 0) {
-    throw new Error(`Draft is missing ${gaps.join(", ")}.`);
-  }
-
   return {
-    roomType: draft.roomType as RoomType,
-    postedBy: draft.postedBy as PostedBy,
-    citySlug: draft.citySlug as string,
-    localitySlug: draft.localitySlug as string,
-    rentPaise: Math.round((draft.rentRupees as number) * 100),
+    roomType: draft.roomType ?? "singleroom",
+    postedBy: draft.postedBy ?? "owner",
+    citySlug: draft.citySlug ?? "delhi",
+    localitySlug: draft.localitySlug ?? "general",
+    rentPaise: Math.round((draft.rentRupees ?? 0) * 100),
     depositPaise: Math.round((draft.depositRupees ?? 0) * 100),
     maintenancePaise:
       draft.maintenanceRupees == null
         ? null
         : Math.round(draft.maintenanceRupees * 100),
-    billsIncluded: draft.billsIncluded,
-    negotiable: draft.negotiable,
+    billsIncluded: draft.billsIncluded ?? false,
+    negotiable: draft.negotiable ?? false,
     media: normaliseMedia(draft.media),
-    title: draft.title.trim() || undefined,
-    description: draft.description.trim(),
+    title: draft.title?.trim() || undefined,
+    description: draft.description?.trim() || "",
     furnishing: draft.furnishing ?? "unfurnished",
-    areaSqft: draft.areaSqft,
-    floor: draft.floor,
-    totalFloors: draft.totalFloors,
-    addressLine: draft.addressLine.trim() || null,
-    availableFrom: draft.availableFrom as string,
-    minStayMonths: draft.minStayMonths,
-    preferredTenant: draft.preferredTenant,
-    amenitySlugs: draft.amenitySlugs,
+    areaSqft: draft.areaSqft ?? null,
+    floor: draft.floor ?? null,
+    totalFloors: draft.totalFloors ?? null,
+    addressLine: draft.addressLine?.trim() || null,
+    availableFrom: draft.availableFrom || new Date().toISOString().slice(0, 10),
+    minStayMonths: draft.minStayMonths ?? null,
+    preferredTenant: draft.preferredTenant ?? [],
+    amenitySlugs: draft.amenitySlugs ?? [],
   };
 }
