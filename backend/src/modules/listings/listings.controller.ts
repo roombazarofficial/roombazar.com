@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Inject,
 } from "@nestjs/common";
 import { z } from "zod";
@@ -136,5 +137,42 @@ export class ListingsController {
   @HttpCode(204)
   async remove(@Param("id") id: string, @CurrentUser() user: User) {
     await this.listings.softDelete(id, user);
+  }
+
+@Get("search")
+  async search(
+    @CurrentUserOptional() user: User | null,
+    @Query() query: {
+      citySlug?: string;
+      localitySlugs?: string[];
+      roomTypes?: string[];
+      furnishing?: string[];
+      postedBy?: string[];
+      amenitySlugs?: string[];
+      minRentPaise?: number;
+      maxRentPaise?: number;
+      availableFrom?: string;
+      occupancy?: number;
+      sort?: "relevance" | "newest" | "rentlow" | "renthigh";
+      page?: number;
+    },
+  ) {
+    const filters = {
+      citySlug: query.citySlug,
+      localitySlugs: query.localitySlugs?.filter((v) => v),
+      roomTypes: query.roomTypes?.filter((v) => v),
+      furnishing: query.furnishing?.filter((v) => v),
+      postedBy: query.postedBy?.filter((v) => v),
+      amenitySlugs: query.amenitySlugs?.filter((v) => v),
+      minRentPaise: query.minRentPaise,
+      maxRentPaise: query.maxRentPaise,
+      availableFrom: query.availableFrom,
+      occupancy: query.occupancy,
+      sort: query.sort,
+      page: query.page,
+    };
+
+    const result = await this.listings.search(filters);
+    return result;
   }
 }
