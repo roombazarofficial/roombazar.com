@@ -46,10 +46,11 @@ export default async function Page() {
                     )}
                   </div>
 
-                  <p className="mt-0.5 truncate text-xs text-ink-muted">
+<p className="mt-0.5 truncate text-xs text-ink-muted">
                     {conversation.listingTitle} ·{" "}
-                    {formatRupees(conversation.listingRentPaise)}/month
-
+                    {conversation.listingRentPaise != null
+                      ? `${formatRupees(conversation.listingRentPaise)}/month`
+                      : "Price not available"}
                   </p>
 
                   <p className="mt-1.5 truncate text-sm text-ink-muted">

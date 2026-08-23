@@ -1,3 +1,5 @@
+import type { ListingSearchCriteria } from "src/persistence/ports/listings.repository";
+
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import {
@@ -330,6 +332,38 @@ export class ListingsService {
     }
 
     return overdue.length;
+  }
+
+  async search(
+    filters: { citySlug?: string; localitySlugs?: string[];
+      roomTypes?: string[]; furnishing?: string[];
+      postedBy?: string[]; amenitySlugs?: string[];
+      minRentPaise?: number; maxRentPaise?: number;
+      availableFrom?: string; occupancy?: number; sort?: string; page?: number },
+  ): Promise<{ listings: Listing[]; totalItems: number; page: number; totalPages: number }> {
+    const criteria: ListingSearchCriteria = {
+      citySlug: filters.citySlug,
+      localitySlugs: filters.localitySlugs?.filter((v) => v),
+      roomTypes: filters.roomTypes?.filter((v) => v),
+      furnishing: filters.furnishing?.filter((v) => v),
+      postedBy: filters.postedBy?.filter((v) => v),
+      amenitySlugs: filters.amenitySlugs?.filter((v) => v),
+      minRentPaise: filters.minRentPaise,
+      maxRentPaise: filters.maxRentPaise,
+      availableFrom: filters.availableFrom,
+      occupancy: filters.occupancy,
+      sort: filters.sort as "relevance" | "newest" | "rentlow" | "renthigh",
+      page: filters.page ?? 1,
+      pageSize: 24,
+    };
+
+    const result = await this.listings.search(criteria);
+    return {
+      listings: result.items,
+      totalItems: result.totalItems,
+      page: result.page,
+      totalPages: result.totalPages,
+    };
   }
 }
 

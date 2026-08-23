@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { sendMessage } from "@/lib/api/conversations.client";
 
 const contactPattern =
   /(\+?\d[\d\s-]{8,})|([\w.-]+@[\w.-]+\.\w+)|(\b(whatsapp|telegram|insta|instagram)\b)/i;
 
-export function MessageComposer({ contactShared }: { contactShared: boolean }) {
+export function MessageComposer({
+  contactShared,
+  conversationId,
+  onMessageSent,
+}: {
+  contactShared: boolean;
+  conversationId: string;
+  onMessageSent?: () => void;
+}) {
   const [body, setBody] = useState("");
 
   const wouldRedact = !contactShared && contactPattern.test(body);
@@ -17,14 +26,20 @@ export function MessageComposer({ contactShared }: { contactShared: boolean }) {
         <p className="mb-2 rounded-control bg-warning-soft px-3 py-2 text-xs text-warning">
           Contact details will be hidden until you both agree to share numbers.
         </p>
-
       )}
 
       <form
         className="flex items-end gap-2"
         onSubmit={(event) => {
           event.preventDefault();
+          const trimmed = body.trim();
+          if (trimmed && conversationId) {
+            sendMessage(conversationId, trimmed).catch(
+              (err) => console.error("Failed to send message:", err)
+            );
+          }
           setBody("");
+          onMessageSent?.();
         }}
       >
         <textarea
@@ -42,6 +57,5 @@ export function MessageComposer({ contactShared }: { contactShared: boolean }) {
       </form>
 
     </div>
-
   );
 }

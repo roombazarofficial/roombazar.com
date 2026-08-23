@@ -4,7 +4,9 @@ import { ContactRevealPanel } from "@/components/messaging/contactrevealpanel";
 import { MessageThread } from "@/components/messaging/messagethread";
 import { MessageComposer } from "@/components/messaging/messagecomposer";
 import { BlockUserButton } from "@/components/messaging/blockuserbutton";
-import { getConversations, getMessages } from "@/lib/api/conversations";
+import { getMessages } from "@/lib/api/conversations";
+import { getConversations } from "@/lib/api/conversations";
+import type { Conversation } from "@/types/conversation";
 import { formatRupees } from "@/lib/format/rupees";
 import { routes } from "@/lib/constants/routes";
 
@@ -18,7 +20,9 @@ export default async function Page({ params }: { params: Params }) {
     getMessages(id),
   ]);
 
-  const conversation = conversations.find((item) => item.id === id);
+  const conversation = conversations.find(
+    (item): item is Conversation => item.id === id,
+  );
   if (!conversation) notFound();
 
   return (
@@ -46,6 +50,7 @@ export default async function Page({ params }: { params: Params }) {
           contactShared={Boolean(
             conversation.youRevealedAt && conversation.theyRevealedAt,
           )}
+          conversationId={conversation.id}
         />
 
       </div>
@@ -67,10 +72,7 @@ export default async function Page({ params }: { params: Params }) {
           </button>
 
         </div>
-
       </aside>
-
     </div>
-
   );
 }

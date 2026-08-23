@@ -16,9 +16,7 @@ export function MessageThread({ messages }: { messages: Message[] }) {
               <div
                 className={cn(
                   "rounded-sheet px-3.5 py-2.5 text-sm",
-                  mine
-                    ? "bg-brand-600 text-ink-inverse"
-                    : "bg-surface-muted text-ink",
+                  mine ? "bg-brand-600 text-ink-inverse" : "bg-surface-muted text-ink",
                 )}
               >
                 {message.body}
@@ -29,15 +27,11 @@ export function MessageThread({ messages }: { messages: Message[] }) {
                 <p className="mt-1 text-2xs text-ink-subtle">
                   Contact details are hidden until you both agree to share them
                 </p>
-
               )}
 
               <time
                 dateTime={message.sentAt}
-                className={cn(
-                  "mt-1 block text-2xs text-ink-subtle",
-                  mine && "text-right",
-                )}
+                className={cn("mt-1 block text-2xs text-ink-subtle", mine && "text-right")}
               >
                 {new Intl.DateTimeFormat("en-IN", {
                   hour: "numeric",
