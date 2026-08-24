@@ -19,6 +19,15 @@ const config: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = {
+        type: "memory",
+      };
+    }
+    return config;
+  },
+
   async headers() {
     return [
       {

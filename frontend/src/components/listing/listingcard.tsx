@@ -13,6 +13,7 @@ import { routes } from "@/lib/constants/routes";
 import { useAuthUi } from "@/store/authuistore";
 import { startConversation } from "@/lib/api/conversations.client";
 import { cn } from "@/lib/utils/classnames";
+import { WatermarkedImage } from "@/components/ui/watermarkedimage";
 import type { ListingSummary } from "@/types/listing";
 
 const QUICK_PROMPTS = [
@@ -114,14 +115,12 @@ export function ListingCard({
         {/* 1. Image Container */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-sunken">
           {listing.coverPhoto ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <WatermarkedImage
               src={listing.coverPhoto.url}
               alt={listing.title}
-              loading={priority ? "eager" : "lazy"}
-              width={listing.coverPhoto.width}
-              height={listing.coverPhoto.height}
+              fill
               className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              watermarkText="roombazar"
             />
           ) : (
             <div className="flex size-full items-center justify-center text-sm font-medium text-ink-subtle">
@@ -131,7 +130,7 @@ export function ListingCard({
 
           {/* Photo Count Badge */}
           {listing.photoCount > 1 && (
-            <span className="absolute bottom-2 right-2 rounded-full bg-ink/75 backdrop-blur-xs px-2 py-0.5 text-2xs font-semibold text-white shadow-2xs">
+            <span className="absolute bottom-2 left-2 rounded-full bg-ink/75 backdrop-blur-xs px-2 py-0.5 text-2xs font-semibold text-white shadow-2xs z-10">
               {listing.photoCount} photos
             </span>
           )}
@@ -140,7 +139,7 @@ export function ListingCard({
           <SaveListingButton
             listingId={listing.id}
             initialSaved={listing.isSaved}
-            className="absolute top-2 right-2 size-8.5 bg-white/90 shadow-sm hover:bg-white text-ink-muted hover:text-brand-600"
+            className="absolute top-2 right-2 size-8.5 bg-white/90 shadow-sm hover:bg-white text-ink-muted hover:text-brand-600 z-10"
           />
         </div>
 
