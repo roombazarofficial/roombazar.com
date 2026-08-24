@@ -16,6 +16,7 @@ export interface ConversationsRepository {
   listMessages(conversationId: string): Promise<Message[]>;
   addMessage(message: Message): Promise<Message>;
   markRead(conversationId: string, readerId: string): Promise<void>;
+  countUnreadForUser(userId: string): Promise<number>;
 
   countThreadsStartedSince(seekerId: string, since: string): Promise<number>;
 

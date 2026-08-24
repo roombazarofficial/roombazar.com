@@ -12,6 +12,23 @@ export interface MessageView {
   readAt: string | null;
 }
 
+export interface ConversationView {
+  id: string;
+  listingId: string;
+  listingSlug: string;
+  listingTitle: string;
+  listingRentPaise: number;
+  counterpartId: string;
+  counterpartName: string;
+  youRevealedAt: string | null;
+  theyRevealedAt: string | null;
+  publicCounterpartPhone: string | null;
+  lastMessagePreview: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  status: Conversation["status"];
+}
+
 export function presentMessage(
   message: Message,
   viewerId: string,
@@ -40,7 +57,7 @@ export function presentConversation(
   lastMessagePreview: string,
   unreadCount: number,
   counterpartPhone: string | null,
-): Record<string, unknown> {
+): ConversationView {
   const isSeeker = conversation.seekerId === viewer.id;
 
   return {

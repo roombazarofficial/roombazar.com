@@ -112,7 +112,7 @@ export const approveMany = (listingIds: string[]) =>
     approved: number;
     failed: number;
     outcomes: { listingId: string; ok: boolean; error?: string }[];
-  }>("/approvals/bulk/approve", {
+  }>("/approvals/bulk-approve", {
     method: "POST",
     body: JSON.stringify({ listingIds }),
   });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { formatRupees, formatRupeesCompact } from "../../src/lib/format/rupees";
-import { formatAvailability } from "../../src/lib/format/dates";
+import { formatAvailability, formatIndiaTime } from "../../src/lib/format/dates";
 import { routes } from "../../src/lib/constants/routes";
 
 describe("Formatting helpers", () => {
@@ -18,6 +18,12 @@ describe("Formatting helpers", () => {
   it("formats availability string", () => {
     expect(formatAvailability(null)).toBe("Available now");
     expect(formatAvailability("")).toBe("Available now");
+  });
+
+  it("formats message timestamps in Indian Standard Time", () => {
+    const formatted = formatIndiaTime("2026-08-24T00:00:00.000Z");
+    expect(formatted).toContain("5:30");
+    expect(formatted.toLowerCase()).toContain("am");
   });
 
   it("constructs type-safe routes", () => {

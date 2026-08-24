@@ -62,15 +62,8 @@ export class ConversationsController {
   @Post(":id/reveal")
   @HttpCode(200)
   async reveal(@Param("id") id: string, @CurrentUser() user: User) {
-    const conversation = await this.conversations.reveal(id, user);
-
-    return {
-      conversation,
-      publicCounterpartPhone: await this.conversations.counterpartPhone(
-        id,
-        user,
-      ),
-    };
+    await this.conversations.reveal(id, user);
+    return this.conversations.view(id, user);
   }
 
   @Post(":id/read")

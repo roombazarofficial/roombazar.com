@@ -94,6 +94,22 @@ export class MemoryConversationsRepository implements ConversationsRepository {
     );
   }
 
+  async countUnreadForUser(userId: string): Promise<number> {
+    let count = 0;
+
+    for (const conversation of this.conversations.values()) {
+      if (conversation.seekerId !== userId && conversation.listerId !== userId) {
+        continue;
+      }
+
+      for (const message of this.messages.get(conversation.id) ?? []) {
+        if (message.senderId !== userId && message.readAt === null) count += 1;
+      }
+    }
+
+    return count;
+  }
+
   async countThreadsStartedSince(
     seekerId: string,
     since: string,

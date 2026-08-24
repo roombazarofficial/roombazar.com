@@ -41,20 +41,6 @@ const schema = z.object({
       .optional(),
   ),
   /*
-    Mail delivery. Resend is the default primary with SMTP behind it, so one
-    provider failing cannot stop people signing up. With neither configured the
-    code is written to the log, which keeps local development working without
-    credentials and is refused outright in production.
-  */
-  MAIL_DRIVER: z.preprocess(
-    blankAsAbsent,
-    z.enum(["resend", "smtp"]).default("resend"),
-  ),
-  MAIL_FALLBACK: z.preprocess(
-    blankAsAbsent,
-    z.enum(["on", "off"]).default("on"),
-  ),
-  /*
     Must be a bare address or "Name <address>". Providers reject anything else,
     and the failure surfaces at send time as an opaque "invalid from field"
     rather than anywhere near the typo that caused it.
@@ -72,26 +58,6 @@ const schema = z.object({
 
   RESEND_API_KEY: z.preprocess(blankAsAbsent, z.string().optional()),
 
-  /*
-    A hostname, not an address. Putting the account's email here is an easy slip
-    and produces a DNS failure at send time, far from the cause.
-  */
-  SMTP_HOST: z.preprocess(
-    blankAsAbsent,
-    z
-      .string()
-      .refine((value) => !value.includes("@"), {
-        message: 'must be a hostname such as "smtp.gmail.com", not an email address',
-      })
-      .optional(),
-  ),
-  SMTP_PORT: z.preprocess(
-    blankAsAbsent,
-    z.coerce.number().int().positive().optional(),
-  ),
-  SMTP_USER: z.preprocess(blankAsAbsent, z.string().optional()),
-  SMTP_PASSWORD: z.preprocess(blankAsAbsent, z.string().optional()),
-
   DATABASE_URL: z.preprocess(blankAsAbsent, z.string().url().optional()),
 
   /*
@@ -103,6 +69,14 @@ const schema = z.object({
   CLOUDINARY_API_KEY: z.preprocess(blankAsAbsent, z.string().optional()),
   CLOUDINARY_API_SECRET: z.preprocess(blankAsAbsent, z.string().optional()),
   CLOUDINARY_URL: z.preprocess(blankAsAbsent, z.string().optional()),
+}).superRefine((env, context) => {
+  if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["RESEND_API_KEY"],
+      message: "is required in production",
+    });
+  }
 });
 
 export type Env = z.infer<typeof schema>;

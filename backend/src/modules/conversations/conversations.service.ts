@@ -26,7 +26,13 @@ import {
   looksLikeAdvanceRequest,
   redactContactDetails,
 } from "./contactredaction";
-import { presentMessage, type MessageView } from "./conversations.presenter";
+import {
+  presentConversation,
+  presentMessage,
+  type ConversationView,
+  type MessageView,
+} from "./conversations.presenter";
+import { ConversationsGateway } from "./conversations.gateway";
 
 @Injectable()
 export class ConversationsService {
@@ -35,10 +41,16 @@ export class ConversationsService {
     private readonly conversations: ConversationsRepository,
     @Inject(LISTINGS_REPOSITORY) private readonly listings: ListingsRepository,
     @Inject(USERS_REPOSITORY) private readonly users: UsersRepository,
+    private readonly gateway: ConversationsGateway,
   ) {}
 
-  async listForUser(user: User): Promise<Conversation[]> {
-    return this.conversations.findForUser(user.id);
+  async listForUser(user: User): Promise<ConversationView[]> {
+    const conversations = await this.conversations.findForUser(user.id);
+    const views = await Promise.all(
+      conversations.map((conversation) => this.viewConversation(conversation, user)),
+    );
+
+    return views.filter((view): view is ConversationView => view !== null);
   }
 
   async typicalReplyHours(userId: string): Promise<number | null> {
@@ -176,6 +188,8 @@ export class ConversationsService {
 
     const stored = await this.conversations.addMessage(message);
 
+    this.gateway.conversationChanged(conversation, "message");
+
     if (advanceRequest || redaction.matched.includes("spelleddigits")) {
     }
 
@@ -189,6 +203,12 @@ export class ConversationsService {
       throw new Forbidden("This conversation is closed");
     }
 
+    if (!user.phone) {
+      throw new ValidationFailed(
+        "Add your phone number in Account settings before sharing it.",
+      );
+    }
+
     const now = new Date().toISOString();
 
     const isSeeker = conversation.seekerId === user.id;
@@ -196,9 +216,11 @@ export class ConversationsService {
     if (isSeeker && conversation.seekerRevealedAt) return conversation;
     if (!isSeeker && conversation.listerRevealedAt) return conversation;
 
-    return this.conversations.update(conversationId,
+    const updated = await this.conversations.update(conversationId,
       isSeeker ? { seekerRevealedAt: now } : { listerRevealedAt: now },
     );
+    this.gateway.conversationChanged(updated, "contact");
+    return updated;
   }
 
   async counterpartPhone(
@@ -225,12 +247,15 @@ export class ConversationsService {
   async block(conversationId: string, user: User): Promise<Conversation> {
     await this.getParticipating(conversationId, user);
 
-    return this.conversations.update(conversationId, { status: "blocked" });
+    const updated = await this.conversations.update(conversationId, { status: "blocked" });
+    this.gateway.conversationChanged(updated, "blocked");
+    return updated;
   }
 
   async markRead(conversationId: string, user: User): Promise<void> {
-    await this.getParticipating(conversationId, user);
+    const conversation = await this.getParticipating(conversationId, user);
     await this.conversations.markRead(conversationId, user.id);
+    this.gateway.conversationChanged(conversation, "read");
   }
 
   async messages(
@@ -247,6 +272,56 @@ export class ConversationsService {
     return all
       .filter((message) => !message.hiddenAt)
       .map((message) => presentMessage(message, user.id, bothRevealed));
+  }
+
+  async view(conversationId: string, user: User): Promise<ConversationView> {
+    const conversation = await this.getParticipating(conversationId, user);
+    const view = await this.viewConversation(conversation, user);
+    if (!view) throw new NotFound("Conversation");
+    return view;
+  }
+
+  private async viewConversation(
+    conversation: Conversation,
+    viewer: User,
+  ): Promise<ConversationView | null> {
+    const counterpartId =
+      conversation.seekerId === viewer.id
+        ? conversation.listerId
+        : conversation.seekerId;
+
+    const [counterpart, listing, messages] = await Promise.all([
+      this.users.findById(counterpartId),
+      this.listings.findById(conversation.listingId),
+      this.conversations.listMessages(conversation.id),
+    ]);
+
+    if (!counterpart || counterpart.deletedAt || !listing || listing.deletedAt) {
+      return null;
+    }
+
+    const bothRevealed = Boolean(
+      conversation.seekerRevealedAt && conversation.listerRevealedAt,
+    );
+    const visible = messages.filter((message) => !message.hiddenAt);
+    const last = visible.at(-1);
+    const lastMessagePreview = last
+      ? presentMessage(last, viewer.id, bothRevealed).publicBody
+      : "No messages yet";
+    const unreadCount = visible.filter(
+      (message) => message.senderId !== viewer.id && message.readAt === null,
+    ).length;
+    const counterpartPhone = bothRevealed ? counterpart.phone : null;
+
+    return presentConversation(
+      conversation,
+      viewer,
+      counterpart,
+      listing,
+      lastMessagePreview,
+      unreadCount,
+      counterpartPhone,
+    );
   }
 }
 
