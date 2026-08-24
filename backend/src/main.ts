@@ -43,7 +43,9 @@ async function bootstrap(): Promise<void> {
   app.getHttpAdapter().getInstance().set("trust proxy", 1);
 
   const port = config.getOrThrow<number>("PORT");
-  await app.listen(port);
+  // Render routes traffic to the port it provides and requires the process to
+  // accept connections outside the container's loopback interface.
+  await app.listen(port, "0.0.0.0");
 
   new Logger("Bootstrap").log(`API listening on http://localhost:${port}/api`);
 }

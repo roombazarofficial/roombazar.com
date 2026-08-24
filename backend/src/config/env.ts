@@ -26,6 +26,21 @@ const schema = z.object({
       ),
   ),
   /*
+    Share the session with sibling production hosts such as roombazar.com and
+    api.roombazar.com. Leave unset locally so the browser uses a host-only
+    localhost cookie.
+  */
+  COOKIE_DOMAIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .regex(
+        /^\.?[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i,
+        'must be a hostname such as ".roombazar.com", not a URL',
+      )
+      .optional(),
+  ),
+  /*
     Mail delivery. Resend is the default primary with SMTP behind it, so one
     provider failing cannot stop people signing up. With neither configured the
     code is written to the log, which keeps local development working without
