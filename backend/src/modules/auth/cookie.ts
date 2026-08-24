@@ -1,14 +1,18 @@
-import type { Response } from "express";
+import type { CookieOptions, Response } from "express";
 
 export const SESSION_COOKIE = "rb_session";
 
-const isProduction = process.env.NODE_ENV === "production";
-const base = {
-  httpOnly: true,
-  sameSite: "lax" as const,
-  secure: isProduction,
-  path: "/",
-};
+function cookieOptions(): CookieOptions {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    ...(process.env.COOKIE_DOMAIN
+      ? { domain: process.env.COOKIE_DOMAIN }
+      : {}),
+  };
+}
 
 export function setSessionCookie(
   response: Response,
@@ -16,14 +20,14 @@ export function setSessionCookie(
   expiresAt: string,
 ): void {
   response.cookie(SESSION_COOKIE, token, {
-    ...base,
+    ...cookieOptions(),
     expires: new Date(expiresAt),
   });
 }
 
 export function clearSessionCookie(response: Response): void {
   response.clearCookie(SESSION_COOKIE, {
-    ...base,
+    ...cookieOptions(),
     expires: new Date(0),
     maxAge: 0,
   });
