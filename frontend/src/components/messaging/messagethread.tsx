@@ -1,11 +1,18 @@
 import { cn } from "@/lib/utils/classnames";
 import type { Message } from "@/types/message";
+import { formatIndiaTime } from "@/lib/format/dates";
 
-export function MessageThread({ messages }: { messages: Message[] }) {
+export function MessageThread({
+  messages,
+  currentUserId,
+}: {
+  messages: Message[];
+  currentUserId: string | null;
+}) {
   return (
     <div className="flex-1 space-y-3 overflow-y-auto p-4">
       {messages.map((message) => {
-        const mine = message.senderId === "me";
+        const mine = message.senderId === currentUserId;
 
         return (
           <div
@@ -33,10 +40,7 @@ export function MessageThread({ messages }: { messages: Message[] }) {
                 dateTime={message.sentAt}
                 className={cn("mt-1 block text-2xs text-ink-subtle", mine && "text-right")}
               >
-                {new Intl.DateTimeFormat("en-IN", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                }).format(new Date(message.sentAt))}
+                {formatIndiaTime(message.sentAt)}
               </time>
 
             </div>

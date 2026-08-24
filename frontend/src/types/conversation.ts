@@ -15,5 +15,5 @@ export interface Conversation {
   lastMessagePreview: string;
   lastMessageAt: string;
   unreadCount: number;
-  status: "active" | "archived" | "blocked";
+  status: "active" | "archivedbyseeker" | "archivedbylister" | "blocked";
 }

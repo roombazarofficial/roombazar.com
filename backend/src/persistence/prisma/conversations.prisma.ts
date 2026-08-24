@@ -115,6 +115,18 @@ export class PrismaConversationsRepository implements ConversationsRepository {
     });
   }
 
+  async countUnreadForUser(userId: string): Promise<number> {
+    return this.prisma.message.count({
+      where: {
+        senderId: { not: userId },
+        readAt: null,
+        conversation: {
+          OR: [{ seekerId: userId }, { listerId: userId }],
+        },
+      },
+    });
+  }
+
   async countThreadsStartedSince(
     seekerId: string,
     since: string,

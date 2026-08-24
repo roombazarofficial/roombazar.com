@@ -17,6 +17,8 @@ export function MessageComposer({
   onMessageSent?: () => void;
 }) {
   const [body, setBody] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const wouldRedact = !contactShared && contactPattern.test(body);
 
@@ -30,16 +32,22 @@ export function MessageComposer({
 
       <form
         className="flex items-end gap-2"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
           const trimmed = body.trim();
-          if (trimmed && conversationId) {
-            sendMessage(conversationId, trimmed).catch(
-              (err) => console.error("Failed to send message:", err)
-            );
+          if (!trimmed || !conversationId || pending) return;
+
+          setPending(true);
+          setError(null);
+          try {
+            await sendMessage(conversationId, trimmed);
+            setBody("");
+            await onMessageSent?.();
+          } catch (caught) {
+            setError(caught instanceof Error ? caught.message : "Could not send message");
+          } finally {
+            setPending(false);
           }
-          setBody("");
-          onMessageSent?.();
         }}
       >
         <textarea
@@ -50,11 +58,12 @@ export function MessageComposer({
           className="max-h-32 min-h-11 flex-1 resize-y rounded-control border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink outline-none placeholder:text-ink-subtle focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
 
-        <Button type="submit" disabled={!body.trim()}>
+        <Button type="submit" disabled={!body.trim()} loading={pending}>
           Send
         </Button>
 
       </form>
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
 
     </div>
   );

@@ -47,6 +47,10 @@ export function fetchCurrentUser(): Promise<CurrentUser | null> {
   return api.get<CurrentUser | null>("/users/me").catch(() => null);
 }
 
-export function updateProfile(input: { name?: string; avatarUrl?: string | null }) {
+export function updateProfile(input: {
+  name?: string;
+  avatarUrl?: string | null;
+  phone?: string | null;
+}) {
   return api.patch<CurrentUser>("/users/me", input);
 }

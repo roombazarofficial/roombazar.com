@@ -56,6 +56,10 @@ export function SiteHeader() {
   }
 
   function handleWishlistClick(e: React.MouseEvent) {
+    if (!loaded) {
+      e.preventDefault();
+      return;
+    }
     if (!user) {
       e.preventDefault();
       openSignIn({
@@ -66,6 +70,10 @@ export function SiteHeader() {
   }
 
   function handleChatClick(e: React.MouseEvent) {
+    if (!loaded) {
+      e.preventDefault();
+      return;
+    }
     if (!user) {
       e.preventDefault();
       openSignIn({
@@ -175,7 +183,12 @@ export function SiteHeader() {
           </Link>
 
           {/* 3. User Avatar Profile Button & Dropdown */}
-          {mounted && user ? (
+          {!mounted || !loaded ? (
+            <div
+              className="size-9 animate-pulse rounded-full bg-surface-muted"
+              aria-hidden="true"
+            />
+          ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
                 type="button"

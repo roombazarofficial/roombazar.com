@@ -96,7 +96,8 @@ export class ApprovalsController {
    * because one bad row in a batch of forty must not hide the other
    * thirty-nine, nor abandon them.
    */
-  @Post("bulk/approve")
+  // A static segment avoids being captured by the earlier :id/approve route.
+  @Post("bulk-approve")
   @HttpCode(200)
   async approveMany(
     @Body(new ZodValidationPipe(bulkSchema)) dto: z.infer<typeof bulkSchema>,

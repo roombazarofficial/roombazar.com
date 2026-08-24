@@ -38,6 +38,12 @@ import type { User } from "src/domain/user.entity";
 const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
   avatarUrl: z.string().url().nullable().optional(),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number")
+    .nullable()
+    .optional(),
 });
 
 @Controller("users")
@@ -53,16 +59,7 @@ export class UsersController {
   @Get("me")
   async me(@CurrentUserOptional() user: User | null) {
     if (!user) return null;
-
-    const stats = await this.statsFor(user.id);
-
-    return {
-      ...presentPublicUser(user, stats),
-      publicPhone: user.phone,
-      email: user.email,
-      role: user.role,
-      limits: policyFor(user.trustLevel),
-    };
+    return this.presentCurrentUser(user);
   }
 
   @Patch("me")
@@ -72,7 +69,7 @@ export class UsersController {
     @CurrentUser() user: User,
   ) {
     const updated = await this.users.update(user.id, dto);
-    return presentPublicUser(updated, await this.statsFor(user.id));
+    return this.presentCurrentUser(updated);
   }
 
   @Delete("me")
@@ -97,5 +94,23 @@ export class UsersController {
     ]);
 
     return { activeListingCount, typicalReplyHours };
+  }
+
+  private async presentCurrentUser(user: User) {
+    const [stats, unreadMessageCount] = await Promise.all([
+      this.statsFor(user.id),
+      this.conversations.countUnreadForUser(user.id),
+    ]);
+
+    return {
+      ...presentPublicUser(user, stats),
+      publicPhone: user.phone,
+      publicPhoneVerifiedAt: user.phoneVerifiedAt,
+      email: user.email,
+      role: user.role,
+      limits: policyFor(user.trustLevel),
+      unreadMessageCount,
+      unreadNotificationCount: 0,
+    };
   }
 }

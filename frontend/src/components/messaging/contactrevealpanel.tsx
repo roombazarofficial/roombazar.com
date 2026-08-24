@@ -11,6 +11,7 @@ export function ContactRevealPanel({
   theirName,
   theirPhone,
   conversationId,
+  onChanged,
   className,
 }: {
   youRevealed: boolean;
@@ -18,6 +19,7 @@ export function ContactRevealPanel({
   theirName: string;
   theirPhone: string | null;
   conversationId: string;
+  onChanged?: () => void | Promise<void>;
   className?: string;
 }) {
   const [pending, setPending] = useState(false);
@@ -73,7 +75,14 @@ export function ContactRevealPanel({
             setPending(true);
             setError(null);
             void revealContact(conversationId)
-              .catch(() => setError("Could not share your number. Try again."))
+              .then(() => onChanged?.())
+              .catch((caught) =>
+                setError(
+                  caught instanceof Error
+                    ? caught.message
+                    : "Could not share your number. Try again.",
+                ),
+              )
               .finally(() => setPending(false));
           }}
         >
