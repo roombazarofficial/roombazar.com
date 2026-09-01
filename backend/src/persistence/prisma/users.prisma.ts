@@ -3,7 +3,7 @@ import type { TrustLevel, User } from "src/domain/user.entity";
 import type { UsersRepository } from "src/persistence/ports/users.repository";
 import type { UserAdminCriteria, UserPage } from "src/persistence/ports/users.repository";
 import { PrismaService } from "./prisma.service";
-import { toDomainUser, userInclude } from "./mappers";
+import { toDomainUser, userInclude, isValidObjectId } from "./mappers";
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -87,7 +87,7 @@ export class PrismaUsersRepository implements UsersRepository {
   async create(user: User): Promise<User> {
     const row = await this.prisma.user.create({
       data: {
-        id: user.id,
+        ...(isValidObjectId(user.id) ? { id: user.id } : {}),
         email: user.email,
         emailVerifiedAt: user.emailVerifiedAt
           ? new Date(user.emailVerifiedAt)

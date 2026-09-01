@@ -6,6 +6,8 @@ import type {
 } from "src/persistence/ports/auth.repository";
 import { PrismaService } from "./prisma.service";
 
+import { isValidObjectId } from "./mappers";
+
 @Injectable()
 export class PrismaAuthRepository implements AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -13,7 +15,7 @@ export class PrismaAuthRepository implements AuthRepository {
   async createSession(session: SessionRecord): Promise<SessionRecord> {
     const row = await this.prisma.session.create({
       data: {
-        id: session.id,
+        ...(isValidObjectId(session.id) ? { id: session.id } : {}),
         userId: session.userId,
         tokenHash: session.tokenHash,
         userAgent: session.userAgent,
@@ -70,7 +72,7 @@ export class PrismaAuthRepository implements AuthRepository {
   async createEmailCode(record: EmailCodeRecord): Promise<EmailCodeRecord> {
     const row = await this.prisma.emailVerification.create({
       data: {
-        id: record.id,
+        ...(isValidObjectId(record.id) ? { id: record.id } : {}),
         email: record.email,
         codeHash: record.codeHash,
         purpose: record.purpose,

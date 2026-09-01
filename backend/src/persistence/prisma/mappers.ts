@@ -216,3 +216,7 @@ function toIso(value: Date | null): string | null {
 function toDateString(value: Date): string {
   return value.toISOString().slice(0, 10);
 }
+
+export function isValidObjectId(id?: string | null): boolean {
+  return typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
+}

@@ -2,7 +2,11 @@ import { Injectable } from "@nestjs/common";
 import type { Conversation, Message } from "src/domain/conversation.entity";
 import type { ConversationsRepository } from "src/persistence/ports/conversations.repository";
 import { PrismaService } from "./prisma.service";
-import { toDomainConversation, toDomainMessage } from "./mappers";
+import {
+  toDomainConversation,
+  toDomainMessage,
+  isValidObjectId,
+} from "./mappers";
 
 const REPLY_SAMPLE_THREADS = 40;
 
@@ -38,7 +42,7 @@ export class PrismaConversationsRepository implements ConversationsRepository {
   async create(conversation: Conversation): Promise<Conversation> {
     const row = await this.prisma.conversation.create({
       data: {
-        id: conversation.id,
+        ...(isValidObjectId(conversation.id) ? { id: conversation.id } : {}),
         listingId: conversation.listingId,
         seekerId: conversation.seekerId,
         listerId: conversation.listerId,
@@ -87,7 +91,7 @@ export class PrismaConversationsRepository implements ConversationsRepository {
     const [row] = await this.prisma.$transaction([
       this.prisma.message.create({
         data: {
-          id: message.id,
+          ...(isValidObjectId(message.id) ? { id: message.id } : {}),
           conversationId: message.conversationId,
           senderId: message.senderId,
           body: message.body,

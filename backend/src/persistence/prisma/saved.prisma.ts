@@ -5,7 +5,7 @@ import type {
 } from "src/persistence/ports/saved.repository";
 import type { Listing } from "src/domain/listing.entity";
 import { PrismaService } from "./prisma.service";
-import { listingInclude, toDomainListing } from "./mappers";
+import { listingInclude, toDomainListing, isValidObjectId } from "./mappers";
 
 @Injectable()
 export class PrismaSavedRepository implements SavedRepository {
@@ -29,6 +29,15 @@ export class PrismaSavedRepository implements SavedRepository {
     });
 
     return rows.map((row) => toDomainListing(row.listing));
+  }
+
+  async isSaved(userId: string, listingId: string): Promise<boolean> {
+    const rows = await this.prisma.savedListing.findMany({
+      where: { userId, listingId },
+      take: 1,
+    });
+
+    return rows.length > 0;
   }
 
   async saveListing(userId: string, listingId: string): Promise<void> {
@@ -62,7 +71,7 @@ export class PrismaSavedRepository implements SavedRepository {
   async createSearch(search: SavedSearch): Promise<SavedSearch> {
     const row = await this.prisma.savedSearch.create({
       data: {
-        id: search.id,
+        ...(isValidObjectId(search.id) ? { id: search.id } : {}),
         userId: search.userId,
         label: search.label,
         query: search.query,

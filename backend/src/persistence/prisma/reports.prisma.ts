@@ -6,7 +6,11 @@ import type {
 } from "src/domain/report.entity";
 import type { ReportsRepository } from "src/persistence/ports/reports.repository";
 import { PrismaService } from "./prisma.service";
-import { toDomainModerationAction, toDomainReport } from "./mappers";
+import {
+  toDomainModerationAction,
+  toDomainReport,
+  isValidObjectId,
+} from "./mappers";
 
 @Injectable()
 export class PrismaReportsRepository implements ReportsRepository {
@@ -43,7 +47,7 @@ export class PrismaReportsRepository implements ReportsRepository {
   async create(report: Report): Promise<Report> {
     const row = await this.prisma.report.create({
       data: {
-        id: report.id,
+        ...(isValidObjectId(report.id) ? { id: report.id } : {}),
         reporterId: report.reporterId,
         targetType: report.targetType,
         targetId: report.targetId,
@@ -74,7 +78,7 @@ export class PrismaReportsRepository implements ReportsRepository {
   async recordAction(action: ModerationAction): Promise<ModerationAction> {
     const row = await this.prisma.moderationAction.create({
       data: {
-        id: action.id,
+        ...(isValidObjectId(action.id) ? { id: action.id } : {}),
         moderatorId: action.moderatorId,
         targetType: action.targetType,
         targetId: action.targetId,
