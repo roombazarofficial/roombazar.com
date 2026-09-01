@@ -5,7 +5,6 @@ import {
   OnModuleInit,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 @Injectable()
@@ -24,7 +23,13 @@ export class PrismaService
       );
     }
 
-    super({ adapter: new PrismaPg({ connectionString }) });
+    super({
+      datasources: {
+        db: {
+          url: connectionString,
+        },
+      },
+    });
   }
 
   async onModuleInit(): Promise<void> {

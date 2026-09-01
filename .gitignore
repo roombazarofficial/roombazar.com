@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+.env.*.local
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+prisma.config.ts.bak

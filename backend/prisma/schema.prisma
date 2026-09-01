@@ -15,9 +15,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // Prisma 7 moved the connection URL out of the schema. It now lives in
-  // prisma.config.ts, which keeps the schema free of environment concerns.
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // ---------------------------------------------------------------------------
@@ -44,11 +43,11 @@ enum TrustLevel {
 }
 
 model User {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   /// Identity. Verified by emailed code before the account exists.
   email           String    @unique
-  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz
+  emailVerifiedAt DateTime? @map("email_verified_at") 
 
   /// scrypt, stored as algorithm$params$salt$hash. Never leaves this table.
   passwordHash String @map("password_hash")
@@ -62,7 +61,7 @@ model User {
   ///
   /// Encrypt at rest at the column level before production.
   phone           String?   @unique
-  phoneVerifiedAt DateTime? @map("phone_verified_at") @db.Timestamptz
+  phoneVerifiedAt DateTime? @map("phone_verified_at") 
 
   name      String
   avatarUrl String? @map("avatar_url")
@@ -70,11 +69,11 @@ model User {
   platformRole PlatformRole @default(user) @map("platform_role")
   trustLevel   TrustLevel   @default(new) @map("trust_level")
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") 
+  updatedAt DateTime  @updatedAt @map("updated_at") 
   /// Soft delete. Messages that are evidence in an open report are anonymised
   /// rather than removed, which needs the row to survive. DPDP Act 2023.
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") 
 
   ownedOrganizations Organization[]       @relation("organizationOwner")
   memberships        OrganizationMember[]
@@ -101,20 +100,20 @@ model User {
 /// Server-side session, so a sign-out or a suspension takes effect at once.
 /// A stateless token could not be revoked before it expired.
 model Session {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   /// SHA-256 of the token. The raw value exists only in the user's cookie, so
   /// a leaked database row cannot be replayed as a session.
   tokenHash String @unique @map("token_hash")
-  userId    String @map("user_id") @db.Uuid
+  userId    String @map("user_id") @db.ObjectId
 
   userAgent String? @map("user_agent")
   ipAddress String? @map("ip_address")
 
-  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
-  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz
-  lastSeenAt DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt  DateTime  @map("expires_at") 
+  revokedAt  DateTime? @map("revoked_at") 
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at") 
+  createdAt  DateTime  @default(now()) @map("created_at") 
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -133,16 +132,16 @@ enum EmailCodePurpose {
 /// Only the hash is stored, and a row is consumed on first successful use, so
 /// a code cannot be replayed and a database leak does not hand over live codes.
 model EmailVerification {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   email    String
   codeHash String           @map("code_hash")
   purpose  EmailCodePurpose @default(signup)
 
   attempts   Int       @default(0)
-  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
-  consumedAt DateTime? @map("consumed_at") @db.Timestamptz
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt  DateTime  @map("expires_at") 
+  consumedAt DateTime? @map("consumed_at") 
+  createdAt  DateTime  @default(now()) @map("created_at") 
 
   @@index([email, purpose, consumedAt])
   @@index([expiresAt])
@@ -169,8 +168,8 @@ enum VerificationStatus {
 /// result and the name-match outcome only — storing the number itself is a
 /// regulatory liability with no product benefit.
 model UserVerification {
-  id     String @id @default(uuid()) @db.Uuid
-  userId String @map("user_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @map("user_id") @db.ObjectId
 
   kind   VerificationKind
   status VerificationStatus @default(pending)
@@ -180,8 +179,8 @@ model UserVerification {
   nameMatched       Boolean @default(false) @map("name_matched")
   reviewerNote      String? @map("reviewer_note")
 
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  decidedAt  DateTime? @map("decided_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") 
+  decidedAt  DateTime? @map("decided_at") 
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -197,7 +196,7 @@ model UserVerification {
 /// Org-scoped membership role, from the ERD's ROLES table. A lookup rather than
 /// an enum because operators will want their own titles.
 model Role {
-  id   String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   code String @unique
   name String
 
@@ -218,8 +217,8 @@ enum OrganizationStatus {
 /// would put a two-branch ownership check in every authorisation path. One code
 /// path is worth the empty-looking row.
 model Organization {
-  id          String             @id @default(uuid()) @db.Uuid
-  ownerUserId String             @map("owner_user_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerUserId String             @map("owner_user_id") @db.ObjectId
   name        String
   status      OrganizationStatus @default(active)
 
@@ -227,9 +226,9 @@ model Organization {
   /// organization management from someone who never asked for it.
   isPersonal Boolean @default(true) @map("is_personal")
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") 
+  updatedAt DateTime  @updatedAt @map("updated_at") 
+  deletedAt DateTime? @map("deleted_at") 
 
   owner        User                 @relation("organizationOwner", fields: [ownerUserId], references: [id])
   members      OrganizationMember[]
@@ -240,12 +239,12 @@ model Organization {
 }
 
 model OrganizationMember {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @map("organization_id") @db.Uuid
-  userId         String @map("user_id") @db.Uuid
-  roleId         String @map("role_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String @map("organization_id") @db.ObjectId
+  userId         String @map("user_id") @db.ObjectId
+  roleId         String @map("role_id") @db.ObjectId
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -263,7 +262,7 @@ model OrganizationMember {
 
 /// Referenced by cities.state_id in the ERD but not drawn there.
 model State {
-  id   String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name String @unique
   code String @unique
 
@@ -273,8 +272,8 @@ model State {
 }
 
 model City {
-  id      String @id @default(uuid()) @db.Uuid
-  stateId String @map("state_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  stateId String @map("state_id") @db.ObjectId
 
   name String
   slug String @unique
@@ -298,8 +297,8 @@ model City {
 /// here: without the alias list, "Indiranagar" and "Indira Nagar" become
 /// different places and both sides of the market stop finding each other.
 model Locality {
-  id     String @id @default(uuid()) @db.Uuid
-  cityId String @map("city_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  cityId String @map("city_id") @db.ObjectId
 
   name String
   slug String
@@ -326,12 +325,12 @@ model Locality {
 /// Requests for localities we do not have yet, so a lister is never blocked by
 /// our curation being incomplete.
 model LocalityRequest {
-  id          String   @id @default(uuid()) @db.Uuid
-  cityId      String   @map("city_id") @db.Uuid
-  requestedBy String   @map("requested_by") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  cityId      String   @map("city_id") @db.ObjectId
+  requestedBy String   @map("requested_by") @db.ObjectId
   name        String
   resolved    Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") 
 
   @@index([cityId, resolved])
   @@map("locality_requests")
@@ -342,7 +341,7 @@ model LocalityRequest {
 // ---------------------------------------------------------------------------
 
 model PropertyType {
-  id   String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   code String @unique
   name String
 
@@ -366,16 +365,16 @@ enum PropertyStatus {
 /// its own listing would flood search; modelling the property as one listing
 /// would lose per-bed availability.
 model Property {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @map("organization_id") @db.Uuid
-  propertyTypeId String @map("property_type_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String @map("organization_id") @db.ObjectId
+  propertyTypeId String @map("property_type_id") @db.ObjectId
 
   name   String
   status PropertyStatus @default(draft)
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") 
+  updatedAt DateTime  @updatedAt @map("updated_at") 
+  deletedAt DateTime? @map("deleted_at") 
 
   organization   Organization           @relation(fields: [organizationId], references: [id])
   propertyType   PropertyType           @relation(fields: [propertyTypeId], references: [id])
@@ -395,10 +394,10 @@ model Property {
 /// One-to-one with Property, split out so the sensitive columns sit in a table
 /// no read path touches by accident.
 model PropertyAddress {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @unique @map("property_id") @db.Uuid
-  localityId String @map("locality_id") @db.Uuid
-  cityId     String @map("city_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @unique @map("property_id") @db.ObjectId
+  localityId String @map("locality_id") @db.ObjectId
+  cityId     String @map("city_id") @db.ObjectId
 
   /// Never leaves the server. Used for moderation and to derive the public
   /// circle; no API response includes it.
@@ -428,7 +427,7 @@ enum AmenityCategory {
 }
 
 model Amenity {
-  id       String          @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   slug     String          @unique
   name     String
   category AmenityCategory
@@ -442,20 +441,21 @@ model Amenity {
 /// A join table rather than a JSON column, because amenity filters have to be
 /// indexed and countable: "142 rooms with power backup in this locality".
 model PropertyAmenity {
-  propertyId String @map("property_id") @db.Uuid
-  amenityId  String @map("amenity_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @map("property_id") @db.ObjectId
+  amenityId  String @map("amenity_id") @db.ObjectId
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   amenity  Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
 
-  @@id([propertyId, amenityId])
+  @@unique([propertyId, amenityId])
   @@index([amenityId])
   @@map("property_amenities")
 }
 
 model Building {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @map("property_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @map("property_id") @db.ObjectId
   name       String
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
@@ -466,8 +466,8 @@ model Building {
 }
 
 model Floor {
-  id          String @id @default(uuid()) @db.Uuid
-  buildingId  String @map("building_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  buildingId  String @map("building_id") @db.ObjectId
   floorNumber Int    @map("floor_number")
 
   building Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
@@ -478,7 +478,7 @@ model Floor {
 }
 
 model RoomType {
-  id   String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   code String @unique
   name String
 
@@ -495,9 +495,9 @@ enum RoomStatus {
 }
 
 model Room {
-  id         String @id @default(uuid()) @db.Uuid
-  floorId    String @map("floor_id") @db.Uuid
-  roomTypeId String @map("room_type_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  floorId    String @map("floor_id") @db.ObjectId
+  roomTypeId String @map("room_type_id") @db.ObjectId
 
   roomNumber String     @map("room_number")
   areaSqft   Int?       @map("area_sqft")
@@ -516,7 +516,7 @@ model Room {
 }
 
 model BedType {
-  id   String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   code String @unique
   name String
 
@@ -535,9 +535,9 @@ enum BedStatus {
 /// The smallest rentable unit. A PG sells beds, not rooms, so availability and
 /// price both have to live at this level.
 model Bed {
-  id        String @id @default(uuid()) @db.Uuid
-  roomId    String @map("room_id") @db.Uuid
-  bedTypeId String @map("bed_type_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  roomId    String @map("room_id") @db.ObjectId
+  bedTypeId String @map("bed_type_id") @db.ObjectId
 
   bedNumber String    @map("bed_number")
   status    BedStatus @default(available)
@@ -570,8 +570,8 @@ enum BillingPeriod {
 /// and mixing representations across a boundary is how rounding drift starts.
 /// 1500000 is fifteen thousand rupees.
 model PricingPlan {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @map("property_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @map("property_id") @db.ObjectId
 
   name          String
   billingPeriod BillingPeriod @default(monthly) @map("billing_period")
@@ -585,7 +585,7 @@ model PricingPlan {
   billsIncluded  Boolean @default(false) @map("bills_included")
 
   isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   roomPrices RoomPrice[]
@@ -596,9 +596,9 @@ model PricingPlan {
 }
 
 model RoomPrice {
-  id            String @id @default(uuid()) @db.Uuid
-  roomId        String @map("room_id") @db.Uuid
-  pricingPlanId String @map("pricing_plan_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  roomId        String @map("room_id") @db.ObjectId
+  pricingPlanId String @map("pricing_plan_id") @db.ObjectId
 
   amountPaise Int @map("amount_paise")
 
@@ -610,9 +610,9 @@ model RoomPrice {
 }
 
 model BedPrice {
-  id            String @id @default(uuid()) @db.Uuid
-  bedId         String @map("bed_id") @db.Uuid
-  pricingPlanId String @map("pricing_plan_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  bedId         String @map("bed_id") @db.ObjectId
+  pricingPlanId String @map("pricing_plan_id") @db.ObjectId
 
   amountPaise Int @map("amount_paise")
 
@@ -678,23 +678,23 @@ enum TenantPreference {
 /// The advertisement. Points at a property, and optionally at the specific room
 /// or bed being offered.
 model Listing {
-  id         String @id @default(uuid()) @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   slug       String @unique
-  propertyId String @map("property_id") @db.Uuid
+  propertyId String @map("property_id") @db.ObjectId
   /// The user who posted it, distinct from the organization that owns the
   /// property — an operator's staff member posts on the organization's behalf.
-  createdById String @map("created_by_id") @db.Uuid
+  createdById String @map("created_by_id") @db.ObjectId
 
   /// Null for a whole-property listing; set when advertising one unit.
-  roomId String? @map("room_id") @db.Uuid
-  bedId  String? @map("bed_id") @db.Uuid
+  roomId String? @map("room_id") @db.ObjectId
+  bedId  String? @map("bed_id") @db.ObjectId
 
   status       ListingStatus       @default(draft)
-  submittedAt       DateTime? @map("submitted_at") @db.Timestamptz
-  approvedAt        DateTime? @map("approved_at") @db.Timestamptz
-  approvedByUserId  String?   @map("approved_by_user_id") @db.Uuid
-  rejectedAt        DateTime? @map("rejected_at") @db.Timestamptz
-  rejectedByUserId  String?   @map("rejected_by_user_id") @db.Uuid
+  submittedAt       DateTime? @map("submitted_at") 
+  approvedAt        DateTime? @map("approved_at") 
+  approvedByUserId  String?   @map("approved_by_user_id") @db.ObjectId
+  rejectedAt        DateTime? @map("rejected_at") 
+  rejectedByUserId  String?   @map("rejected_by_user_id") @db.ObjectId
   rejectionReason   String?   @map("rejection_reason")
   postedBy     PostedBy            @map("posted_by")
   roomCategory ListingRoomCategory @map("room_category")
@@ -713,14 +713,14 @@ model Listing {
   negotiable       Boolean @default(false)
 
   /// Also denormalised from PropertyAddress, for the same reason.
-  cityId     String @map("city_id") @db.Uuid
-  localityId String @map("locality_id") @db.Uuid
+  cityId     String @map("city_id") @db.ObjectId
+  localityId String @map("locality_id") @db.ObjectId
 
   areaSqft    Int? @map("area_sqft")
   floorNumber Int? @map("floor_number")
   totalFloors Int? @map("total_floors")
 
-  availableFrom DateTime @map("available_from") @db.Date
+  availableFrom DateTime @map("available_from") 
   minStayMonths Int?     @map("min_stay_months")
 
   /// A closed enum with no free-text escape. Free-form tenant preferences in
@@ -737,11 +737,11 @@ model Listing {
   /// bait pricing, which is the problem this marketplace exists to avoid.
   rankScore Float @default(0) @map("rank_score")
 
-  publishedAt DateTime? @map("published_at") @db.Timestamptz
-  expiresAt   DateTime? @map("expires_at") @db.Timestamptz
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  publishedAt DateTime? @map("published_at") 
+  expiresAt   DateTime? @map("expires_at") 
+  createdAt   DateTime  @default(now()) @map("created_at") 
+  updatedAt   DateTime  @updatedAt @map("updated_at") 
+  deletedAt   DateTime? @map("deleted_at") 
 
   property      Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   createdBy     User             @relation(fields: [createdById], references: [id])
@@ -765,13 +765,14 @@ model Listing {
 }
 
 model ListingAmenity {
-  listingId String @map("listing_id") @db.Uuid
-  amenityId String @map("amenity_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String @map("listing_id") @db.ObjectId
+  amenityId String @map("amenity_id") @db.ObjectId
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   amenity Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
 
-  @@id([listingId, amenityId])
+  @@unique([listingId, amenityId])
   @@index([amenityId])
   @@map("listing_amenities")
 }
@@ -795,8 +796,8 @@ enum MediaModerationState {
 /// the join tables below — one photo of a building frontage belongs to the
 /// property and may appear in several listings.
 model Media {
-  id           String @id @default(uuid()) @db.Uuid
-  uploadedById String @map("uploaded_by_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  uploadedById String @map("uploaded_by_id") @db.ObjectId
 
   /// Object key in R2. Uploads go straight from the browser via a presigned
   /// URL; this row is written after the object is verified server-side.
@@ -829,7 +830,7 @@ model Media {
   /// the strongest single scam signal available.
   perceptualHash String? @map("perceptual_hash")
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   uploadedBy User            @relation(fields: [uploadedById], references: [id])
   properties PropertyMedia[]
@@ -842,39 +843,42 @@ model Media {
 }
 
 model PropertyMedia {
-  propertyId String @map("property_id") @db.Uuid
-  mediaId    String @map("media_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @map("property_id") @db.ObjectId
+  mediaId    String @map("media_id") @db.ObjectId
   position   Int    @default(0)
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   media    Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
-  @@id([propertyId, mediaId])
+  @@unique([propertyId, mediaId])
   @@map("property_media")
 }
 
 model RoomMedia {
-  roomId   String @map("room_id") @db.Uuid
-  mediaId  String @map("media_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  roomId   String @map("room_id") @db.ObjectId
+  mediaId  String @map("media_id") @db.ObjectId
   position Int    @default(0)
 
   room  Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
   media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
-  @@id([roomId, mediaId])
+  @@unique([roomId, mediaId])
   @@map("room_media")
 }
 
 model ListingMedia {
-  listingId String @map("listing_id") @db.Uuid
-  mediaId   String @map("media_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String @map("listing_id") @db.ObjectId
+  mediaId   String @map("media_id") @db.ObjectId
   /// Position 0 is the cover, which is what a results page renders.
   position  Int    @default(0)
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
-  @@id([listingId, mediaId])
+  @@unique([listingId, mediaId])
   @@index([listingId, position])
   @@map("listing_media")
 }
@@ -893,22 +897,22 @@ enum ConversationStatus {
 /// One thread per seeker per listing. That uniqueness is what stops a seeker
 /// spamming a lister by repeatedly opening fresh conversations.
 model Conversation {
-  id        String @id @default(uuid()) @db.Uuid
-  listingId String @map("listing_id") @db.Uuid
-  seekerId  String @map("seeker_id") @db.Uuid
-  listerId  String @map("lister_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String @map("listing_id") @db.ObjectId
+  seekerId  String @map("seeker_id") @db.ObjectId
+  listerId  String @map("lister_id") @db.ObjectId
 
   /// Mutual contact reveal. Two columns rather than one boolean, because "who
   /// agreed and when" is exactly what is needed if a reveal is ever disputed.
   /// Both must be set before either party sees a phone number.
-  seekerRevealedAt DateTime? @map("seeker_revealed_at") @db.Timestamptz
-  listerRevealedAt DateTime? @map("lister_revealed_at") @db.Timestamptz
+  seekerRevealedAt DateTime? @map("seeker_revealed_at") 
+  listerRevealedAt DateTime? @map("lister_revealed_at") 
 
   /// Denormalised for inbox ordering, which is read far more than it is written.
-  lastMessageAt DateTime           @default(now()) @map("last_message_at") @db.Timestamptz
+  lastMessageAt DateTime           @default(now()) @map("last_message_at") 
   status        ConversationStatus @default(active)
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
   seeker   User      @relation("conversationSeeker", fields: [seekerId], references: [id])
@@ -923,9 +927,9 @@ model Conversation {
 }
 
 model Message {
-  id             String @id @default(uuid()) @db.Uuid
-  conversationId String @map("conversation_id") @db.Uuid
-  senderId       String @map("sender_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String @map("conversation_id") @db.ObjectId
+  senderId       String @map("sender_id") @db.ObjectId
 
   /// Exactly as the sender typed it. Retained for moderation and never served
   /// to the other party before mutual reveal.
@@ -940,12 +944,12 @@ model Message {
   /// the dominant rental scam here.
   flaggedAdvanceRequest Boolean @default(false) @map("flagged_advance_request")
 
-  readAt DateTime? @map("read_at") @db.Timestamptz
+  readAt DateTime? @map("read_at") 
   /// Moderation hides messages; nothing here is ever hard-deleted, because
   /// these are the evidence for every report.
-  hiddenAt DateTime? @map("hidden_at") @db.Timestamptz
+  hiddenAt DateTime? @map("hidden_at") 
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id])
@@ -972,20 +976,20 @@ enum LeadStatus {
 /// operators managing forty beds get the funnel they need, while contact details
 /// still travel only through mutual reveal.
 model Lead {
-  id             String  @id @default(uuid()) @db.Uuid
-  propertyId     String  @map("property_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId     String  @map("property_id") @db.ObjectId
   /// The seeker. Named customer_id in the ERD.
-  customerId     String  @map("customer_id") @db.Uuid
+  customerId     String  @map("customer_id") @db.ObjectId
   /// Every lead originates from a real conversation; there is no path that
   /// creates one from a bare contact form.
-  conversationId String  @unique @map("conversation_id") @db.Uuid
+  conversationId String  @unique @map("conversation_id") @db.ObjectId
 
   status LeadStatus @default(new)
   /// Operator's own notes. Never shown to the seeker.
   note   String?
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
+  updatedAt DateTime @updatedAt @map("updated_at") 
 
   property     Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   customer     User         @relation(fields: [customerId], references: [id])
@@ -1000,14 +1004,15 @@ model Lead {
 // ---------------------------------------------------------------------------
 
 model SavedListing {
-  userId    String   @map("user_id") @db.Uuid
-  listingId String   @map("listing_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @map("user_id") @db.ObjectId
+  listingId String   @map("listing_id") @db.ObjectId
+  createdAt DateTime @default(now()) @map("created_at") 
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  @@id([userId, listingId])
+  @@unique([userId, listingId])
   @@map("saved_listings")
 }
 
@@ -1020,8 +1025,8 @@ enum NotifyFrequency {
 /// The main retention loop: a seeker who saves a search and gets a matching room
 /// the next morning returns without any paid acquisition behind it.
 model SavedSearch {
-  id     String @id @default(uuid()) @db.Uuid
-  userId String @map("user_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @map("user_id") @db.ObjectId
 
   label String
   /// The serialised filter set, exactly as the frontend encodes it in the URL.
@@ -1030,9 +1035,9 @@ model SavedSearch {
   query String
 
   notifyFrequency NotifyFrequency @default(daily) @map("notify_frequency")
-  lastNotifiedAt  DateTime?       @map("last_notified_at") @db.Timestamptz
+  lastNotifiedAt  DateTime?       @map("last_notified_at") 
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1051,13 +1056,13 @@ model SavedSearch {
 /// One row per lister — a second draft would raise "which one am I editing?"
 /// with no way for the wizard to answer it.
 model ListingDraft {
-  id     String @id @default(uuid()) @db.Uuid
-  userId String @unique @map("user_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @map("user_id") @db.ObjectId
 
   data Json
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
+  updatedAt DateTime @updatedAt @map("updated_at") 
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1078,19 +1083,19 @@ enum VerificationLevel {
 /// verifying a person is not the same as proving they control the address, and
 /// "Ownership verified" is the strongest badge a listing can carry.
 model PropertyVerification {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @map("property_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String @map("property_id") @db.ObjectId
 
   level  VerificationLevel  @default(none)
   status VerificationStatus @default(pending)
 
   /// Utility bill or tax receipt matching the address, reviewed by a person.
-  evidenceMediaId String? @map("evidence_media_id") @db.Uuid
-  reviewerId      String? @map("reviewer_id") @db.Uuid
+  evidenceMediaId String? @map("evidence_media_id") @db.ObjectId
+  reviewerId      String? @map("reviewer_id") @db.ObjectId
   reviewerNote    String? @map("reviewer_note")
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  decidedAt DateTime? @map("decided_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") 
+  decidedAt DateTime? @map("decided_at") 
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
@@ -1122,20 +1127,20 @@ enum ReportStatus {
 }
 
 model Report {
-  id         String @id @default(uuid()) @db.Uuid
-  reporterId String @map("reporter_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId String @map("reporter_id") @db.ObjectId
 
   targetType ReportTargetType @map("target_type")
-  targetId   String           @map("target_id") @db.Uuid
+  targetId   String           @map("target_id") @db.ObjectId
 
   reason ReportReason
   detail String?
   status ReportStatus @default(open)
 
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") 
+  resolvedAt DateTime? @map("resolved_at") 
   /// Reporters are told the outcome. Silent reporting trains people to stop.
-  reporterNotifiedAt DateTime? @map("reporter_notified_at") @db.Timestamptz
+  reporterNotifiedAt DateTime? @map("reporter_notified_at") 
 
   reporter User @relation("reportReporter", fields: [reporterId], references: [id])
 
@@ -1178,11 +1183,11 @@ enum ModerationActionKind {
 /// suspension is inferable only from the mutated record. There is deliberately
 /// no update or delete path for these.
 model ModerationAction {
-  id          String @id @default(uuid()) @db.Uuid
-  moderatorId String @map("moderator_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  moderatorId String @map("moderator_id") @db.ObjectId
 
   targetType ReportTargetType     @map("target_type")
-  targetId   String               @map("target_id") @db.Uuid
+  targetId   String               @map("target_id") @db.ObjectId
   action     ModerationActionKind
 
   /// Required for any action that restricts someone. An audit row reading only
@@ -1190,7 +1195,7 @@ model ModerationAction {
   /// on appeal.
   note String
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   moderator User @relation(fields: [moderatorId], references: [id])
 
@@ -1202,19 +1207,19 @@ model ModerationAction {
 /// General activity log from the ERD, broader than ModerationAction: it records
 /// what users did, not only what moderators decided.
 model AuditLog {
-  id          String @id @default(uuid()) @db.Uuid
-  actorUserId String? @map("actor_user_id") @db.Uuid
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  actorUserId String? @map("actor_user_id") @db.ObjectId
 
   action     String
   entityType String? @map("entity_type")
-  entityId   String? @map("entity_id") @db.Uuid
+  entityId   String? @map("entity_id") @db.ObjectId
 
   /// Correlates a log row with the x-request-id returned to the client.
   requestId String?  @map("request_id")
   ipAddress String?  @map("ip_address")
   metadata  Json?
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") 
 
   actor User? @relation(fields: [actorUserId], references: [id])
 

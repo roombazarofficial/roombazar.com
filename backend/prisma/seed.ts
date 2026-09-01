@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 /**
@@ -23,9 +22,7 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set — nothing to seed against.");
 }
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString }),
-});
+const prisma = new PrismaClient();
 
 /** Org-scoped membership roles. Distinct from the platform role on User. */
 const roles = [
