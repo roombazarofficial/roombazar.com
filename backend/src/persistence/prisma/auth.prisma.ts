@@ -21,6 +21,7 @@ export class PrismaAuthRepository implements AuthRepository {
         userAgent: session.userAgent,
         ipAddress: session.ipAddress,
         expiresAt: new Date(session.expiresAt),
+        revokedAt: null,
       },
     });
 
@@ -62,7 +63,11 @@ export class PrismaAuthRepository implements AuthRepository {
 
   async listSessionsForUser(userId: string): Promise<SessionRecord[]> {
     const rows = await this.prisma.session.findMany({
-      where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
+      where: {
+        userId,
+        OR: [{ revokedAt: null }, { revokedAt: { isSet: false } }],
+        expiresAt: { gt: new Date() },
+      },
       orderBy: { lastSeenAt: "desc" },
     });
 
@@ -77,6 +82,7 @@ export class PrismaAuthRepository implements AuthRepository {
         codeHash: record.codeHash,
         purpose: record.purpose,
         expiresAt: new Date(record.expiresAt),
+        consumedAt: null,
       },
     });
 
@@ -92,7 +98,11 @@ export class PrismaAuthRepository implements AuthRepository {
     purpose: EmailCodeRecord["purpose"],
   ): Promise<EmailCodeRecord | null> {
     const row = await this.prisma.emailVerification.findFirst({
-      where: { email, purpose, consumedAt: null },
+      where: {
+        email,
+        purpose,
+        OR: [{ consumedAt: null }, { consumedAt: { isSet: false } }],
+      },
       orderBy: { createdAt: "desc" },
     });
 
