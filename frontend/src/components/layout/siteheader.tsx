@@ -17,11 +17,21 @@ export function SiteHeader() {
 
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 12);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -98,9 +108,13 @@ export function SiteHeader() {
   return (
     <header
       suppressHydrationWarning
-      className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-xs"
+      className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${
+        scrolled
+          ? "border-line bg-white/98 shadow-raised backdrop-blur-sm"
+          : "border-line bg-white/95 shadow-none backdrop-blur-xs"
+      }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6">
+      <div className={`mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6 transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-6">
           <Link

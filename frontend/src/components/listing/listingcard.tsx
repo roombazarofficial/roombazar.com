@@ -21,6 +21,16 @@ const QUICK_PROMPTS = [
   "Hi, what is the deposit and move-in date?",
 ];
 
+// Badge colour for room types
+const ROOM_TYPE_BADGE: Record<string, string> = {
+  private: "bg-indigo-50 text-indigo-700 border-indigo-100",
+  shared: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  studio: "bg-amber-50 text-amber-700 border-amber-100",
+  pg: "bg-purple-50 text-purple-700 border-purple-100",
+  flat: "bg-blue-50 text-blue-700 border-blue-100",
+  house: "bg-teal-50 text-teal-700 border-teal-100",
+};
+
 export function ListingCard({
   listing,
   priority = false,
@@ -102,17 +112,22 @@ export function ListingCard({
     }
   }
 
+  const roomTypeLabel = roomTypeLabels[listing.roomType] || "Room";
+  const roomTypeBadgeColor =
+    ROOM_TYPE_BADGE[listing.roomType] ||
+    "bg-surface-sunken text-ink-muted border-line";
+
   return (
     <>
       <article
         className={cn(
-          "group relative flex flex-col justify-between overflow-hidden rounded-lg border border-line bg-surface shadow-2xs",
-          "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card",
+          "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-surface",
+          "shadow-card transition-all duration-250 hover:-translate-y-1 hover:shadow-card-hover hover:border-line-strong",
           className,
         )}
       >
         {/* 1. Image Container */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-sunken">
+        <div className="relative aspect-[16/11] w-full overflow-hidden bg-surface-sunken">
           {listing.coverPhoto ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -121,18 +136,52 @@ export function ListingCard({
               loading={priority ? "eager" : "lazy"}
               width={listing.coverPhoto.width}
               height={listing.coverPhoto.height}
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-400 group-hover:scale-105"
             />
           ) : (
-            <div className="flex size-full items-center justify-center text-sm font-medium text-ink-subtle">
-              No photo
+            /* Premium no-photo placeholder */
+            <div className="flex size-full flex-col items-center justify-center bg-gradient-to-br from-surface-sunken to-brand-50 text-brand-300">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                className="size-10 mb-2"
+              >
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              <span className="text-xs font-medium text-brand-400">
+                No photo yet
+              </span>
             </div>
           )}
 
-          {/* Photo Count Badge */}
+          {/* Gradient overlay at bottom for text legibility */}
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/25 to-transparent pointer-events-none"
+          />
+
+          {/* Room type badge (top-left) */}
+          <span
+            className={cn(
+              "absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-bold shadow-card",
+              roomTypeBadgeColor,
+            )}
+          >
+            {roomTypeLabel}
+          </span>
+
+          {/* Photo count badge (bottom-right) */}
           {listing.photoCount > 1 && (
-            <span className="absolute bottom-2 right-2 rounded-full bg-ink/75 backdrop-blur-xs px-2 py-0.5 text-2xs font-semibold text-white shadow-2xs">
-              {listing.photoCount} photos
+            <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-3" aria-hidden>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              {listing.photoCount}
             </span>
           )}
 
@@ -140,63 +189,83 @@ export function ListingCard({
           <SaveListingButton
             listingId={listing.id}
             initialSaved={listing.isSaved}
-            className="absolute top-2 right-2 size-8.5 bg-white/90 shadow-sm hover:bg-white text-ink-muted hover:text-brand-600"
+            className={cn(
+              "absolute top-2 right-2 size-9",
+              "bg-white/85 backdrop-blur-sm shadow-card text-ink-muted",
+              "opacity-80 group-hover:opacity-100",
+              "hover:bg-white hover:text-brand-600 transition-all duration-200",
+            )}
           />
         </div>
 
         {/* 2. Card Content Body */}
-        <div className="flex flex-1 flex-col justify-between p-3 sm:p-3.5">
+        <div className="flex flex-1 flex-col justify-between p-3.5">
           <div>
-            {/* Price */}
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-ink">
+            {/* Price row */}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-extrabold tracking-tight text-brand-600">
                 {formatRupees(listing.rentPaise || 0)}
               </span>
-              <span className="text-xs font-normal text-ink-muted">/month</span>
+              <span className="text-xs font-normal text-ink-subtle">/mo</span>
             </div>
 
-            {/* Room Specs */}
-            <p className="mt-1 text-xs sm:text-sm font-medium text-ink-muted line-clamp-1">
-              {roomTypeLabels[listing.roomType] || "Room"}
-              {listing.furnishing
-                ? ` · ${furnishingLabels[listing.furnishing] || ""}`
-                : ""}
-            </p>
+            {/* Furnishing detail */}
+            {listing.furnishing && (
+              <p className="mt-0.5 text-[11px] font-medium text-ink-subtle">
+                {furnishingLabels[listing.furnishing] || ""}
+              </p>
+            )}
 
             {/* Title */}
-            <h3 className="mt-0.5 text-xs sm:text-sm font-normal text-ink group-hover:text-brand-600 transition-colors">
+            <h3 className="mt-1.5 text-sm font-medium text-ink line-clamp-1 group-hover:text-brand-600 transition-colors">
               <Link
                 href={routes.listing(listing.slug)}
                 className="after:absolute after:inset-0 after:content-['']"
               >
-                <span className="line-clamp-1">{listing.title}</span>
+                {listing.title}
               </Link>
             </h3>
           </div>
 
-          {/* 3. Footer: Location, Date & OLX Action Buttons (Chat & Call) */}
-          <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-2.5">
+          {/* 3. Footer: Location + Action Buttons */}
+          <div className="mt-3 flex items-center justify-between border-t border-line/50 pt-2.5">
             <div className="min-w-0 flex-1 pr-2">
-              <p className="truncate text-[11px] font-semibold text-ink-muted uppercase tracking-wider">
-                {listing.localityName || listing.cityName}
-                {listing.cityName && listing.localityName !== listing.cityName
-                  ? `, ${listing.cityName}`
-                  : ""}
-              </p>
-              <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">
+              {/* Location */}
+              <div className="flex items-center gap-1 min-w-0">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  className="size-3 shrink-0 text-ink-subtle"
+                  aria-hidden
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <p className="truncate text-[11px] font-semibold text-ink-muted">
+                  {listing.localityName || listing.cityName}
+                  {listing.cityName && listing.localityName !== listing.cityName
+                    ? `, ${listing.cityName}`
+                    : ""}
+                </p>
+              </div>
+              {/* Date */}
+              <p className="mt-0.5 text-[10px] text-ink-subtle">
                 {formatCardDate(listing.publishedAt)}
               </p>
             </div>
 
             {/* OLX-Style Call & Chat Buttons */}
             <div className="relative z-10 flex shrink-0 items-center gap-1.5">
-              {/* Chat / Message Button */}
+              {/* Chat Button */}
               <button
                 type="button"
                 onClick={handleChatClick}
                 title="Message host"
                 aria-label="Message host"
-                className="flex size-7.5 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-700 transition-all hover:bg-brand-600 hover:text-white hover:border-brand-600 active:scale-95 shadow-2xs cursor-pointer"
+                className="flex size-8 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-700 transition-all hover:bg-brand-600 hover:text-white hover:border-brand-600 hover:shadow-raised active:scale-95 shadow-card cursor-pointer"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -218,7 +287,7 @@ export function ListingCard({
                 onClick={handleCallClick}
                 title="Call host"
                 aria-label="Call host"
-                className="flex size-7.5 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-700 transition-all hover:bg-brand-600 hover:text-white hover:border-brand-600 active:scale-95 shadow-2xs cursor-pointer"
+                className="flex size-8 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-700 transition-all hover:bg-brand-600 hover:text-white hover:border-brand-600 hover:shadow-raised active:scale-95 shadow-card cursor-pointer"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -376,18 +445,21 @@ export function ListingCard({
               <img
                 src={listing.coverPhoto.url}
                 alt={listing.title}
-                className="size-14 rounded-md object-cover"
+                className="size-14 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex size-14 items-center justify-center rounded-md bg-brand-100 text-xs font-semibold text-brand-700">
-                Room
+              <div className="flex size-14 items-center justify-center rounded-lg bg-brand-100 text-brand-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="size-6">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
               </div>
             )}
             <div className="min-w-0 flex-1">
               <h4 className="truncate text-sm font-semibold text-ink">
                 {listing.title}
               </h4>
-              <p className="text-xs font-bold text-brand-600">
+              <p className="text-sm font-bold text-brand-600">
                 {formatRupees(listing.rentPaise || 0)} /month
               </p>
               <p className="text-xs text-ink-muted truncate">
@@ -397,7 +469,6 @@ export function ListingCard({
           </div>
 
           <div className="space-y-2">
-            {/* Quick Action 1: Direct Message */}
             <Button
               fullWidth
               variant="secondary"
@@ -413,7 +484,6 @@ export function ListingCard({
               Send instant message
             </Button>
 
-            {/* Quick Action 2: View Details & Host Contact */}
             <Button
               fullWidth
               onClick={() => {
@@ -425,7 +495,7 @@ export function ListingCard({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
-              Open room & contact host
+              Open room &amp; contact host
             </Button>
           </div>
 
@@ -439,27 +509,18 @@ export function ListingCard({
 }
 
 function formatCardDate(dateStr?: string): string {
-  if (!dateStr) return "RECENT";
+  if (!dateStr) return "Recent";
   const date = new Date(dateStr);
   const now = new Date();
   const diffDays = Math.floor(
     (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  if (diffDays <= 0) return "TODAY";
-  if (diffDays === 1) return "YESTERDAY";
+  if (diffDays <= 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) {
-    return date
-      .toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-      })
-      .toUpperCase();
+    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
   }
-  return date
-    .toLocaleDateString("en-IN", {
-      month: "short",
-      year: "2-digit",
-    })
-    .toUpperCase();
+  return date.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
 }

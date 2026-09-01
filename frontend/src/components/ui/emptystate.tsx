@@ -16,24 +16,41 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-card",
-        "border border-dashed border-line-strong bg-surface-muted",
-        "px-6 py-12 text-center",
+        "flex flex-col items-center justify-center rounded-2xl",
+        "border border-dashed border-line-strong bg-surface-muted/60",
+        "px-8 py-14 text-center",
         className,
       )}
     >
-      {icon && <div className="mb-3 text-ink-subtle">{icon}</div>}
-
-      <h3 className="text-base font-semibold text-ink">{title}</h3>
-
-      {description && (
-        <p className="mt-1.5 max-w-sm text-sm text-ink-muted">{description}</p>
-
+      {icon ? (
+        <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600">
+          {icon}
+        </div>
+      ) : (
+        /* Default icon */
+        <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-surface-sunken text-ink-subtle">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="size-7"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </div>
       )}
 
-      {action && <div className="mt-5">{action}</div>}
+      <h3 className="text-base font-bold text-ink">{title}</h3>
 
+      {description && (
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-muted">
+          {description}
+        </p>
+      )}
+
+      {action && <div className="mt-6">{action}</div>}
     </div>
-
   );
 }

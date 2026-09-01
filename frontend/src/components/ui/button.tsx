@@ -6,7 +6,7 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-brand-600 text-ink-inverse hover:bg-brand-700 active:bg-brand-800 shadow-card",
+    "bg-brand-600 text-ink-inverse hover:bg-brand-700 active:bg-brand-800 shadow-card hover:shadow-raised",
   secondary:
     "bg-surface text-ink border border-line-strong hover:bg-surface-muted active:bg-surface-sunken",
   ghost: "bg-transparent text-ink hover:bg-surface-muted active:bg-surface-sunken",
@@ -33,8 +33,10 @@ export function buttonStyles({
 } = {}) {
   return cn(
     "inline-flex items-center justify-center rounded-control font-medium",
-    "transition-colors duration-150",
+    "transition-all duration-150",
+    "active:scale-[0.97]",
     "disabled:pointer-events-none disabled:opacity-50",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1",
     variants[variant],
     sizes[size],
     fullWidth && "w-full",
@@ -77,11 +79,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             aria-hidden
             className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
           />
-
         )}
         {children}
       </button>
-
     );
   },
 );

@@ -6,7 +6,7 @@
   Components reference tokens (bg-brand-600, text-ink-muted) and never
   hardcode a hex value.
 
-  Direction: clean and trustworthy. White surfaces, one confident blue, plenty
+  Direction: clean and trustworthy. White surfaces, one confident red, plenty
   of breathing room. The product's main risk is a seeker suspecting a scam, so
   the interface should feel calm and legible rather than loud.
 */
@@ -57,10 +57,12 @@
   --radius-card: 0.625rem;
   --radius-sheet: 0.875rem;
 
-  /* Elevation. Subtle. */
-  --shadow-card: 0 1px 3px 0 rgb(23 23 23 / 0.04), 0 1px 2px -1px rgb(23 23 23 / 0.04);
-  --shadow-raised: 0 4px 6px -1px rgb(23 23 23 / 0.07), 0 2px 4px -2px rgb(23 23 23 / 0.05);
+  /* Elevation. Subtle → strong. */
+  --shadow-card: 0 1px 3px 0 rgb(23 23 23 / 0.06), 0 1px 2px -1px rgb(23 23 23 / 0.04);
+  --shadow-card-hover: 0 8px 24px -4px rgb(23 23 23 / 0.12), 0 4px 8px -2px rgb(23 23 23 / 0.06);
+  --shadow-raised: 0 4px 12px -2px rgb(23 23 23 / 0.10), 0 2px 4px -2px rgb(23 23 23 / 0.06);
   --shadow-overlay: 0 20px 25px -5px rgb(23 23 23 / 0.1), 0 8px 10px -6px rgb(23 23 23 / 0.05);
+  --shadow-feature: 0 0 0 1px rgb(209 52 33 / 0.08), 0 12px 32px -8px rgb(209 52 33 / 0.18);
 }
 
 html {
@@ -104,6 +106,123 @@ input[data-input-control]:focus-visible {
 ::selection {
   background-color: var(--color-brand-100);
 }
+
+/* ============================================================
+   ANIMATION KEYFRAMES
+   ============================================================ */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse-brand {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.35); }
+  60% { transform: scale(0.95); }
+  80% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================================
+   ANIMATION UTILITY CLASSES
+   ============================================================ */
+
+.animate-fade-up {
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-heart-beat {
+  animation: heartBeat 0.4s ease-in-out;
+}
+
+/* Stagger delays for grid reveals */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+
+/* ============================================================
+   SHIMMER SKELETON OVERRIDE
+   ============================================================ */
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-sunken) 25%,
+    #f0e8e4 50%,
+    var(--color-surface-sunken) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ============================================================
+   SCROLLBAR UTILITIES
+   ============================================================ */
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   *,

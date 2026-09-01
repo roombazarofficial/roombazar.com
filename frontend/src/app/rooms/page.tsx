@@ -29,12 +29,15 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
     <SiteShell>
       <div className="mx-auto max-w-7xl px-4 py-8">
         <header>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          <p className="text-2xs font-bold uppercase tracking-widest text-brand-600">
+            Browse spaces
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
             Rooms for rent across India
           </h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            {results.totalItems} {results.totalItems === 1 ? "room" : "rooms"}{" "}
-            available now
+          <p className="mt-1.5 text-sm text-ink-muted">
+            {results.totalItems}{" "}
+            {results.totalItems === 1 ? "room" : "rooms"} available right now
           </p>
         </header>
 
@@ -70,7 +73,13 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
             ) : (
               <EmptyState
                 title="No rooms match these filters"
-                description="Try clearing a filter. New rooms are posted every day."
+                description="Try clearing a filter or widening your search. New rooms are posted every day."
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="size-7">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                }
                 action={
                   <Link
                     href={routes.rooms}

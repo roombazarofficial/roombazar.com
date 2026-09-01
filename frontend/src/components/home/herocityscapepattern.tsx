@@ -214,7 +214,7 @@ export function HeroCityscapePattern() {
         {/* =========================================================================
             ICONIC LOCATION PIN (Positioned prominent on right near search bar)
             ========================================================================= */}
-        <g transform="translate(1180, 68) scale(1.15)">
+        <g transform="translate(1180, 68) scale(1.15)" className="animate-float" style={{ transformOrigin: "14px 38px" }}>
           {/* Drop shadow / subtle glow for pin */}
           <ellipse cx="14" cy="42" rx="6" ry="2.5" fill="#E88370" fillOpacity="0.25" />
           {/* Map Pin Body */}
