@@ -18,6 +18,8 @@ export interface ListingDraft {
   citySlug: string | null;
   localitySlug: string | null;
   addressLine: string;
+  lat: number | null;
+  lng: number | null;
 
   rentRupees: number | null;
   depositRupees: number | null;
@@ -44,9 +46,11 @@ export interface ListingDraft {
   media: UploadedMedia[];
 }
 
+const todayDateStr: string = new Date().toISOString().slice(0, 10);
+
 const emptyDraft: ListingDraft = {
   roomType: null,
-  postedBy: null,
+  postedBy: "owner",
   title: "",
   description: "",
   /*
@@ -59,18 +63,20 @@ const emptyDraft: ListingDraft = {
   citySlug: null,
   localitySlug: null,
   addressLine: "",
+  lat: null,
+  lng: null,
   rentRupees: null,
   depositRupees: null,
   maintenanceRupees: null,
   billsIncluded: false,
   negotiable: false,
-  furnishing: null,
+  furnishing: "unfurnished",
   areaSqft: null,
   floor: null,
   totalFloors: null,
   amenitySlugs: [],
   preferredTenant: [],
-  availableFrom: null,
+  availableFrom: todayDateStr,
   minStayMonths: null,
   media: [],
 };
@@ -104,7 +110,12 @@ export function normaliseDraft(data: Partial<ListingDraft>): ListingDraft {
 
   return {
     ...merged,
+    postedBy: merged.postedBy || "owner",
+    availableFrom: merged.availableFrom || todayDateStr,
+    furnishing: merged.furnishing || "unfurnished",
     districtSlug: merged.districtSlug ?? merged.citySlug,
+    lat: typeof merged.lat === "number" && !isNaN(merged.lat) ? merged.lat : null,
+    lng: typeof merged.lng === "number" && !isNaN(merged.lng) ? merged.lng : null,
     media: normaliseMedia(merged.media),
     amenitySlugs: Array.isArray(merged.amenitySlugs) ? merged.amenitySlugs : [],
     preferredTenant: Array.isArray(merged.preferredTenant)
@@ -165,20 +176,20 @@ export const useListingDraft = create<DraftStore>()((set) => ({
 }));
 
 /*
-  One source of truth for what a listing still needs. The preview step used to
-  keep its own copy of this list, so a field could be required by one and not
-  the other — and availableFrom was in neither, even though the API rejects a
-  listing without it.
+  One source of truth for what a listing still needs.
+  Compressed to minimal essential questions:
+  1. Room Type
+  2. Location (City & Locality)
+  3. Monthly Rent
+  4. At least one photo
 */
 export function missingFields(draft: ListingDraft): string[] {
   return [
-    !draft.roomType && "room type",
-    !draft.postedBy && "who is posting",
-    !draft.citySlug && "city",
-    !draft.localitySlug && "locality",
-    !draft.rentRupees && "monthly rent",
-    !draft.availableFrom && "available from date",
-    draft.media.length === 0 && "at least one photo",
+    !draft.roomType && "Room Type",
+    (!draft.stateCode || !draft.districtSlug || !draft.localitySlug) &&
+      "Location (State, District & City)",
+    (!draft.rentRupees || draft.rentRupees <= 0) && "Monthly Rent",
+    draft.media.length === 0 && "At least 1 photo",
   ].filter(Boolean) as string[];
 }
 
@@ -204,6 +215,8 @@ export interface CreateListingPayload {
   floor: number | null;
   totalFloors: number | null;
   addressLine: string | null;
+  lat: number | null;
+  lng: number | null;
   availableFrom: string;
   minStayMonths: number | null;
   preferredTenant: TenantPreference[];
@@ -212,19 +225,35 @@ export interface CreateListingPayload {
 
 /*
   Rupees are converted to paise here, at the one boundary where the draft
-  becomes an API request. Money is integer paise everywhere server-side, so
-  rounding once at the edge keeps a fractional rupee from ever reaching it.
+  becomes an API request.
 */
 export function draftToPayload(draft: ListingDraft): CreateListingPayload {
   const gaps = missingFields(draft);
   if (gaps.length > 0) {
-    throw new Error(`Draft is missing ${gaps.join(", ")}.`);
+    throw new Error(`Please complete: ${gaps.join(", ")}.`);
   }
+
+  // Validate coordinates within valid geographic bounds
+  const validLat =
+    typeof draft.lat === "number" &&
+    !isNaN(draft.lat) &&
+    draft.lat >= -90 &&
+    draft.lat <= 90
+      ? draft.lat
+      : null;
+
+  const validLng =
+    typeof draft.lng === "number" &&
+    !isNaN(draft.lng) &&
+    draft.lng >= -180 &&
+    draft.lng <= 180
+      ? draft.lng
+      : null;
 
   return {
     roomType: draft.roomType as RoomType,
-    postedBy: draft.postedBy as PostedBy,
-    citySlug: draft.citySlug as string,
+    postedBy: (draft.postedBy || "owner") as PostedBy,
+    citySlug: draft.citySlug || (draft.districtSlug as string),
     localitySlug: draft.localitySlug as string,
     rentPaise: Math.round((draft.rentRupees as number) * 100),
     depositPaise: Math.round((draft.depositRupees ?? 0) * 100),
@@ -232,19 +261,23 @@ export function draftToPayload(draft: ListingDraft): CreateListingPayload {
       draft.maintenanceRupees == null
         ? null
         : Math.round(draft.maintenanceRupees * 100),
-    billsIncluded: draft.billsIncluded,
-    negotiable: draft.negotiable,
+    billsIncluded: draft.billsIncluded ?? false,
+    negotiable: draft.negotiable ?? false,
     media: normaliseMedia(draft.media),
     title: draft.title.trim() || undefined,
     description: draft.description.trim(),
     furnishing: draft.furnishing ?? "unfurnished",
-    areaSqft: draft.areaSqft,
-    floor: draft.floor,
-    totalFloors: draft.totalFloors,
+    areaSqft: draft.areaSqft ?? null,
+    floor: draft.floor ?? null,
+    totalFloors: draft.totalFloors ?? null,
     addressLine: draft.addressLine.trim() || null,
-    availableFrom: draft.availableFrom as string,
-    minStayMonths: draft.minStayMonths,
-    preferredTenant: draft.preferredTenant,
-    amenitySlugs: draft.amenitySlugs,
+    lat: validLat,
+    lng: validLng,
+    availableFrom: draft.availableFrom || todayDateStr,
+    minStayMonths: draft.minStayMonths ?? null,
+    preferredTenant: draft.preferredTenant ?? [],
+    amenitySlugs: draft.amenitySlugs ?? [],
   };
 }
+
+

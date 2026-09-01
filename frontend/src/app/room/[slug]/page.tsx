@@ -38,7 +38,7 @@ export async function generateMetadata({
 
   return {
     title: `${listing.title} — ${formatRupees(listing.rentPaise)}/month`,
-    description: `${roomTypeLabels[listing.roomType]} in ${listing.locality.name}, ${listing.city.name}. ${formatRupees(listing.rentPaise)} per month, posted by ${listing.postedBy === "agent" ? "an agent" : "the owner"}.`,
+    description: `${roomTypeLabels[listing.roomType]} in ${listing.locality.name}, ${listing.city.name}. ${formatRupees(listing.rentPaise)} per month, direct from owner.`,
     alternates: { canonical: routes.listing(listing.slug) },
     robots: isLive ? undefined : { index: false, follow: true },
   };

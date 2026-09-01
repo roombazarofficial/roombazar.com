@@ -1,51 +1,73 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/api/users";
 
-const tiers = [
-  {
-    id: "phone",
-    title: "Phone number",
-    description: "Confirms you can be reached. Required for every account.",
-    state: "done" as const,
-    unlocks: "Post up to 2 rooms, message 10 people a day",
-  },
-  {
-    id: "email",
-    title: "Email address",
-    description: "Used for alerts and to recover your account.",
-    state: "available" as const,
-    unlocks: "Digest emails for saved searches",
-  },
-  {
-    id: "governmentid",
-    title: "Government ID",
-    description:
-      "Verified through DigiLocker. We keep the result and your name, never your Aadhaar number.",
-    state: "available" as const,
-    unlocks: "Verified badge, post up to 5 rooms, higher ranking",
-  },
-  {
-    id: "ownership",
-    title: "Proof of ownership",
-    description:
-      "A utility bill or tax receipt matching the address. Reviewed by a person.",
-    state: "locked" as const,
-    unlocks: "Ownership verified badge, the strongest signal on a listing",
-  },
-];
+export default async function Page() {
+  const user = await getCurrentUser();
 
-export default function Page() {
+  const isPhoneVerified = Boolean(
+    user?.phoneVerifiedAt || user?.verifications?.includes("phone"),
+  );
+  const isEmailVerified = Boolean(
+    user?.emailVerifiedAt || user?.verifications?.includes("email"),
+  );
+  const isGovIdVerified = Boolean(
+    user?.verifications?.includes("governmentid"),
+  );
+  const isOwnershipVerified = Boolean(
+    user?.verifications?.includes("ownership"),
+  );
+
+  const tiers = [
+    {
+      id: "phone",
+      title: "Phone number",
+      description: isPhoneVerified
+        ? `Verified (${user?.phone ?? "Active mobile"})`
+        : "Confirms you can be reached. Required for every account.",
+      state: isPhoneVerified ? ("done" as const) : ("available" as const),
+      unlocks: "Post up to 2 rooms, message 10 people a day",
+    },
+    {
+      id: "email",
+      title: "Email address",
+      description: isEmailVerified
+        ? `Verified (${user?.email ?? "Active email"})`
+        : "Used for alerts and to recover your account.",
+      state: isEmailVerified ? ("done" as const) : ("available" as const),
+      unlocks: "Digest emails for saved searches",
+    },
+    {
+      id: "governmentid",
+      title: "Government ID",
+      description:
+        "Verified through DigiLocker. We keep the result and your name, never your Aadhaar number.",
+      state: isGovIdVerified ? ("done" as const) : ("available" as const),
+      unlocks: "Verified badge, post up to 5 rooms, higher ranking",
+    },
+    {
+      id: "ownership",
+      title: "Proof of ownership",
+      description:
+        "A utility bill or tax receipt matching the address. Reviewed by a person.",
+      state: isOwnershipVerified
+        ? ("done" as const)
+        : isGovIdVerified
+          ? ("available" as const)
+          : ("locked" as const),
+      unlocks: "Ownership verified badge, the strongest signal on a listing",
+    },
+  ];
+
   return (
     <div>
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Verification
         </h1>
-
         <p className="mt-1 text-sm text-ink-muted">
           Optional, but verified listers get noticeably more enquiries.
         </p>
-
       </header>
 
       <ul className="mt-6 space-y-3">
@@ -57,43 +79,30 @@ export default function Page() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-sm font-medium text-ink">{tier.title}</h2>
-
-                <p className="mt-1 text-sm text-ink-muted">
-                  {tier.description}
-                </p>
-
+                <p className="mt-1 text-sm text-ink-muted">{tier.description}</p>
                 <p className="mt-2 text-xs text-ink-subtle">
                   Unlocks: {tier.unlocks}
                 </p>
-
               </div>
 
               {tier.state === "done" ? (
                 <Badge tone="success">Verified</Badge>
-
               ) : tier.state === "locked" ? (
                 <Badge tone="neutral">Needs ID first</Badge>
-
               ) : (
                 <Button size="sm" variant="secondary">
                   Verify
                 </Button>
-
               )}
             </div>
-
           </li>
-
         ))}
       </ul>
 
       <p className="mt-6 rounded-card border border-line bg-surface-muted p-4 text-sm text-ink-muted">
-        We store a verification result and your name, never your Aadhaar
-        number. Holding that number would be a liability with no benefit to
-        you or to us.
+        We store a verification result and your name, never your Aadhaar number.
+        Holding that number would be a liability with no benefit to you or to us.
       </p>
-
     </div>
-
   );
 }

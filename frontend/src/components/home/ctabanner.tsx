@@ -20,7 +20,7 @@ export function CTABanner() {
   return (
     <section className="mx-auto max-w-7xl px-4 pb-14 pt-4">
       <div
-        className="relative overflow-hidden rounded-2xl px-8 py-10 sm:px-12 sm:py-12"
+        className="relative overflow-hidden rounded-2xl px-5 py-8 sm:px-12 sm:py-12"
         style={{
           background:
             "linear-gradient(135deg, #fff9f7 0%, #fce9e6 40%, #f8cfc8 100%)",
@@ -52,7 +52,7 @@ export function CTABanner() {
               For property owners
             </p>
             {/* Heading */}
-            <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            <h2 className="mt-1.5 text-xl font-bold tracking-tight text-ink sm:text-3xl">
               Have a space to rent?
             </h2>
             {/* Sub */}
@@ -94,7 +94,7 @@ export function CTABanner() {
             {user ? (
               <Link
                 href={routes.post}
-                className="inline-flex items-center gap-2.5 rounded-xl bg-brand-600 px-7 py-3.5 text-sm font-bold text-white shadow-raised transition-all hover:bg-brand-700 hover:-translate-y-0.5 hover:shadow-card-hover active:translate-y-0 active:scale-[0.98]"
+                className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand-600 px-7 py-3.5 text-sm font-bold text-white shadow-raised transition-all hover:bg-brand-700 active:scale-[0.98] sm:w-auto"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -113,7 +113,7 @@ export function CTABanner() {
               <button
                 type="button"
                 onClick={handleHostClick}
-                className="inline-flex items-center gap-2.5 rounded-xl bg-brand-600 px-7 py-3.5 text-sm font-bold text-white shadow-raised transition-all hover:bg-brand-700 hover:-translate-y-0.5 hover:shadow-card-hover active:translate-y-0 active:scale-[0.98] cursor-pointer"
+                className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand-600 px-7 py-3.5 text-sm font-bold text-white shadow-raised transition-all hover:bg-brand-700 active:scale-[0.98] cursor-pointer sm:w-auto"
               >
                 <svg
                   viewBox="0 0 24 24"

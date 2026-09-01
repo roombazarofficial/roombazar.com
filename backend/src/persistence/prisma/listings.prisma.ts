@@ -9,7 +9,7 @@ import type {
   Page,
 } from "src/persistence/ports/listings.repository";
 import { PrismaService } from "./prisma.service";
-import { listingInclude, toDomainListing } from "./mappers";
+import { listingInclude, toDomainListing, isValidObjectId } from "./mappers";
 
 @Injectable()
 export class PrismaListingsRepository implements ListingsRepository {
@@ -35,7 +35,10 @@ export class PrismaListingsRepository implements ListingsRepository {
 
   async findByOwner(ownerId: string): Promise<Listing[]> {
     const rows = await this.prisma.listing.findMany({
-      where: { createdById: ownerId, deletedAt: null },
+      where: {
+        createdById: ownerId,
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+      },
       include: listingInclude,
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
     });
@@ -68,15 +71,19 @@ export class PrismaListingsRepository implements ListingsRepository {
 
   async findForAdmin(criteria: ListingAdminCriteria): Promise<Page<Listing>> {
     const where: Prisma.ListingWhereInput = {
-      deletedAt: null,
+      OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
       ...(criteria.statuses?.length && { status: { in: criteria.statuses } }),
       ...(criteria.ownerId && { createdById: criteria.ownerId }),
       ...(criteria.citySlug && { city: { slug: criteria.citySlug } }),
       ...(criteria.query && {
-        OR: [
-          { title: { contains: criteria.query, mode: "insensitive" } },
-          { description: { contains: criteria.query, mode: "insensitive" } },
-          { slug: { contains: criteria.query, mode: "insensitive" } },
+        AND: [
+          {
+            OR: [
+              { title: { contains: criteria.query, mode: "insensitive" } },
+              { description: { contains: criteria.query, mode: "insensitive" } },
+              { slug: { contains: criteria.query, mode: "insensitive" } },
+            ],
+          },
         ],
       }),
     };
@@ -113,7 +120,7 @@ export class PrismaListingsRepository implements ListingsRepository {
   async countByStatus(): Promise<Record<string, number>> {
     const rows = await this.prisma.listing.groupBy({
       by: ["status"],
-      where: { deletedAt: null },
+      where: { OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }] },
       _count: { _all: true },
     });
 
@@ -127,7 +134,7 @@ export class PrismaListingsRepository implements ListingsRepository {
   ): Prisma.ListingWhereInput {
     const where: Prisma.ListingWhereInput = {
       status: "active",
-      deletedAt: null,
+      OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
     };
 
     if (criteria.citySlug) where.city = { slug: criteria.citySlug };
@@ -197,7 +204,7 @@ export class PrismaListingsRepository implements ListingsRepository {
   async findSimilar(listing: Listing, limit: number): Promise<Listing[]> {
     const base: Prisma.ListingWhereInput = {
       status: "active",
-      deletedAt: null,
+      OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
       id: { not: listing.id },
     };
 
@@ -260,7 +267,7 @@ export class PrismaListingsRepository implements ListingsRepository {
 
       return tx.listing.create({
         data: {
-          id: listing.id,
+          ...(isValidObjectId(listing.id) ? { id: listing.id } : {}),
           slug: listing.slug,
           propertyId: property.id,
           createdById: listing.ownerId,
@@ -300,7 +307,7 @@ export class PrismaListingsRepository implements ListingsRepository {
               position: photo.position,
               media: {
                 create: {
-                  id: photo.id,
+                  ...(isValidObjectId(photo.id) ? { id: photo.id } : {}),
                   uploadedById: listing.ownerId,
                   objectKey: photo.objectKey,
                   secureUrl: photo.secureUrl,
@@ -440,7 +447,7 @@ export class PrismaListingsRepository implements ListingsRepository {
     return this.prisma.listing.count({
       where: {
         createdById: ownerId,
-        deletedAt: null,
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
         status: { in: ["active", "paused"] },
       },
     });
@@ -460,7 +467,11 @@ export class PrismaListingsRepository implements ListingsRepository {
 
   async findActiveInCity(cityId: string): Promise<Listing[]> {
     const rows = await this.prisma.listing.findMany({
-      where: { cityId, status: "active", deletedAt: null },
+      where: {
+        cityId,
+        status: "active",
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+      },
       include: listingInclude,
     });
 
@@ -472,7 +483,11 @@ export class PrismaListingsRepository implements ListingsRepository {
     userId: string,
   ) {
     const existing = await tx.organization.findFirst({
-      where: { ownerUserId: userId, isPersonal: true, deletedAt: null },
+      where: {
+        ownerUserId: userId,
+        isPersonal: true,
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+      },
     });
 
     if (existing) return existing;

@@ -9,7 +9,7 @@ const SPACE_TYPES = [
     sublabel: "Single rooms & PGs",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
@@ -23,7 +23,7 @@ const SPACE_TYPES = [
     sublabel: "Full apartments",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <rect x="2" y="3" width="20" height="18" rx="2" />
         <path d="M8 21V11h8v10" />
         <path d="M2 11h20" />
@@ -39,7 +39,7 @@ const SPACE_TYPES = [
     sublabel: "Independent houses",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <path d="M22 10v12H2V10L12 2z" />
         <path d="M6 22v-8h12v8" />
         <path d="M10 22v-4h4v4" />
@@ -55,7 +55,7 @@ const SPACE_TYPES = [
     sublabel: "Workspaces & cabins",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <rect x="2" y="3" width="20" height="18" rx="2" />
         <path d="M8 3v18M16 3v18M2 9h20M2 15h20" />
       </svg>
@@ -69,7 +69,7 @@ const SPACE_TYPES = [
     sublabel: "Retail & commercial",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
         <line x1="3" y1="6" x2="21" y2="6" />
         <path d="M16 10a4 4 0 0 1-8 0" />
@@ -84,7 +84,7 @@ const SPACE_TYPES = [
     sublabel: "Events & functions",
     href: routes.rooms,
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-7">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="size-6 sm:size-7">
         <path d="M2 20h20M4 20V8l8-6 8 6v12" />
         <path d="M10 20v-6h4v6" />
         <path d="M8 11h.01M12 11h.01M16 11h.01" />
@@ -98,19 +98,48 @@ const SPACE_TYPES = [
 
 export function SpaceTypeGrid() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
       {/* Section header */}
-      <div className="mb-6">
+      <div className="mb-5">
         <p className="text-2xs font-bold uppercase tracking-widest text-brand-600">
           What are you looking for?
         </p>
-        <h2 className="mt-1 text-xl font-bold tracking-tight text-ink sm:text-2xl">
+        <h2 className="mt-1 text-lg font-bold tracking-tight text-ink sm:text-2xl">
           Explore by space type
         </h2>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4">
+      {/* 
+        Mobile: horizontal scroll row (no overflow clipping, single row).
+        Tablet+: 6-column grid.
+      */}
+      {/* Mobile scrollable row */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none sm:hidden">
+        {SPACE_TYPES.map((type) => (
+          <Link
+            key={type.label}
+            href={type.href}
+            className={`
+              group flex shrink-0 flex-col items-center gap-2 rounded-xl border bg-gradient-to-br
+              p-3 text-center transition-all duration-200 w-[4.5rem]
+              ${type.color} ${type.border}
+            `}
+          >
+            <div
+              className={`
+                flex size-10 items-center justify-center rounded-xl
+                bg-white/70 ${type.iconColor}
+              `}
+            >
+              {type.icon}
+            </div>
+            <p className="text-xs font-bold text-ink leading-tight">{type.label}</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Tablet+ grid */}
+      <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
         {SPACE_TYPES.map((type, i) => (
           <Link
             key={type.label}

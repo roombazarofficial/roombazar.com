@@ -208,43 +208,92 @@ async function main(): Promise<void> {
   }
   console.log(`  amenities        ${amenities.length}`);
 
-  const karnataka = await prisma.state.upsert({
-    where: { code: "KA" },
-    update: { name: "Karnataka" },
-    create: { name: "Karnataka", code: "KA" },
-  });
+  const statesData = [
+    { code: "KA", name: "Karnataka" },
+    { code: "UP", name: "Uttar Pradesh" },
+    { code: "DL", name: "Delhi" },
+    { code: "HR", name: "Haryana" },
+    { code: "MH", name: "Maharashtra" },
+    { code: "TS", name: "Telangana" },
+    { code: "TN", name: "Tamil Nadu" },
+    { code: "WB", name: "West Bengal" },
+    { code: "GJ", name: "Gujarat" },
+    { code: "RJ", name: "Rajasthan" },
+  ];
 
-  /*
-    Only Bengaluru is active. Adding a city is not a matter of inserting a row:
-    it needs a curated locality list with aliases first, or search in that city
-    fragments from day one. The inactive flag is what stops a half-seeded city
-    appearing in the picker.
-  */
-  const bengaluru = await prisma.city.upsert({
-    where: { slug: "bengaluru" },
-    update: { isActive: true },
-    create: {
-      stateId: karnataka.id,
-      name: "Bengaluru",
-      slug: "bengaluru",
-      isActive: true,
-      centroidLat: 12.9716,
-      centroidLng: 77.5946,
-    },
-  });
-  console.log(`  states           1`);
-  console.log(`  cities           1 (bengaluru, active)`);
+  const stateMap = new Map<string, string>();
+  for (const st of statesData) {
+    const s = await prisma.state.upsert({
+      where: { code: st.code },
+      update: { name: st.name },
+      create: { name: st.name, code: st.code },
+    });
+    stateMap.set(st.code, s.id);
+  }
 
+  const citiesData = [
+    { slug: "bengaluru", name: "Bengaluru", stateCode: "KA", centroidLat: 12.9716, centroidLng: 77.5946 },
+    { slug: "gautam-buddha-nagar", name: "Gautam Buddha Nagar (Noida)", stateCode: "UP", centroidLat: 28.5355, centroidLng: 77.391 },
+    { slug: "ghaziabad", name: "Ghaziabad", stateCode: "UP", centroidLat: 28.6692, centroidLng: 77.4538 },
+    { slug: "lucknow", name: "Lucknow", stateCode: "UP", centroidLat: 26.8467, centroidLng: 80.9462 },
+    { slug: "south-delhi", name: "South Delhi", stateCode: "DL", centroidLat: 28.4817, centroidLng: 77.1873 },
+    { slug: "new-delhi", name: "New Delhi", stateCode: "DL", centroidLat: 28.6139, centroidLng: 77.209 },
+    { slug: "gurugram", name: "Gurugram (Gurgaon)", stateCode: "HR", centroidLat: 28.4595, centroidLng: 77.0266 },
+    { slug: "mumbai-suburban", name: "Mumbai Suburban", stateCode: "MH", centroidLat: 19.076, centroidLng: 72.8777 },
+    { slug: "pune", name: "Pune", stateCode: "MH", centroidLat: 18.5204, centroidLng: 73.8567 },
+    { slug: "hyderabad", name: "Hyderabad", stateCode: "TS", centroidLat: 17.385, centroidLng: 78.4867 },
+  ];
+
+  const cityMap = new Map<string, string>();
+  for (const c of citiesData) {
+    const stateId = stateMap.get(c.stateCode) ?? stateMap.get("KA")!;
+    const city = await prisma.city.upsert({
+      where: { slug: c.slug },
+      update: { name: c.name, isActive: true },
+      create: {
+        stateId,
+        name: c.name,
+        slug: c.slug,
+        isActive: true,
+        centroidLat: c.centroidLat,
+        centroidLng: c.centroidLng,
+      },
+    });
+    cityMap.set(c.slug, city.id);
+  }
+
+  // Localities for Noida
+  const noidaCityId = cityMap.get("gautam-buddha-nagar");
+  if (noidaCityId) {
+    const noidaLocs = [
+      { name: "Noida Sector 62", slug: "noida-sector-62", aliases: ["Sector 62", "Sec 62 Noida"], centroidLat: 28.628, centroidLng: 77.3649 },
+      { name: "Noida Sector 18", slug: "noida-sector-18", aliases: ["Sector 18", "Atta Market"], centroidLat: 28.5708, centroidLng: 77.3271 },
+      { name: "Noida Sector 15", slug: "noida-sector-15", aliases: ["Sector 15"], centroidLat: 28.5833, centroidLng: 77.3117 },
+      { name: "Noida Sector 50", slug: "noida-sector-50", aliases: ["Sector 50"], centroidLat: 28.5714, centroidLng: 77.3694 },
+      { name: "Noida Sector 76", slug: "noida-sector-76", aliases: ["Sector 76"], centroidLat: 28.5667, centroidLng: 77.3833 },
+      { name: "Greater Noida West", slug: "greater-noida-west", aliases: ["Noida Extension", "Gaur City"], centroidLat: 28.5983, centroidLng: 77.4333 },
+    ];
+
+    for (const loc of noidaLocs) {
+      await prisma.locality.upsert({
+        where: { cityId_slug: { cityId: noidaCityId, slug: loc.slug } },
+        update: { name: loc.name, aliases: loc.aliases },
+        create: { ...loc, cityId: noidaCityId },
+      });
+    }
+  }
+
+  const bengaluruId = cityMap.get("bengaluru")!;
   for (const locality of bengaluruLocalities) {
     await prisma.locality.upsert({
-      where: { cityId_slug: { cityId: bengaluru.id, slug: locality.slug } },
+      where: { cityId_slug: { cityId: bengaluruId, slug: locality.slug } },
       update: {
         name: locality.name,
         aliases: locality.aliases,
         centroidLat: locality.centroidLat,
         centroidLng: locality.centroidLng,
       },
-      create: { ...locality, cityId: bengaluru.id },
+      create: { ...locality, cityId: bengaluruId },
     });
   }
 

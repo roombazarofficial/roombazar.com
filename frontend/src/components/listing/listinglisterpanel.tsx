@@ -111,19 +111,19 @@ export function ListingListerPanel({ listing }: { listing: Listing }) {
       {isLive ? (
         <>
           {isOwner ? (
-            <div className="mt-5 space-y-2">
+            <div className="mt-5 space-y-2.5 rounded-xl border border-line bg-surface-muted/60 p-3.5">
               <Link
                 href={routes.myListing(listing.id)}
                 className={buttonStyles({
                   variant: "secondary",
                   size: "lg",
-                  className: "w-full text-center",
+                  className: "w-full text-center font-medium",
                 })}
               >
-                Manage your listing
+                ⚙️ Manage your listing
               </Link>
-              <p className="text-center text-xs text-ink-muted">
-                You posted this room listing.
+              <p className="text-center text-xs text-ink-muted leading-relaxed">
+                👤 <span className="font-semibold text-ink">You are the owner</span> of this listing. Seekers visiting this page see a <strong>&quot;💬 Chat with Owner&quot;</strong> button to message you.
               </p>
             </div>
           ) : (
@@ -132,13 +132,13 @@ export function ListingListerPanel({ listing }: { listing: Listing }) {
                 fullWidth
                 size="lg"
                 onClick={handleMessageClick}
-                className="mt-5 bg-brand-600 hover:bg-brand-700 font-semibold"
+                className="mt-5 bg-brand-600 hover:bg-brand-700 font-semibold shadow-xs flex items-center justify-center gap-2"
               >
-                Message about this room
+                <span>💬</span> Chat with Owner
               </Button>
 
               <p className="mt-2 text-center text-xs text-ink-subtle">
-                Your phone number stays private until you both choose to share it.
+                Direct in-app chat · Contact numbers can be shared in conversation.
               </p>
             </>
           )}

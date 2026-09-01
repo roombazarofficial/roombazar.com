@@ -43,30 +43,30 @@ const TRUST_ITEMS = [
 export function TrustStrip() {
   return (
     <section className="border-y border-line bg-surface-muted/50">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:py-12">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
         {/* Heading */}
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center sm:mb-8">
           <p className="text-2xs font-bold uppercase tracking-widest text-brand-600">
             Why RoomBazar?
           </p>
-          <h2 className="mt-1 text-xl font-bold tracking-tight text-ink sm:text-2xl">
+          <h2 className="mt-1 text-lg font-bold tracking-tight text-ink sm:text-2xl">
             Built for trust
           </h2>
         </div>
 
-        {/* Items */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Items — 2 cols on mobile, 4 on desktop */}
+        <div className="grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4">
           {TRUST_ITEMS.map((item, i) => (
             <div
               key={item.title}
-              className={`flex flex-col items-center text-center sm:items-start sm:text-left animate-fade-up stagger-${Math.min(i + 1, 6)}`}
+              className={`flex flex-col items-center text-center animate-fade-up stagger-${Math.min(i + 1, 6)}`}
             >
               {/* Icon circle */}
               <div className="flex size-10 items-center justify-center rounded-xl bg-brand-100 text-brand-600 mb-3">
                 {item.icon}
               </div>
-              <h3 className="text-sm font-bold text-ink">{item.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-ink-muted">{item.desc}</p>
+              <h3 className="text-xs font-bold text-ink sm:text-sm">{item.title}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-ink-muted sm:text-sm">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -74,3 +74,4 @@ export function TrustStrip() {
     </section>
   );
 }
+

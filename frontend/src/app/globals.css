@@ -68,6 +68,8 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  /* Prevent horizontal overflow on mobile from any oversized element */
+  overflow-x: hidden;
 }
 
 :root {
@@ -80,6 +82,9 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Prevent any child from causing horizontal scroll */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Listing photos arrive over slow connections. Images always declare their

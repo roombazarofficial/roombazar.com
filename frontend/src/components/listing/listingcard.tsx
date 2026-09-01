@@ -199,11 +199,11 @@ export function ListingCard({
         </div>
 
         {/* 2. Card Content Body */}
-        <div className="flex flex-1 flex-col justify-between p-3.5">
+        <div className="flex flex-1 flex-col justify-between p-3 sm:p-3.5">
           <div>
             {/* Price row */}
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-extrabold tracking-tight text-brand-600">
+              <span className="text-lg font-extrabold tracking-tight text-brand-600 sm:text-xl">
                 {formatRupees(listing.rentPaise || 0)}
               </span>
               <span className="text-xs font-normal text-ink-subtle">/mo</span>

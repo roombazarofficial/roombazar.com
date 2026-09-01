@@ -136,7 +136,7 @@ export function SiteHeader() {
         </div>
 
         {/* Right: 4 Navigation Action Buttons */}
-        <div className="flex items-center gap-3 sm:gap-5 md:gap-6">
+        <div className="flex items-center gap-2 sm:gap-5 md:gap-6">
           {/* 1. Wishlist Button */}
           <Link
             href={mounted && user ? routes.saved : "#"}
@@ -158,7 +158,7 @@ export function SiteHeader() {
             >
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
-            <span className="text-[11px] sm:text-xs font-semibold text-ink group-hover:text-brand-600 transition-colors leading-tight mt-0.5">
+            <span className="hidden sm:block text-[11px] sm:text-xs font-semibold text-ink group-hover:text-brand-600 transition-colors leading-tight mt-0.5">
               Wishlist
             </span>
           </Link>
@@ -191,7 +191,7 @@ export function SiteHeader() {
                 </span>
               )}
             </div>
-            <span className="text-[11px] sm:text-xs font-semibold text-ink group-hover:text-brand-600 transition-colors leading-tight mt-0.5">
+            <span className="hidden sm:block text-[11px] sm:text-xs font-semibold text-ink group-hover:text-brand-600 transition-colors leading-tight mt-0.5">
               Chat
             </span>
           </Link>

@@ -13,7 +13,13 @@ export default async function Page() {
   ]);
 
   const active = listings.filter((listing) => listing.status === "active");
-  const closed = listings.filter((listing) => listing.status !== "active");
+  const pending = listings.filter(
+    (listing) => listing.status === "pendingapproval",
+  );
+  const closed = listings.filter(
+    (listing) =>
+      listing.status !== "active" && listing.status !== "pendingapproval",
+  );
 
   const unread = conversations.reduce(
     (sum, conversation) => sum + conversation.unreadCount,
@@ -34,14 +40,18 @@ export default async function Page() {
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Your rooms
-        </h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            Your rooms
+          </h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            Manage your ads, reviews, and tenant enquiries.
+          </p>
+        </div>
 
         <Link href={routes.post} className={buttonStyles()}>
           Host a room
         </Link>
-
       </header>
 
       {(unread > 0 || expiring.length > 0) && (
@@ -56,17 +66,14 @@ export default async function Page() {
                   {unread} {unread === 1 ? "message" : "messages"} waiting for
                   your reply
                 </p>
-
                 <p className="mt-0.5 text-sm text-brand-700">
                   Seekers usually move on within a day if nobody answers.
                 </p>
-
               </div>
-
-              <span aria-hidden className="text-brand-700">→</span>
-
+              <span aria-hidden className="text-brand-700">
+                →
+              </span>
             </Link>
-
           )}
 
           {expiring.map((listing) => (
@@ -77,72 +84,85 @@ export default async function Page() {
               <p className="text-sm font-medium text-warning">
                 “{listing.title}” expires soon
               </p>
-
               <p className="mt-0.5 text-sm text-warning">
                 Renew it if the room is still free, or mark it taken so seekers
                 stop messaging you about it.
               </p>
-
             </div>
-
           ))}
         </section>
-
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Stat label="Total rooms" value={String(listings.length)} />
         <Stat label="Live rooms" value={String(active.length)} />
-
+        <Stat label="In review" value={String(pending.length)} />
         <Stat label="Total views" value={String(totalViews)} />
-
-        <Stat label="Conversations" value={String(conversations.length)} />
-
       </div>
 
-      <section>
-        <h2 className="mb-3 text-base font-semibold text-ink">Live rooms</h2>
+      {/* Empty State */}
+      {listings.length === 0 ? (
+        <EmptyState
+          title="No rooms listed yet"
+          description="Posting is free and takes about three minutes. Your phone number stays private."
+          action={
+            <Link href={routes.post} className={buttonStyles()}>
+              Post your first room
+            </Link>
+          }
+        />
+      ) : (
+        <div className="space-y-8">
+          {/* Pending Approval Section */}
+          {pending.length > 0 && (
+            <section>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-ink flex items-center gap-2">
+                  <span>⏳</span> In review ({pending.length})
+                </h2>
+                <span className="text-xs text-amber-700 font-medium">
+                  Waiting for admin verification
+                </span>
+              </div>
+              <div className="space-y-3">
+                {pending.map((listing) => (
+                  <OwnerListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+          )}
 
-        {active.length === 0 ? (
-          <EmptyState
-            title="No rooms listed yet"
-            description="Posting is free and takes about three minutes. Your phone number stays private."
-            action={
-              <Link href={routes.post} className={buttonStyles()}>
-                Post your first room
-              </Link>
+          {/* Active Live Rooms Section */}
+          {active.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-base font-semibold text-ink flex items-center gap-2">
+                <span>🟢</span> Live rooms ({active.length})
+              </h2>
+              <div className="space-y-3">
+                {active.map((listing) => (
+                  <OwnerListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+          )}
 
-            }
-          />
-
-        ) : (
-          <div className="space-y-3">
-            {active.map((listing) => (
-              <OwnerListingCard key={listing.id} listing={listing} />
-
-            ))}
-          </div>
-
-        )}
-      </section>
-
-      {closed.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-base font-semibold text-ink">
-            Taken and expired
-          </h2>
-
-          <div className="space-y-3">
-            {closed.map((listing) => (
-              <OwnerListingCard key={listing.id} listing={listing} />
-
-            ))}
-          </div>
-
-        </section>
-
+          {/* Closed / Taken Rooms Section */}
+          {closed.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-base font-semibold text-ink">
+                Taken and expired ({closed.length})
+              </h2>
+              <div className="space-y-3">
+                {closed.map((listing) => (
+                  <OwnerListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </div>
-
   );
 }
 
@@ -150,10 +170,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-card border border-line bg-surface p-4">
       <p className="text-xs text-ink-muted">{label}</p>
-
       <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{value}</p>
-
     </div>
-
   );
 }

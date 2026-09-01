@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LocationPicker } from "./locationpicker";
 import { buildSearchQuery } from "@/lib/utils/querystring";
@@ -13,7 +13,8 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
   const [selectedLocationLabel, setSelectedLocationLabel] = useState("");
   const [citySlug, setCitySlug] = useState("");
   const [moveIn, setMoveIn] = useState("");
-  const [focused, setFocused] = useState<"location" | "movein" | null>(null);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -30,86 +31,81 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
     <form
       onSubmit={submit}
       className={`
-        relative mx-auto mt-8 w-full max-w-3xl overflow-visible
-        rounded-2xl border bg-white shadow-raised
+        relative mx-auto mt-6 w-full max-w-3xl
+        rounded-2xl sm:rounded-full
+        border border-line bg-white shadow-raised
         transition-all duration-200
-        sm:rounded-full
-        ${focused
-          ? "border-brand-400 shadow-feature"
-          : "border-line hover:border-line-strong hover:shadow-overlay"
-        }
+        ${isLocationOpen ? "ring-2 ring-brand-500/20 border-brand-300" : "hover:border-line-strong hover:shadow-overlay"}
       `}
     >
-      <div className="flex flex-col sm:flex-row sm:items-stretch">
+      <div className="flex flex-col sm:flex-row sm:items-center">
         {/* =========================================================================
-            1. LOCATION FIELD
+            1. LOCATION SEGMENT
             ========================================================================= */}
         <div
           className={`
-            relative min-w-0 flex-[1.5] px-5 py-3.5 sm:pl-6 sm:pr-4 text-left
-            flex flex-col justify-center items-start cursor-pointer
+            relative min-w-0 flex-[1.4] px-4 py-3 sm:px-6
+            flex flex-col justify-center items-start text-left cursor-pointer
             rounded-t-2xl sm:rounded-l-full sm:rounded-tr-none
             transition-colors duration-150
-            ${focused === "location" ? "bg-brand-50/60" : "hover:bg-surface-muted/70"}
+            ${isLocationOpen ? "bg-brand-50/40" : "hover:bg-surface-muted/60"}
           `}
-          onClick={() => setFocused("location")}
         >
-          {/* Location icon + label row */}
-          <div className="flex items-center gap-2 mb-1.5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-3.5 shrink-0 text-brand-600"
-              aria-hidden
-            >
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            <label
-              htmlFor="hero-where"
-              className="block text-[11px] font-bold uppercase tracking-widest text-ink cursor-pointer"
-            >
-              Location
-            </label>
-          </div>
+          <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-0.5 cursor-pointer">
+            Location
+          </label>
 
-          {/* Value row */}
-          <div className="flex h-5 w-full items-center text-left">
-            <LocationPicker
-              selectedLabel={selectedLocationLabel}
-              cities={cities}
-              onSelect={({ label, citySlug: cSlug }) => {
-                setSelectedLocationLabel(label);
-                setCitySlug(cSlug || "");
-                setFocused(null);
-              }}
-            />
-          </div>
+          <LocationPicker
+            selectedLabel={selectedLocationLabel}
+            cities={cities}
+            isOpen={isLocationOpen}
+            onToggle={() => setIsLocationOpen((prev) => !prev)}
+            onClose={() => setIsLocationOpen(false)}
+            onSelect={({ label, citySlug: cSlug }) => {
+              setSelectedLocationLabel(label);
+              setCitySlug(cSlug || "");
+              setIsLocationOpen(false);
+            }}
+          />
         </div>
 
-        {/* Dividers */}
-        <div className="hidden sm:flex items-center self-center px-1">
-          <span className="h-10 w-px bg-line" aria-hidden />
-        </div>
-        <span className="block sm:hidden h-px w-full bg-line" aria-hidden />
+        {/* Divider (Desktop) */}
+        <div className="hidden sm:block h-8 w-px bg-line shrink-0" aria-hidden />
+        {/* Divider (Mobile) */}
+        <div className="block sm:hidden h-px w-full bg-line" aria-hidden />
 
         {/* =========================================================================
-            2. MOVE-IN DATE FIELD
+            2. MOVE-IN DATE SEGMENT
             ========================================================================= */}
         <div
-          className={`
-            relative min-w-0 flex-1 px-5 py-3.5 sm:px-5 text-left
-            flex flex-col justify-center items-start cursor-pointer
-            transition-colors duration-150
-            ${focused === "movein" ? "bg-brand-50/60" : "hover:bg-surface-muted/70"}
-          `}
+          onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
+          className="
+            relative min-w-0 flex-1 px-4 py-3 sm:px-6
+            flex flex-col justify-center items-start text-left cursor-pointer
+            hover:bg-surface-muted/60 transition-colors duration-150
+          "
         >
-          {/* Calendar icon + label row */}
-          <div className="flex items-center gap-2 mb-1.5">
+          <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-0.5 cursor-pointer">
+            Move-in
+          </label>
+
+          <div className="flex h-5 w-full items-center justify-between">
+            <span
+              className={
+                moveIn
+                  ? "truncate text-sm font-semibold text-ink"
+                  : "truncate text-sm font-normal text-ink-muted"
+              }
+            >
+              {moveIn
+                ? new Date(moveIn).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Add dates"}
+            </span>
+
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -117,7 +113,7 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="size-3.5 shrink-0 text-brand-600"
+              className="size-4 shrink-0 text-ink-subtle"
               aria-hidden
             >
               <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
@@ -125,56 +121,32 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
               <line x1="8" x2="8" y1="2" y2="6" />
               <line x1="3" x2="21" y1="10" y2="10" />
             </svg>
-            <label
-              htmlFor="hero-movein"
-              className="block text-[11px] font-bold uppercase tracking-widest text-ink cursor-pointer"
-            >
-              Move-in
-            </label>
           </div>
 
-          {/* Value row */}
-          <div className="flex h-5 w-full items-center justify-between text-left">
-            <span
-              className={
-                moveIn
-                  ? "truncate text-sm font-semibold text-ink"
-                  : "truncate text-sm font-normal text-ink-subtle"
-              }
-            >
-              {moveIn ? new Date(moveIn).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Any time"}
-            </span>
-          </div>
-
-          {/* Invisible date input */}
+          {/* Invisible date picker input overlay */}
           <input
+            ref={dateInputRef}
             id="hero-movein"
             type="date"
             value={moveIn}
-            onFocus={() => setFocused("movein")}
-            onBlur={() => setFocused(null)}
-            onChange={(event) => setMoveIn(event.target.value)}
+            onChange={(e) => setMoveIn(e.target.value)}
             className="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
-            aria-label="Move-in date"
+            aria-label="Select move-in date"
           />
         </div>
 
         {/* =========================================================================
             3. SEARCH ACTION BUTTON
             ========================================================================= */}
-        <div className="p-2.5 sm:pr-3 flex items-center">
+        <div className="p-2 sm:pr-2.5 flex items-center">
           <button
             type="submit"
             className="
-              flex h-12 w-full items-center justify-center gap-2
-              rounded-xl sm:rounded-full
-              bg-brand-600 px-8
-              text-sm font-bold text-white
-              shadow-raised
-              transition-all duration-200
-              hover:bg-brand-700 hover:-translate-y-px hover:shadow-card-hover
-              active:scale-[0.97] active:translate-y-0
-              sm:h-12 sm:w-auto
+              flex h-11 sm:h-12 w-full sm:w-auto items-center justify-center gap-2
+              rounded-xl sm:rounded-full bg-brand-600 px-7 sm:px-8
+              text-sm font-bold text-white shadow-xs
+              transition-all duration-150 hover:bg-brand-700 active:scale-[0.98]
+              cursor-pointer
             "
           >
             <svg

@@ -68,7 +68,7 @@ export default async function Image({
                 fontWeight: 600,
               }}
             >
-              {listing.postedBy === "agent" ? "Agent" : "Owner"}
+              Owner
             </span>
 
             <span

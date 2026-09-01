@@ -2,7 +2,6 @@ import Link from "next/link";
 import { SiteShell } from "@/components/layout/siteshell";
 import { ListingCard } from "@/components/listing/listingcard";
 import { HeroSearchBar } from "@/components/search/herosearchbar";
-import { HeroCityscapePattern } from "@/components/home/herocityscapepattern";
 import { PopularLocations } from "@/components/home/popularlocations";
 import { SpaceTypeGrid } from "@/components/home/spacetypegrid";
 import { TrustStrip } from "@/components/home/truststrip";
@@ -33,55 +32,20 @@ export default async function Page() {
   return (
     <SiteShell>
       {/* ===== HERO SECTION ===== */}
-      <section className="relative border-b border-line bg-white overflow-hidden">
-        <HeroCityscapePattern />
-
-        {/* Gradient overlay at bottom so illustration blends into next section */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 inset-x-0 h-16 z-10"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent, rgba(255,255,255,0.9) 90%, white)",
-          }}
-        />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-14 text-center sm:pt-20 sm:pb-18">
-          {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-1.5 mb-5 animate-fade-in">
-            <span className="size-1.5 rounded-full bg-brand-500 animate-pulse-brand" />
-            <span className="text-xs font-semibold text-brand-700">
-              Rooms, Flats &amp; More — Direct from Owners
-            </span>
-          </div>
-
-          {/* Main heading */}
-          <h1 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-ink sm:text-5xl animate-fade-up">
-            Find a place that{" "}
-            <span className="text-brand-600">feels like home</span>
+      <section className="relative border-b border-line bg-gradient-to-b from-brand-50/50 via-white to-white">
+        <div className="mx-auto max-w-7xl px-4 pt-10 pb-12 text-center sm:pt-14 sm:pb-16">
+          {/* Controlled, Balanced Heading */}
+          <h1 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-[2.75rem] leading-[1.2]">
+            Find a place that <span className="text-brand-600">feels like home</span>
           </h1>
 
-          {/* Subheading */}
-          <p className="mx-auto mt-4 max-w-lg text-sm text-ink-muted sm:text-base animate-fade-up stagger-1">
-            Browse rooms, flats, shops, halls and more — talk to owners
-            directly and arrange a visit.
+          {/* Supporting Text */}
+          <p className="mx-auto mt-3 max-w-lg text-sm text-ink-muted sm:text-base leading-relaxed">
+            Browse rooms, flats, PGs, and commercial spaces — connect directly with owners.
           </p>
 
-          {/* Search Bar */}
-          <div className="animate-fade-up stagger-2">
-            <HeroSearchBar cities={cities} />
-          </div>
-
-          {/* Host CTA micro-link */}
-          <p className="mt-5 text-sm text-ink-muted animate-fade-up stagger-3">
-            Have a space to rent?{" "}
-            <Link
-              href={routes.post}
-              className="font-semibold text-brand-600 underline underline-offset-4 transition-colors hover:text-brand-700"
-            >
-              Post it free →
-            </Link>
-          </p>
+          {/* Unified Search Experience */}
+          <HeroSearchBar cities={cities} />
         </div>
       </section>
 
@@ -106,7 +70,7 @@ export default async function Page() {
       )}
 
       {/* ===== RECENTLY POSTED ===== */}
-      <section className="mx-auto max-w-7xl px-4 pt-2 pb-10">
+      <section className="mx-auto max-w-7xl px-4 pt-2 pb-12">
         <div className="mb-6 flex items-end justify-between">
           <div>
             <p className="text-2xs font-bold uppercase tracking-widest text-brand-600">
@@ -137,21 +101,23 @@ export default async function Page() {
         {recent.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {recent.slice(0, 8).map((listing, index) => (
-              <div
+              <ListingCard
                 key={listing.id}
-                className={`animate-fade-up stagger-${Math.min(index + 1, 6)}`}
-              >
-                <ListingCard
-                  listing={listing}
-                  priority={index === 0}
-                />
-              </div>
+                listing={listing}
+                priority={index === 0}
+              />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line-strong bg-surface-muted py-16 text-center">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600 mb-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="size-7">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                className="size-7"
+              >
                 <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
