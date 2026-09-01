@@ -25,10 +25,13 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Params;
+  searchParams: Search;
 }): Promise<Metadata> {
   const { city, locality } = await params;
+  const rawSearch = await searchParams;
   const [foundCity, localities] = await Promise.all([
     getCityBySlug(city),
     getLocalities(city),
@@ -37,10 +40,30 @@ export async function generateMetadata({
   const found = localities.find((item) => item.slug === locality);
   if (!foundCity || !found) return {};
 
+  const title = `Rooms for Rent in ${found.name}, ${foundCity.name} — Direct From Owners | RoomBazar`;
+  const description = `Find verified single rooms, shared rooms, 1 BHK, and flats for rent in ${found.name}, ${foundCity.name}. Direct from property owners with 0% brokerage.`;
+  const hasFilterParams = Object.keys(rawSearch).length > 0;
+
   return {
-    title: `Rooms for rent in ${found.name}, ${foundCity.name}`,
-    description: `Rooms and PGs for rent in ${found.name}, ${foundCity.name}, posted directly by owners. No broker fees.`,
+    title,
+    description,
     alternates: { canonical: routes.locality(city, locality) },
+    openGraph: {
+      title,
+      description,
+      url: routes.locality(city, locality),
+      siteName: "RoomBazar",
+      locale: "en_IN",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: hasFilterParams
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
   };
 }
 

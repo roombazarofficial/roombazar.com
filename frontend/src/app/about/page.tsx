@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/layout/siteshell";
+import { BreadcrumbStructuredData } from "@/components/common/structureddata";
 import { routes } from "@/lib/constants/routes";
 
 export const metadata: Metadata = {
-  title: "About RoomBazar | Find Rooms, PGs & Shared Spaces",
+  title: "About RoomBazar — Direct From Owner Room Rental Marketplace",
   description:
-    "Learn about RoomBazar, a simple way to find rooms, PGs and shared spaces and connect with the people who post them.",
+    "Learn about RoomBazar, India's peer-to-peer room rental marketplace connecting seekers directly with property owners with 0% brokerage.",
 };
 
 export default function AboutPage() {
   return (
     <SiteShell>
+      <BreadcrumbStructuredData
+        trail={[
+          { name: "Home", path: routes.home },
+          { name: "About RoomBazar", path: routes.about },
+        ]}
+      />
       <div className="bg-white">
         {/* =========================================================================
             HERO SECTION

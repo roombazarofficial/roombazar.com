@@ -1,0 +1,63 @@
+# RoomBazar
+
+> Direct-from-owner room and rentable space marketplace in India with zero broker fees (0% brokerage).
+
+## Overview
+RoomBazar (https://roombazar.com) is a platform connecting property owners directly with room seekers and tenants across major Indian metropolitan hubs. Room seekers can discover available rooms, review transparent monthly rents and deposits, check furnished amenities, verify location on Google Maps, and start a direct in-app chat with the property owner without middlemen or broker commissions.
+
+## Core Cities & Regional Hubs
+- **Bengaluru (Karnataka)**: HSR Layout, Koramangala, Indiranagar, BTM Layout, Whitefield, Marathahalli, Electronic City, Bellandur, Jayanagar, JP Nagar, Hebbal, Yelahanka
+- **Gautam Buddha Nagar / Noida (Uttar Pradesh)**: Sector 62, Sector 18, Sector 15, Sector 50, Sector 76, Sector 137, Greater Noida West
+- **Delhi NCR (National Capital Region)**: South Delhi, Hauz Khas, Saket, Lajpat Nagar, Connaught Place, Dwarka, Rohini, Vasant Kunj
+- **Gurugram / Gurgaon (Haryana)**: DLF Phase 1-5, Cyber City, Sector 56, Sector 48, Golf Course Road, Sohna Road
+- **Ghaziabad (Uttar Pradesh)**: Indirapuram, Vaishali, Vasundhara, Raj Nagar Extension
+- **Mumbai (Maharashtra)**: Andheri East/West, Bandra, Powai, Goregaon, Borivali, Thane, Navi Mumbai
+- **Pune (Maharashtra)**: Hinjewadi, Wakad, Baner, Kothrud, Viman Nagar, Kharadi, Magarpatta
+- **Hyderabad (Telangana)**: Hitec City, Gachibowli, Madhapur, Kondapur, Kukatpally, Banjara Hills, Jubilee Hills
+
+## Supported Property & Room Categories
+- **Single Room**: Independent private room for 1 person (students or working professionals).
+- **Shared Room**: Multi-occupancy shared room (roommates / budget seekers).
+- **PG / Hostel Bed**: Paying guest accommodation with bed inventory, optional meals, and utilities.
+- **1 BHK Flat**: 1 Bedroom, Hall, Kitchen apartment for individuals, couples, or small families.
+- **2 BHK Flat**: 2 Bedroom apartment for families or shared working professionals.
+- **3+ BHK Flat / House**: Spacious full home or multi-room apartment.
+- **Commercial / Rentable Space**: Shops, office spaces, warehouses, and event halls.
+
+## Canonical URL Structure
+- **Homepage**: `https://roombazar.com/`
+- **City Browse Page**: `https://roombazar.com/rooms/{citySlug}` (e.g. `https://roombazar.com/rooms/bengaluru`)
+- **Locality Browse Page**: `https://roombazar.com/rooms/{citySlug}/{localitySlug}` (e.g. `https://roombazar.com/rooms/bengaluru/hsr-layout`)
+- **Room Listing Detail Page**: `https://roombazar.com/room/{listingSlug}` (e.g. `https://roombazar.com/room/1-bhk-noida-sector-62-9eb5f1`)
+- **All Rooms Directory**: `https://roombazar.com/rooms`
+- **Trust & Safety Guide**: `https://roombazar.com/safety`
+- **About RoomBazar**: `https://roombazar.com/about`
+- **Help Center**: `https://roombazar.com/help`
+
+## Listing Data Attributes
+Every real RoomBazar room listing contains:
+- `title`: Room or apartment title (e.g., "1 BHK Furnished Flat in Sector 62")
+- `roomType`: Category (Single Room, Shared Room, PG Bed, 1 BHK, 2 BHK, 3+ BHK)
+- `furnishing`: Furnished, Semi-Furnished, or Unfurnished
+- `rent`: Integer monthly rent in Indian Rupees (INR / ₹)
+- `deposit`: Security deposit amount in INR (usually 1-2 months)
+- `maintenance`: Maintenance charges (or included)
+- `billsIncluded`: Whether electricity/water/Wi-Fi are included in the rent
+- `location`: Exact locality, district, city, state, and pincode
+- `coordinates`: Latitude and longitude with Google Maps directions link
+- `amenities`: Verified list of features (AC, Wi-Fi, Attached Bathroom, Kitchen, Washing Machine, Car/Bike Parking, Lift, CCTV, Power Backup, RO Water, Security)
+- `preferredTenant`: Anyone, Families, Working Professionals, Students, Bachelors (Men), Bachelors (Women)
+- `availableFrom`: ISO move-in date
+- `photos`: Verified room images uploaded directly by property owner
+- `contact`: Direct in-app messaging and mutual contact number sharing
+
+## Trust & Safety Guarantees
+1. **0% Brokerage**: Direct connection with property owners. No broker fees or agency commissions.
+2. **Contact Privacy**: Phone numbers remain confidential until both parties mutually choose to reveal them in chat.
+3. **No Upfront Payments**: RoomBazar strictly advises seekers never to pay advances or token fees online before in-person property visits.
+4. **Moderation & Verification**: Every listing undergoes administrative verification before going live.
+
+## Contact & Official Support
+- **Website**: https://roombazar.com
+- **Official Email**: roombazar.official@gmail.com
+- **Sitemap**: https://roombazar.com/sitemap.xml

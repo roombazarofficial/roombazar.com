@@ -4,24 +4,19 @@ import type { Locality } from "@/types/locality";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://roombazar.com";
 
 /**
- * JSON-LD for listing and locality pages.
- *
- * Organic search is the primary acquisition channel, so this is not optional
- * polish — it is what lets a listing appear as a rich result rather than a
- * plain blue link. See docs/02-architecture.md.
- *
- * Note what is deliberately absent: no aggregateRating (we do not rate
- * people), and no precise geo coordinates. Emitting the exact latitude of a
- * room someone lives in would undo the location fuzzing the rest of the
- * product is careful about.
+ * JSON-LD for listing detail pages.
+ * Maps real room data into Schema.org Accommodation and RealEstateListing schemas.
  */
 export function ListingStructuredData({ listing }: { listing: Listing }) {
+  const photos = listing.photos?.map((p) => p.url) ?? [];
+
   const data = {
     "@context": "https://schema.org",
-    "@type": "Accommodation",
+    "@type": ["Accommodation", "RealEstateListing"],
     name: listing.title,
     description: listing.description,
     url: `${siteUrl}/room/${listing.slug}`,
+    image: photos.length > 0 ? photos : undefined,
     numberOfRooms: roomCount(listing.roomType),
     floorSize: listing.areaSqft
       ? {
@@ -32,15 +27,28 @@ export function ListingStructuredData({ listing }: { listing: Listing }) {
       : undefined,
     address: {
       "@type": "PostalAddress",
+      streetAddress: listing.locality.name,
       addressLocality: listing.locality.name,
       addressRegion: listing.city.state,
       addressCountry: "IN",
     },
-    amenityFeature: listing.amenities.map((amenity) => ({
+    geo:
+      listing.approximateLat && listing.approximateLng
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: listing.approximateLat,
+            longitude: listing.approximateLng,
+          }
+        : undefined,
+    amenityFeature: listing.amenities?.map((amenity) => ({
       "@type": "LocationFeatureSpecification",
       name: amenity.label,
       value: true,
     })),
+    provider: {
+      "@type": "Person",
+      name: listing.lister?.name ?? "Property Owner",
+    },
     potentialAction: {
       "@type": "RentAction",
       target: `${siteUrl}/room/${listing.slug}`,
@@ -66,6 +74,30 @@ export function ListingStructuredData({ listing }: { listing: Listing }) {
   return <JsonLd data={data} />;
 }
 
+export function CityStructuredData({
+  cityName,
+  citySlug,
+  listingCount,
+}: {
+  cityName: string;
+  citySlug: string;
+  listingCount: number;
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `Rooms for rent in ${cityName} — Direct from Owners | RoomBazar`,
+    description: `Browse verified rooms, 1 BHK, 2 BHK, and flats for rent in ${cityName} with zero broker fees.`,
+    url: `${siteUrl}/rooms/${citySlug}`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: listingCount,
+    },
+  };
+
+  return <JsonLd data={data} />;
+}
+
 export function LocalityStructuredData({
   locality,
   cityName,
@@ -78,7 +110,8 @@ export function LocalityStructuredData({
   const data = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `Rooms for rent in ${locality.name}, ${cityName}`,
+    name: `Rooms for rent in ${locality.name}, ${cityName} | RoomBazar`,
+    description: `Discover verified rooms, flats and shared accommodation for rent in ${locality.name}, ${cityName} directly from property owners.`,
     url: `${siteUrl}/rooms/${locality.citySlug}/${locality.slug}`,
     mainEntity: {
       "@type": "ItemList",
@@ -89,35 +122,27 @@ export function LocalityStructuredData({
   return <JsonLd data={data} />;
 }
 
-function JsonLd({ data }: { data: unknown }) {
-  return (
-    <script
-      type="application/ld+json"
-      // JSON.stringify drops undefined keys, so optional fields simply vanish
-      // rather than emitting nulls that validators complain about.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  );
+export function FAQStructuredData({
+  items,
+}: {
+  items: { question: string; answer: string }[];
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
+  return <JsonLd data={data} />;
 }
 
-function roomCount(roomType: Listing["roomType"]): number {
-  switch (roomType) {
-    case "bhk3plus":
-      return 3;
-    case "bhk2":
-      return 2;
-    default:
-      return 1;
-  }
-}
-
-/**
- * Site-level identity, emitted once from the root layout.
- *
- * The SearchAction is what can earn a sitelinks search box in Google results —
- * for a marketplace whose entire acquisition channel is organic search, that
- * is worth the twenty lines.
- */
 export function SiteStructuredData() {
   const data = {
     "@context": "https://schema.org",
@@ -127,8 +152,20 @@ export function SiteStructuredData() {
         "@id": `${siteUrl}/#organization`,
         name: "RoomBazar",
         url: siteUrl,
+        logo: `${siteUrl}/icon.png`,
         description:
-          "A peer-to-peer room marketplace with no commission and no broker fees.",
+          "RoomBazar is a peer-to-peer room rental marketplace in India connecting room seekers directly with property owners with 0% brokerage.",
+        email: "roombazar.official@gmail.com",
+        sameAs: [
+          "https://www.instagram.com/roombzr/",
+          "https://www.facebook.com/profile.php?id=61593239100172",
+        ],
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "Customer Support",
+          email: "roombazar.official@gmail.com",
+          availableLanguage: ["English", "Hindi"],
+        },
       },
       {
         "@type": "WebSite",
@@ -141,7 +178,7 @@ export function SiteStructuredData() {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: `${siteUrl}/rooms/bengaluru?q={search_term_string}`,
+            urlTemplate: `${siteUrl}/rooms?q={search_term_string}`,
           },
           "query-input": "required name=search_term_string",
         },
@@ -152,11 +189,6 @@ export function SiteStructuredData() {
   return <JsonLd data={data} />;
 }
 
-/**
- * Breadcrumbs for listing and locality pages. Google renders these in place
- * of the raw URL, so a result reads "Bengaluru › Koramangala" rather than a
- * slug trail.
- */
 export function BreadcrumbStructuredData({
   trail,
 }: {
@@ -174,4 +206,24 @@ export function BreadcrumbStructuredData({
   };
 
   return <JsonLd data={data} />;
+}
+
+function JsonLd({ data }: { data: unknown }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+function roomCount(roomType: Listing["roomType"]): number {
+  switch (roomType) {
+    case "bhk3plus":
+      return 3;
+    case "bhk2":
+      return 2;
+    default:
+      return 1;
+  }
 }

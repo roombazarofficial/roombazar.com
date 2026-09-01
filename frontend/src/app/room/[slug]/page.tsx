@@ -35,12 +35,41 @@ export async function generateMetadata({
   if (!listing) return {};
 
   const isLive = listing.status === "active";
+  const rentFormatted = formatRupees(listing.rentPaise);
+  const typeLabel = roomTypeLabels[listing.roomType] ?? "Room";
+  const title = `${listing.title} — ${rentFormatted}/month in ${listing.locality.name}, ${listing.city.name}`;
+  const description = `Find this ${typeLabel.toLowerCase()} in ${listing.locality.name}, ${listing.city.name} on RoomBazar for ${rentFormatted}/month. Direct from owner with 0% brokerage fees. Verified listing with photos, amenities, and instant direct chat.`;
+  const coverUrl = listing.photos?.[0]?.url;
 
   return {
-    title: `${listing.title} — ${formatRupees(listing.rentPaise)}/month`,
-    description: `${roomTypeLabels[listing.roomType]} in ${listing.locality.name}, ${listing.city.name}. ${formatRupees(listing.rentPaise)} per month, direct from owner.`,
+    title,
+    description,
     alternates: { canonical: routes.listing(listing.slug) },
-    robots: isLive ? undefined : { index: false, follow: true },
+    openGraph: {
+      title,
+      description,
+      url: routes.listing(listing.slug),
+      siteName: "RoomBazar",
+      locale: "en_IN",
+      type: "article",
+      images: coverUrl
+        ? [
+            {
+              url: coverUrl,
+              alt: `${listing.title} in ${listing.locality.name}`,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: coverUrl ? [coverUrl] : undefined,
+    },
+    robots: isLive
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
   };
 }
 

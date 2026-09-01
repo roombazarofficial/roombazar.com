@@ -10,6 +10,10 @@ import { SortSelect } from "@/components/search/sortselect";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/emptystate";
 import { buttonStyles } from "@/components/ui/button";
+import {
+  CityStructuredData,
+  BreadcrumbStructuredData,
+} from "@/components/common/structureddata";
 import { searchListings } from "@/lib/api/listings";
 import { getCityBySlug, getLocalities } from "@/lib/api/geography";
 import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
@@ -20,17 +24,40 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Params;
+  searchParams: Search;
 }): Promise<Metadata> {
   const { city } = await params;
+  const rawSearch = await searchParams;
   const found = await getCityBySlug(city);
   if (!found) return {};
 
+  const title = `Rooms for Rent in ${found.name} — Direct From Owners | RoomBazar`;
+  const description = `Find verified single rooms, shared rooms, 1 BHK, 2 BHK, and flats for rent in ${found.name}, posted directly by owners with zero broker fees.`;
+  const hasFilterParams = Object.keys(rawSearch).length > 0;
+
   return {
-    title: `Rooms for rent in ${found.name}`,
-    description: `Rooms, PGs and flats for rent in ${found.name}, posted directly by owners. No broker fees.`,
+    title,
+    description,
     alternates: { canonical: routes.city(city) },
+    openGraph: {
+      title,
+      description,
+      url: routes.city(city),
+      siteName: "RoomBazar",
+      locale: "en_IN",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: hasFilterParams
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
   };
 }
 
@@ -54,6 +81,17 @@ export default async function Page({
 
   return (
     <SiteShell>
+      <CityStructuredData
+        cityName={found.name}
+        citySlug={city}
+        listingCount={results.totalItems}
+      />
+      <BreadcrumbStructuredData
+        trail={[
+          { name: "Home", path: routes.home },
+          { name: `Rooms in ${found.name}`, path: routes.city(city) },
+        ]}
+      />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <header>
           <h1 className="text-2xl font-semibold tracking-tight text-ink">

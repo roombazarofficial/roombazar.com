@@ -1,17 +1,43 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/layout/siteshell";
+import {
+  FAQStructuredData,
+  BreadcrumbStructuredData,
+} from "@/components/common/structureddata";
 import { routes } from "@/lib/constants/routes";
 
 export const metadata: Metadata = {
-  title: "Staying safe",
+  title: "Staying Safe on RoomBazar — Scam Prevention & Guidelines",
   description:
-    "How to avoid rental scams, what RoomBazar checks, and what we cannot check for you.",
+    "How to avoid rental scams, what RoomBazar checks, and how to verify rooms and owners safely before paying any money.",
 };
+
+const safetyFaqs = [
+  {
+    question: "Should I pay a token advance or booking fee before seeing a room in person?",
+    answer: "No. Never pay any money, token advance, or holding deposit before visiting the property in person and verifying the owner. RoomBazar never collects money on behalf of listers.",
+  },
+  {
+    question: "How does RoomBazar protect my phone number?",
+    answer: "Your contact details stay strictly private by default. Seekers message you via in-app chat, and both parties only share phone numbers when mutually agreed.",
+  },
+  {
+    question: "What are the common signs of a rental scam?",
+    answer: "Rents noticeably below market rate, refusal to let you visit before transferring money, claims that the owner is out of town, and rush to close the deal with instant UPI transfers.",
+  },
+];
 
 export default function Page() {
   return (
     <SiteShell>
+      <FAQStructuredData items={safetyFaqs} />
+      <BreadcrumbStructuredData
+        trail={[
+          { name: "Home", path: routes.home },
+          { name: "Staying Safe", path: routes.safety },
+        ]}
+      />
       <article className="mx-auto max-w-2xl px-4 py-12">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">
           Staying safe

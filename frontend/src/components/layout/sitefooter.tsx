@@ -13,19 +13,33 @@ interface FooterSection {
 const exploreSection: FooterSection = {
   title: "EXPLORE",
   links: [
-    { label: "Browse rooms", href: routes.rooms },
-    { label: "Popular locations", href: routes.city("bengaluru") },
-    { label: "Recently posted", href: `${routes.city("bengaluru")}?sort=newest` },
-    { label: "Host a room", href: routes.post },
+    { label: "Browse all rooms", href: routes.rooms },
+    { label: "Host a room (0% fee)", href: routes.post },
+    { label: "Safety guidelines", href: routes.safety },
+    { label: "Help & FAQs", href: routes.help },
+  ],
+};
+
+const citiesSection: FooterSection = {
+  title: "TOP CITIES",
+  links: [
+    { label: "Rooms in Bengaluru", href: routes.city("bengaluru") },
+    { label: "Rooms in Noida", href: routes.city("gautam-buddha-nagar") },
+    { label: "Rooms in Delhi NCR", href: routes.city("delhi") },
+    { label: "Rooms in Gurugram", href: routes.city("gurugram") },
+    { label: "Rooms in Ghaziabad", href: routes.city("ghaziabad") },
+    { label: "Rooms in Mumbai", href: routes.city("mumbai") },
+    { label: "Rooms in Pune", href: routes.city("pune") },
+    { label: "Rooms in Hyderabad", href: routes.city("hyderabad") },
   ],
 };
 
 const companySection: FooterSection = {
   title: "ROOMBAZAR",
   links: [
-    { label: "How it works", href: routes.about },
-    { label: "Safety tips", href: routes.safety },
-    { label: "About us", href: routes.about },
+    { label: "About RoomBazar", href: routes.about },
+    { label: "How it works", href: `${routes.about}#how-it-works` },
+    { label: "Trust & verification", href: routes.safety },
     { label: "Contact us", href: routes.contact },
   ],
 };
@@ -40,11 +54,12 @@ const legalSection: FooterSection = {
   ],
 };
 
-type SectionKey = "EXPLORE" | "ROOMBAZAR" | "LEGAL";
+type SectionKey = "EXPLORE" | "CITIES" | "ROOMBAZAR" | "LEGAL";
 
 export function SiteFooter() {
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     EXPLORE: false,
+    CITIES: false,
     ROOMBAZAR: false,
     LEGAL: false,
   });
@@ -59,10 +74,10 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-line bg-surface-muted text-ink">
       <div className="mx-auto max-w-7xl px-4 pt-14 pb-10 sm:pt-16 sm:pb-12">
-        {/* Main 4-Column Layout (Desktop/Tablet) & Collapsible (Mobile) */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+        {/* Main 5-Column Layout (Desktop/Tablet) & Collapsible (Mobile) */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           {/* Column 1: Brand & Social Media */}
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 lg:col-span-1">
             <Link
               href={routes.home}
               className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-ink"
@@ -80,7 +95,7 @@ export function SiteFooter() {
             </Link>
 
             <p className="max-w-xs text-sm leading-relaxed text-ink-muted">
-              Find rooms, PGs and shared spaces in one place.
+              Direct-from-owner room rental marketplace with 0% brokerage fees.
             </p>
 
             <a
@@ -147,44 +162,6 @@ export function SiteFooter() {
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
                 </a>
-
-                <a
-                  href="https://x.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="RoomBazar on X (Twitter)"
-                  className="transition-colors duration-150 hover:text-brand-600"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="size-4.5"
-                  >
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                </a>
-
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="RoomBazar on LinkedIn"
-                  className="transition-colors duration-150 hover:text-brand-600"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-5"
-                  >
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                    <rect width="4" height="12" x="2" y="9" />
-                    <circle cx="4" cy="4" r="2" />
-                  </svg>
-                </a>
               </div>
             </div>
           </div>
@@ -196,14 +173,21 @@ export function SiteFooter() {
             onToggle={() => toggleSection("EXPLORE")}
           />
 
-          {/* Column 3: ROOMBAZAR */}
+          {/* Column 3: TOP CITIES */}
+          <FooterColumnGroup
+            section={citiesSection}
+            isOpen={openSections.CITIES}
+            onToggle={() => toggleSection("CITIES")}
+          />
+
+          {/* Column 4: ROOMBAZAR */}
           <FooterColumnGroup
             section={companySection}
             isOpen={openSections.ROOMBAZAR}
             onToggle={() => toggleSection("ROOMBAZAR")}
           />
 
-          {/* Column 4: LEGAL */}
+          {/* Column 5: LEGAL */}
           <FooterColumnGroup
             section={legalSection}
             isOpen={openSections.LEGAL}
@@ -220,7 +204,7 @@ export function SiteFooter() {
             <span className="font-medium text-ink">© 2026 RoomBazar</span>
             <span className="hidden text-line-strong sm:inline">·</span>
             <span className="text-ink-subtle">
-              Listings are posted by users; RoomBazar is not a party to any rental agreement.
+              Listings are posted directly by verified users; 0% brokerage fee.
             </span>
           </div>
 
@@ -265,50 +249,47 @@ function FooterColumnGroup({
   onToggle: () => void;
 }) {
   return (
-    <div className="border-b border-line/70 pb-4 md:border-b-0 md:pb-0">
-      {/* Mobile Toggle Heading */}
+    <div className="border-b border-line pb-4 last:border-b-0 md:border-b-0 md:pb-0">
+      {/* Desktop/Tablet Header */}
+      <h3 className="hidden text-xs font-semibold uppercase tracking-wider text-ink md:block">
+        {section.title}
+      </h3>
+
+      {/* Mobile Accordion Toggle Button */}
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between py-1 text-left text-xs font-semibold uppercase tracking-wider text-ink md:cursor-default md:py-0"
+        className="flex w-full items-center justify-between py-2 text-left text-xs font-semibold uppercase tracking-wider text-ink focus:outline-none md:hidden"
+        aria-expanded={isOpen}
       >
         <span>{section.title}</span>
-        <span className="text-ink-muted md:hidden">
-          {isOpen ? (
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="size-4"
-            >
-              <path d="m18 15-6-6-6 6" />
-            </svg>
-          ) : (
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="size-4"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          )}
-        </span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`size-4 text-ink-muted transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
 
       {/* Links List */}
       <ul
-        className={`mt-3 space-y-2.5 ${
+        className={`mt-3 space-y-2 text-sm text-ink-muted ${
           isOpen ? "block" : "hidden md:block"
         }`}
       >
         {section.links.map((link) => (
-          <li key={link.label}>
+          <li key={link.href}>
             <Link
               href={link.href}
-              className="text-sm text-ink-muted transition-colors duration-150 hover:text-brand-600"
+              className="inline-block transition-colors duration-150 hover:text-brand-600 focus-visible:rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               {link.label}
             </Link>
