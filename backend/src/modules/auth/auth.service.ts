@@ -24,10 +24,12 @@ import type { User } from "src/domain/user.entity";
 import { hashPassword, passwordProblem, verifyPassword } from "./password";
 import { createEmailCode, createSessionToken, hashCode, hashToken } from "./tokens";
 
-const CODE_TTL_MINUTES = 10;
+const CODE_TTL_MINUTES = 15;
 const SESSION_TTL_DAYS = 30;
-const MAX_CODE_ATTEMPTS = 5;
-const MAX_CODES_PER_HOUR = 5;
+const MAX_CODE_ATTEMPTS = 10;
+const MAX_CODES_PER_HOUR = process.env.AUTH_MAX_CODES_PER_HOUR
+  ? Number(process.env.AUTH_MAX_CODES_PER_HOUR)
+  : 15;
 
 export interface SessionContext {
   userAgent: string | null;
@@ -217,6 +219,33 @@ export class AuthService {
       the entire point.
     */
     await this.auth.revokeAllForUser(user.id);
+  }
+
+  async verifyCode(
+    email: string,
+    code: string,
+    purpose: EmailCodeRecord["purpose"] = "signup",
+  ): Promise<{ valid: boolean }> {
+    const record = await this.auth.findLatestEmailCode(email, purpose);
+
+    const wrong = new ValidationFailed("That code is wrong or has expired.", {
+      code: "That code is wrong or has expired.",
+    });
+
+    if (!record) throw wrong;
+
+    if (new Date(record.expiresAt).getTime() < Date.now()) throw wrong;
+
+    if (record.attempts >= MAX_CODE_ATTEMPTS) {
+      throw new RateLimited("Too many attempts. Request a new code.");
+    }
+
+    if (record.codeHash !== hashCode(code)) {
+      await this.auth.incrementCodeAttempts(record.id);
+      throw wrong;
+    }
+
+    return { valid: true };
   }
 
   private async issueCode(

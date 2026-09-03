@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { getAuditLog, type AuditEntry } from "@/lib/api/superadmin";
 
 export function ManagingTopbar({
   publicSite,
-  logoUrl,
+  logoUrl = "/logo/rb-logo.png",
 }: {
   publicSite: string;
-  logoUrl: string;
+  logoUrl?: string;
 }) {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [open, setOpen] = useState(false);
@@ -46,7 +47,14 @@ export function ManagingTopbar({
     <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur-xs">
       <div className="flex h-20 items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 lg:hidden">
-          <img src={logoUrl} alt="RoomBazar" width={30} height={30} className="size-7 rounded-full" />
+          <Image
+            src={logoUrl}
+            alt="RoomBazar Logo"
+            width={30}
+            height={30}
+            className="size-7 rounded-full object-contain"
+            priority
+          />
           <span className="text-sm font-bold">Room<span className="text-brand-600">Bazar</span></span>
         </Link>
         <form action="/listings" className="relative min-w-0 max-w-2xl flex-1">

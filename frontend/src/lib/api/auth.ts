@@ -14,6 +14,14 @@ export function startSignup(email: string) {
   return api.post<{ sent: boolean }>("/auth/signup/start", { email });
 }
 
+export function verifyEmailCode(input: {
+  email: string;
+  code: string;
+  purpose?: "signup" | "passwordreset";
+}) {
+  return api.post<{ valid: boolean }>("/auth/verify-code", input);
+}
+
 export function completeSignup(input: {
   email: string;
   code: string;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ManagingSidebar } from "./managingsidebar";
 import { SignOutButton } from "./signoutbutton";
 import { ManagingTopbar } from "./managingtopbar";
@@ -11,7 +12,6 @@ import { ManagingTopbar } from "./managingtopbar";
  * not resolve. The console owns its own small set of paths instead.
  */
 const publicSite = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-const logoUrl = new URL("/logo/rb-logo.png", publicSite).toString();
 
 export function ManagingShell({ children }: { children: React.ReactNode }) {
   return (
@@ -19,12 +19,13 @@ export function ManagingShell({ children }: { children: React.ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-surface lg:block">
         <div className="flex h-full flex-col">
           <Link href="/" className="flex h-20 items-center gap-3 border-b border-line px-6">
-            <img
-              src={logoUrl}
-              alt="RoomBazar"
+            <Image
+              src="/logo/rb-logo.png"
+              alt="RoomBazar Logo"
               width={38}
               height={38}
-              className="size-9 rounded-full object-contain"
+              className="size-9 shrink-0 rounded-full object-contain"
+              priority
             />
             <span className="text-base font-bold tracking-tight">
               Room<span className="text-brand-600">Bazar</span>
@@ -50,7 +51,7 @@ export function ManagingShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="lg:pl-64">
-        <ManagingTopbar publicSite={publicSite} logoUrl={logoUrl} />
+        <ManagingTopbar publicSite={publicSite} />
         <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>

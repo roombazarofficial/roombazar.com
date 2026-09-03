@@ -22,12 +22,14 @@ import {
   lookupSchema,
   requestResetSchema,
   startSignupSchema,
+  verifyCodeSchema,
   type CompleteSignupDto,
   type ConfirmResetDto,
   type LoginDto,
   type LookupDto,
   type RequestResetDto,
   type StartSignupDto,
+  type VerifyCodeDto,
 } from "./dto/auth.dto";
 
 @Controller("auth")
@@ -51,7 +53,7 @@ export class AuthController {
     sits behind it, catching an attacker who rotates IPs.
   */
   @Public()
-  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post("signup/start")
   @HttpCode(202)
   async startSignup(
@@ -59,6 +61,16 @@ export class AuthController {
   ) {
     await this.auth.startSignup(dto.email);
     return { sent: true };
+  }
+
+  @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
+  @Post("verify-code")
+  @HttpCode(200)
+  async verifyCode(
+    @Body(new ZodValidationPipe(verifyCodeSchema)) dto: VerifyCodeDto,
+  ) {
+    return this.auth.verifyCode(dto.email, dto.code, dto.purpose);
   }
 
   @Public()
@@ -130,7 +142,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post("password/reset/request")
   @HttpCode(202)
   async requestReset(

@@ -44,7 +44,7 @@ export default function Page() {
           label="Your name"
           autoComplete="name"
           autoFocus
-          placeholder="Priya Raghavan"
+          placeholder="Enter your full name"
           value={name}
           onChange={(event) => setName(event.target.value)}
         />

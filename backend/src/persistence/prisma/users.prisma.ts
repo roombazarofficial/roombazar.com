@@ -93,10 +93,10 @@ export class PrismaUsersRepository implements UsersRepository {
           ? new Date(user.emailVerifiedAt)
           : null,
         passwordHash: user.passwordHash,
-        phone: user.phone,
-        phoneVerifiedAt: user.phoneVerifiedAt
-          ? new Date(user.phoneVerifiedAt)
-          : null,
+        ...(user.phone ? { phone: user.phone } : {}),
+        ...(user.phoneVerifiedAt
+          ? { phoneVerifiedAt: new Date(user.phoneVerifiedAt) }
+          : {}),
         name: user.name,
         avatarUrl: user.avatarUrl,
         platformRole: user.role,

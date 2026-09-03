@@ -102,7 +102,5 @@ export function passwordProblem(plain: string): string | null {
 
   if (plain.length > 200) return "That password is too long.";
 
-  if (/^(.)\1+$/.test(plain)) return "That password is too simple.";
-
   return null;
 }

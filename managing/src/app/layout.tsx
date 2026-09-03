@@ -23,6 +23,14 @@ export const metadata: Metadata = {
     template: "%s | RoomBazar management",
   },
   description: "Internal console.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   /*
     Never indexed. This is enforced again by a header in middleware, because a
     console on a real hostname will be found by something eventually and one of

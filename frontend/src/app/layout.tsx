@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
+  verification: {
+    google: "qwx32CzQ4u3KYTJzWYCu6O_Zo7J5Z5s_3f8zNcblsbs",
+  },
   formatDetection: { telephone: false },
   openGraph: {
     type: "website",

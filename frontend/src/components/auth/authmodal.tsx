@@ -17,6 +17,7 @@ import {
   lookupEmail,
   requestPasswordReset,
   startSignup,
+  verifyEmailCode,
 } from "@/lib/api/auth";
 
 const CODE_LENGTH = 6;
@@ -133,11 +134,26 @@ export function AuthModal() {
     }
   }
 
-  /** The code is submitted with the password, so it is only carried forward here. */
-  function submitCode() {
-    if (digits.join("").length !== CODE_LENGTH) return;
+  /** Verifies the OTP with the backend before allowing the user to proceed. */
+  async function submitCode() {
+    const code = digits.join("");
+    if (code.length !== CODE_LENGTH) return;
     setError(null);
-    setStep(resetting ? "reset" : "details");
+    setBusy(true);
+
+    try {
+      await verifyEmailCode({
+        email: address(),
+        code,
+        purpose: resetting ? "passwordreset" : "signup",
+      });
+
+      setStep(resetting ? "reset" : "details");
+    } catch (caught) {
+      setError(messageOf(caught, "That code is wrong or has expired."));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submitDetails() {
@@ -229,24 +245,32 @@ export function AuthModal() {
 
   function setDigit(index: number, value: string) {
     const cleaned = value.replace(/\D/g, "");
-    if (!cleaned) return;
-
     const next = [...digits];
 
-    if (cleaned.length > 1) {
-      cleaned
-        .slice(0, CODE_LENGTH - index)
-        .split("")
-        .forEach((char, offset) => {
-          next[index + offset] = char;
-        });
+    if (!cleaned) {
+      next[index] = "";
       setDigits(next);
-      inputs.current[Math.min(index + cleaned.length, CODE_LENGTH - 1)]?.focus();
+      if (error) setError(null);
       return;
     }
 
-    next[index] = cleaned;
+    if (cleaned.length > 1) {
+      const chars = cleaned.slice(0, CODE_LENGTH).split("");
+      chars.forEach((char, offset) => {
+        if (index + offset < CODE_LENGTH) {
+          next[index + offset] = char;
+        }
+      });
+      setDigits(next);
+      if (error) setError(null);
+      const nextFocus = Math.min(index + chars.length, CODE_LENGTH - 1);
+      inputs.current[nextFocus]?.focus();
+      return;
+    }
+
+    next[index] = cleaned.slice(-1);
     setDigits(next);
+    if (error) setError(null);
     if (index < CODE_LENGTH - 1) inputs.current[index + 1]?.focus();
   }
 
@@ -436,11 +460,52 @@ export function AuthModal() {
                   disabled={busy}
                   aria-label={`Digit ${index + 1}`}
                   onChange={(event) => setDigit(index, event.target.value)}
+                  onFocus={(event) => event.target.select()}
+                  onPaste={(event) => {
+                    event.preventDefault();
+                    const pasted = event.clipboardData
+                      .getData("text")
+                      .replace(/\D/g, "")
+                      .slice(0, CODE_LENGTH);
+                    if (!pasted) return;
+                    const next = [...digits];
+                    pasted.split("").forEach((char, i) => {
+                      next[i] = char;
+                    });
+                    setDigits(next);
+                    if (error) setError(null);
+                    inputs.current[Math.min(pasted.length, CODE_LENGTH - 1)]?.focus();
+                  }}
                   onKeyDown={(event) => {
-                    if (event.key === "Backspace" && !digits[index] && index > 0) {
-                      inputs.current[index - 1]?.focus();
+                    if (event.key === "Backspace") {
+                      event.preventDefault();
+                      const next = [...digits];
+                      if (digits[index]) {
+                        next[index] = "";
+                        setDigits(next);
+                        if (error) setError(null);
+                      } else if (index > 0) {
+                        next[index - 1] = "";
+                        setDigits(next);
+                        if (error) setError(null);
+                        inputs.current[index - 1]?.focus();
+                      }
+                      return;
                     }
-                    if (event.key === "Enter" && codeComplete) submitCode();
+                    if (event.key === "ArrowLeft" && index > 0) {
+                      event.preventDefault();
+                      inputs.current[index - 1]?.focus();
+                      return;
+                    }
+                    if (event.key === "ArrowRight" && index < CODE_LENGTH - 1) {
+                      event.preventDefault();
+                      inputs.current[index + 1]?.focus();
+                      return;
+                    }
+                    if (event.key === "Enter" && codeComplete && !busy) {
+                      event.preventDefault();
+                      void submitCode();
+                    }
                   }}
                   className={cn(
                     "h-14 w-full rounded-control border text-center text-xl font-semibold",
@@ -457,8 +522,9 @@ export function AuthModal() {
             <Button
               size="lg"
               fullWidth
-              disabled={!codeComplete}
-              onClick={submitCode}
+              disabled={!codeComplete || busy}
+              loading={busy}
+              onClick={() => void submitCode()}
             >
               Continue
             </Button>
@@ -497,7 +563,7 @@ export function AuthModal() {
               label="Your name"
               autoComplete="name"
               autoFocus
-              placeholder="Priya Raghavan"
+              placeholder="Enter your full name"
               value={name}
               disabled={busy}
               onChange={(event) => setName(event.target.value)}

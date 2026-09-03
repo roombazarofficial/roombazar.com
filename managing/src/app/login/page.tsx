@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { LoginForm } from "@/components/managing/loginform";
 
 export const metadata = { title: "Sign in" };
@@ -14,9 +15,22 @@ export default function Page() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-12">
       <div>
-        <p className="text-lg font-semibold tracking-tight text-ink">
-          RoomBazar <span className="text-ink-muted">management</span>
-        </p>
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo/rb-logo.png"
+            alt="RoomBazar Logo"
+            width={38}
+            height={38}
+            className="size-9 shrink-0 rounded-full object-contain"
+            priority
+          />
+          <p className="text-lg font-bold tracking-tight text-ink">
+            Room<span className="text-brand-600">Bazar</span>{" "}
+            <span className="text-2xs font-medium uppercase tracking-[0.16em] text-ink-subtle block sm:inline">
+              Management
+            </span>
+          </p>
+        </div>
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">
           Sign in
         </h1>

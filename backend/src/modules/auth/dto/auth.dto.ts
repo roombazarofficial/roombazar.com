@@ -45,3 +45,11 @@ export const confirmResetSchema = z.object({
   password: z.string().min(6).max(200),
 });
 export type ConfirmResetDto = z.infer<typeof confirmResetSchema>;
+
+export const verifyCodeSchema = z.object({
+  email,
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code."),
+  purpose: z.enum(["signup", "passwordreset"]).default("signup"),
+});
+export type VerifyCodeDto = z.infer<typeof verifyCodeSchema>;
+
