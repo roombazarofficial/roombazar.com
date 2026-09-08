@@ -1,4 +1,4 @@
-import { tryGet } from "./client";
+import { api, tryGet } from "./client";
 import { serverTryGet } from "./serverclient";
 import type { Listing, ListingSummary } from "@/types/listing";
 import type { SearchFilters } from "@/types/searchfilters";
@@ -87,15 +87,28 @@ export interface SitemapEntry {
 
 /**
  * Full projection of every publicly indexable listing, for `app/sitemap.ts`.
- * Backed by a dedicated bulk endpoint, not the paged search API.
+ * Backed by the dedicated bulk endpoint `${NEXT_PUBLIC_API_URL}/api/sitemap/listings`
+ * on the backend host — never a relative path on the frontend origin.
+ *
+ * Unlike most reads here this deliberately does NOT swallow errors: if the
+ * backend is unreachable or the endpoint is missing, we must fail the sitemap
+ * render (→ 5xx, which Google retries) rather than silently publish a sitemap
+ * that omits every listing and looks like the whole site is 8 static pages.
+ *
+ * A backend `200 { items: [] }` (a genuinely empty marketplace) is respected.
  */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
-  const response = await tryGet<{ items: SitemapEntry[] }>(
-    "/sitemap/listings",
-    { items: [] },
-    { revalidate: 3600 },
-  );
-  return response.items ?? [];
+  const response = await api.get<{ items: SitemapEntry[] }>("/sitemap/listings", {
+    revalidate: 900,
+  });
+
+  if (!response || !Array.isArray(response.items)) {
+    throw new Error(
+      "sitemap/listings returned an unexpected shape (deployed backend missing the endpoint?)",
+    );
+  }
+
+  return response.items;
 }
 
 export function getMyListings(): Promise<Listing[]> {

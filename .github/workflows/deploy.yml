@@ -1,24 +1,30 @@
 name: Deploy
 
-# Continuous deployment for the two Next.js apps (public frontend + managing).
+# Continuous deployment for all three apps: the NestJS backend (api.roombazar.com)
+# and the two Next.js apps (public frontend www.roombazar.com + managing).
 #
 # This runs only after a commit lands on `main` — i.e. after a pull request has
 # passed the CI workflow and been merged. It never runs on feature branches.
 #
-# It is a no-op until the repository is configured with the secrets listed below,
-# so merging this workflow cannot break anything on its own.
+# It is a no-op for any target whose secrets are unset, so merging this workflow
+# cannot break anything on its own. Each job SKIPS (not fails) when unconfigured.
+#
+# The backend job exists specifically because the backend NOT redeploying while
+# the frontend did is what broke the Phase 2 sitemap: the frontend shipped code
+# that calls `${NEXT_PUBLIC_API_URL}/api/sitemap/listings`, but that route was
+# only in the (undeployed) backend build.
 #
 # Required repository secrets / variables (Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN                 - Vercel access token
-#   VERCEL_ORG_ID               - Vercel organisation id
-#   VERCEL_PROJECT_ID_FRONTEND  - Vercel project id for /frontend
-#   VERCEL_PROJECT_ID_MANAGING  - Vercel project id for /managing
-#   NEXT_PUBLIC_SITE_URL        - https://www.roombazar.com   (Actions *variable*)
-#   NEXT_PUBLIC_API_URL         - public URL of the NestJS backend
-#   NEXT_PUBLIC_IMAGE_HOST      - listing image host (matches next.config.ts)
-#
-# The NestJS backend is deployed separately (its host is not Vercel); document
-# that pipeline here once the target is chosen.
+#   Backend
+#     BACKEND_DEPLOY_HOOK_URL   - deploy-hook URL for the backend host
+#                                 (Render / Railway / Coolify / etc. all provide one)
+#   Frontend + managing (Vercel)
+#     VERCEL_TOKEN              - Vercel access token
+#     VERCEL_ORG_ID             - Vercel organisation id
+#     VERCEL_PROJECT_ID_FRONTEND / VERCEL_PROJECT_ID_MANAGING - Vercel project ids
+#     NEXT_PUBLIC_SITE_URL      - https://www.roombazar.com          (Actions *variable*)
+#     NEXT_PUBLIC_API_URL       - https://api.roombazar.com          (Actions *variable*)
+#     NEXT_PUBLIC_IMAGE_HOST    - listing image host (matches next.config.ts)
 
 on:
   push:
@@ -38,15 +44,23 @@ jobs:
     name: Check deploy config
     runs-on: ubuntu-latest
     outputs:
+      backend: ${{ steps.check.outputs.backend }}
       frontend: ${{ steps.check.outputs.frontend }}
       managing: ${{ steps.check.outputs.managing }}
     steps:
       - id: check
         env:
+          BACKEND_HOOK: ${{ secrets.BACKEND_DEPLOY_HOOK_URL }}
           TOKEN: ${{ secrets.VERCEL_TOKEN }}
           FRONTEND_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
           MANAGING_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_MANAGING }}
         run: |
+          if [ -n "$BACKEND_HOOK" ]; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BACKEND_DEPLOY_HOOK_URL not set — skipping backend deploy."
+          fi
           if [ -n "$TOKEN" ] && [ -n "$FRONTEND_PROJECT" ]; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           else
@@ -60,10 +74,35 @@ jobs:
             echo "::notice::VERCEL_TOKEN / VERCEL_PROJECT_ID_MANAGING not set — skipping managing deploy."
           fi
 
+  backend:
+    name: Deploy backend
+    needs: guard
+    if: needs.guard.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger backend deploy hook
+        env:
+          HOOK: ${{ secrets.BACKEND_DEPLOY_HOOK_URL }}
+        run: |
+          echo "Triggering backend deploy for ${{ github.sha }}"
+          code=$(curl -sS -X POST -o /dev/null -w '%{http_code}' "$HOOK")
+          echo "Deploy hook responded HTTP $code"
+          case "$code" in
+            2*) echo "Backend deploy triggered." ;;
+            *) echo "::error::Backend deploy hook failed (HTTP $code)"; exit 1 ;;
+          esac
+
   frontend:
     name: Deploy frontend
-    needs: guard
-    if: needs.guard.outputs.frontend == 'true'
+    # Deploy the frontend only after the backend deploy has succeeded or been
+    # skipped — never while a backend deploy is failing. This is the ordering
+    # guarantee that the Phase 2 sitemap incident needed.
+    needs: [guard, backend]
+    if: >-
+      always()
+      && needs.guard.outputs.frontend == 'true'
+      && needs.backend.result != 'failure'
+      && needs.backend.result != 'cancelled'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -92,8 +131,12 @@ jobs:
 
   managing:
     name: Deploy managing app
-    needs: guard
-    if: needs.guard.outputs.managing == 'true'
+    needs: [guard, backend]
+    if: >-
+      always()
+      && needs.guard.outputs.managing == 'true'
+      && needs.backend.result != 'failure'
+      && needs.backend.result != 'cancelled'
     runs-on: ubuntu-latest
     defaults:
       run:
