@@ -5,6 +5,7 @@ import { LegalPage } from "@/components/common/legalpage";
 export const metadata: Metadata = {
   title: "Privacy policy",
   description: "What we collect, why, and the rights you have under the DPDP Act 2023.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function Page() {

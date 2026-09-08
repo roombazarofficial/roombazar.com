@@ -14,6 +14,7 @@ import {
   LocalityStructuredData,
   BreadcrumbStructuredData,
 } from "@/components/common/structureddata";
+import { FaqSection } from "@/components/common/faqsection";
 import { searchListings } from "@/lib/api/listings";
 import { getCityBySlug, getLocalities } from "@/lib/api/geography";
 import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
@@ -94,6 +95,37 @@ export default async function Page({
         item.slug !== localitySlug && item.activeListingCount > 0,
     )
     .slice(0, 20);
+
+  const faqItems =
+    results.totalItems > 0
+      ? [
+          {
+            question: `How many rooms are available for rent in ${locality.name}, ${foundCity.name}?`,
+            answer: `${results.totalItems} ${
+              results.totalItems === 1 ? "room is" : "rooms are"
+            } currently listed for rent in ${locality.name}, ${foundCity.name} on RoomBazar, posted directly by owners and tenants.`,
+          },
+          ...(locality.medianRentPaise
+            ? [
+                {
+                  question: `What is the typical rent for a room in ${locality.name}?`,
+                  answer: `The median monthly rent across rooms currently listed in ${locality.name} is ${formatRupees(
+                    locality.medianRentPaise,
+                  )}. The actual rent depends on room type, furnishing and the exact location.`,
+                },
+              ]
+            : []),
+          {
+            question: "Does RoomBazar charge brokerage?",
+            answer: `No. Every room in ${locality.name} is posted directly by the owner or an existing tenant, so there is no broker commission.`,
+          },
+          {
+            question: "How do I contact the owner of a room?",
+            answer:
+              "Open the room and start a chat from its page. Phone numbers are shared only when both sides agree to reveal them.",
+          },
+        ]
+      : [];
 
   return (
     <SiteShell>
@@ -225,6 +257,8 @@ export default async function Page({
           </section>
 
         )}
+
+        <FaqSection items={faqItems} />
       </div>
 
     </SiteShell>

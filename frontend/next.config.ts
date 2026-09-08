@@ -19,6 +19,20 @@ const config: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
+  // Canonical host is www.roombazar.com. Anything hitting the bare apex is
+  // 301'd so search engines only ever index one origin. Hosting-level domain
+  // config should do this too; this is the in-app safety net.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "roombazar.com" }],
+        destination: "https://www.roombazar.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

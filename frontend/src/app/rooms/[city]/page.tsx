@@ -14,6 +14,7 @@ import {
   CityStructuredData,
   BreadcrumbStructuredData,
 } from "@/components/common/structureddata";
+import { FaqSection } from "@/components/common/faqsection";
 import { searchListings } from "@/lib/api/listings";
 import { getCityBySlug, getLocalities } from "@/lib/api/geography";
 import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
@@ -78,6 +79,27 @@ export default async function Page({
     searchListings({ ...filters, citySlug: city }),
     getLocalities(city),
   ]);
+
+  const faqItems =
+    results.totalItems > 0
+      ? [
+          {
+            question: `How many rooms are available for rent in ${found.name}?`,
+            answer: `${results.totalItems} ${
+              results.totalItems === 1 ? "room is" : "rooms are"
+            } listed for rent in ${found.name} on RoomBazar right now, each posted directly by the owner or an existing tenant.`,
+          },
+          {
+            question: "Is there any brokerage or commission on RoomBazar?",
+            answer: `No. Rooms in ${found.name} are listed directly by owners and tenants, so you deal with them directly and pay no broker fee.`,
+          },
+          {
+            question: `How do I contact a room owner in ${found.name}?`,
+            answer:
+              "Open any room and start a chat from the listing page. Phone numbers stay private until both you and the owner agree to share them.",
+          },
+        ]
+      : [];
 
   return (
     <SiteShell>
@@ -195,6 +217,8 @@ export default async function Page({
           </section>
 
         )}
+
+        <FaqSection items={faqItems} />
       </div>
 
     </SiteShell>

@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Staying Safe on RoomBazar — Scam Prevention & Guidelines",
   description:
     "How to avoid rental scams, what RoomBazar checks, and how to verify rooms and owners safely before paying any money.",
+  alternates: { canonical: "/safety" },
 };
 
 const safetyFaqs = [

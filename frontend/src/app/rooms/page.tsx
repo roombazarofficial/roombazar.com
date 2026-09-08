@@ -13,13 +13,27 @@ import { searchListings } from "@/lib/api/listings";
 import { parseSearchParams, buildSearchQuery } from "@/lib/utils/querystring";
 import { routes } from "@/lib/constants/routes";
 
-export const metadata: Metadata = {
-  title: "Browse rooms for rent",
-  description:
-    "Rooms, PGs, flats and hostel beds for rent across India, posted directly by owners.",
-};
-
 type Search = Promise<Record<string, string | string[] | undefined>>;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Search;
+}): Promise<Metadata> {
+  const hasFilterParams = Object.keys(await searchParams).length > 0;
+
+  return {
+    title: "Browse rooms for rent",
+    description:
+      "Rooms, PGs, flats and hostel beds for rent across India, posted directly by owners.",
+    alternates: { canonical: "/rooms" },
+    // Filtered / paginated variants are followed for discovery but not indexed,
+    // so the one canonical /rooms page carries the ranking signal.
+    robots: hasFilterParams
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+  };
+}
 
 export default async function Page({ searchParams }: { searchParams: Search }) {
   const filters = parseSearchParams(await searchParams, "");

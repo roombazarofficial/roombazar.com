@@ -75,6 +75,29 @@ export async function getRecentListings(
   return page.items.slice(0, limit);
 }
 
+export interface SitemapEntry {
+  slug: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  citySlug: string;
+  cityName: string;
+  localitySlug: string;
+  localityName: string;
+}
+
+/**
+ * Full projection of every publicly indexable listing, for `app/sitemap.ts`.
+ * Backed by a dedicated bulk endpoint, not the paged search API.
+ */
+export async function getSitemapEntries(): Promise<SitemapEntry[]> {
+  const response = await tryGet<{ items: SitemapEntry[] }>(
+    "/sitemap/listings",
+    { items: [] },
+    { revalidate: 3600 },
+  );
+  return response.items ?? [];
+}
+
 export function getMyListings(): Promise<Listing[]> {
   return serverTryGet<Listing[]>("/listings/mine", []);
 }

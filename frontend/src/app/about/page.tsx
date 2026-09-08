@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "About RoomBazar — Direct From Owner Room Rental Marketplace",
   description:
     "Learn about RoomBazar, India's peer-to-peer room rental marketplace connecting seekers directly with property owners with 0% brokerage.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

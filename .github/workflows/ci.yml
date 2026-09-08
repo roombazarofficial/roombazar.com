@@ -28,7 +28,12 @@ jobs:
       run:
         working-directory: backend
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/roombazar_ci
+      # Prisma's datasource provider is `mongodb`; `prisma generate` (run via the
+      # backend postinstall and the explicit step below) validates the URL scheme
+      # against the provider, so this must be a mongodb URL. No connection is made
+      # during generate/lint/typecheck/build, and the unit tests use in-memory
+      # repositories, so a non-resolving host is fine for CI.
+      DATABASE_URL: mongodb://localhost:27017/roombazar_ci
 
     steps:
       - name: Check out repository

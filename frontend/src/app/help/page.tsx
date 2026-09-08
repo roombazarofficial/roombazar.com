@@ -5,6 +5,7 @@ import { LegalPage } from "@/components/common/legalpage";
 export const metadata: Metadata = {
   title: "Help centre",
   description: "Answers to common questions about listing, searching and messaging.",
+  alternates: { canonical: "/help" },
 };
 
 export default function Page() {
