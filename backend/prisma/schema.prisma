@@ -59,9 +59,18 @@ model User {
   /// Requiring it at sign-up would put a field in front of someone who only
   /// wants to browse.
   ///
+  /// NOT `@unique`. Identity is `email` (see above); phone is a secondary
+  /// contact field since the move off phone-OTP auth. A plain unique index on
+  /// an optional field is unsafe on MongoDB — null and missing both index as
+  /// the key `null`, so a second account without a phone fails the index
+  /// build. If "one account per phone number" ever becomes a real rule it
+  /// needs a partial unique index (`partialFilterExpression: { phone: { $type:
+  /// "string" } }`) plus P2002 handling on the profile-update path — a
+  /// deliberate feature, managed outside `db push`.
+  ///
   /// Encrypt at rest at the column level before production.
-  phone           String?   @unique
-  phoneVerifiedAt DateTime? @map("phone_verified_at") 
+  phone           String?
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
 
   name      String
   avatarUrl String? @map("avatar_url")
