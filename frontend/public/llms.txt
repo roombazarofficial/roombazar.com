@@ -3,7 +3,7 @@
 > Direct-from-owner room and rentable space marketplace in India with zero broker fees (0% brokerage).
 
 ## Overview
-RoomBazar (https://roombazar.com) is a platform connecting property owners directly with room seekers and tenants across major Indian metropolitan hubs. Room seekers can discover available rooms, review transparent monthly rents and deposits, check furnished amenities, verify location on Google Maps, and start a direct in-app chat with the property owner without middlemen or broker commissions.
+RoomBazar (https://www.roombazar.com) is a platform connecting property owners directly with room seekers and tenants across major Indian metropolitan hubs. Room seekers can discover available rooms, review transparent monthly rents and deposits, check furnished amenities, verify location on Google Maps, and start a direct in-app chat with the property owner without middlemen or broker commissions.
 
 ## Core Cities & Regional Hubs
 - **Bengaluru (Karnataka)**: HSR Layout, Koramangala, Indiranagar, BTM Layout, Whitefield, Marathahalli, Electronic City, Bellandur, Jayanagar, JP Nagar, Hebbal, Yelahanka
@@ -25,14 +25,14 @@ RoomBazar (https://roombazar.com) is a platform connecting property owners direc
 - **Commercial / Rentable Space**: Shops, office spaces, warehouses, and event halls.
 
 ## Canonical URL Structure
-- **Homepage**: `https://roombazar.com/`
-- **City Browse Page**: `https://roombazar.com/rooms/{citySlug}` (e.g. `https://roombazar.com/rooms/bengaluru`)
-- **Locality Browse Page**: `https://roombazar.com/rooms/{citySlug}/{localitySlug}` (e.g. `https://roombazar.com/rooms/bengaluru/hsr-layout`)
-- **Room Listing Detail Page**: `https://roombazar.com/room/{listingSlug}` (e.g. `https://roombazar.com/room/1-bhk-noida-sector-62-9eb5f1`)
-- **All Rooms Directory**: `https://roombazar.com/rooms`
-- **Trust & Safety Guide**: `https://roombazar.com/safety`
-- **About RoomBazar**: `https://roombazar.com/about`
-- **Help Center**: `https://roombazar.com/help`
+- **Homepage**: `https://www.roombazar.com/`
+- **City Browse Page**: `https://www.roombazar.com/rooms/{citySlug}` (e.g. `https://www.roombazar.com/rooms/bengaluru`)
+- **Locality Browse Page**: `https://www.roombazar.com/rooms/{citySlug}/{localitySlug}` (e.g. `https://www.roombazar.com/rooms/bengaluru/hsr-layout`)
+- **Room Listing Detail Page**: `https://www.roombazar.com/room/{listingSlug}` (e.g. `https://www.roombazar.com/room/1-bhk-noida-sector-62-9eb5f1`)
+- **All Rooms Directory**: `https://www.roombazar.com/rooms`
+- **Trust & Safety Guide**: `https://www.roombazar.com/safety`
+- **About RoomBazar**: `https://www.roombazar.com/about`
+- **Help Center**: `https://www.roombazar.com/help`
 
 ## Listing Data Attributes
 Every real RoomBazar room listing contains:
@@ -58,6 +58,6 @@ Every real RoomBazar room listing contains:
 4. **Moderation & Verification**: Every listing undergoes administrative verification before going live.
 
 ## Contact & Official Support
-- **Website**: https://roombazar.com
+- **Website**: https://www.roombazar.com
 - **Official Email**: roombazar.official@gmail.com
-- **Sitemap**: https://roombazar.com/sitemap.xml
+- **Sitemap**: https://www.roombazar.com/sitemap.xml

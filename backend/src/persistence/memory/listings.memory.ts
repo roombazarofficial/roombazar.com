@@ -6,6 +6,7 @@ import type {
   ListingAdminCriteria,
   ListingsRepository,
   Page,
+  SitemapListingEntry,
 } from "src/persistence/ports/listings.repository";
 import { seedCities, seedLocalities } from "./geography.memory";
 
@@ -216,6 +217,39 @@ export class MemoryListingsRepository implements ListingsRepository {
         listing.status === "active" &&
         listing.expiresAt !== null &&
         listing.expiresAt <= now,
+    );
+  }
+
+  async listSitemapEntries(): Promise<SitemapListingEntry[]> {
+    const cityById = new Map(seedCities.map((city) => [city.id, city]));
+    const localityById = new Map(
+      seedLocalities.map((locality) => [locality.id, locality]),
+    );
+
+    const entries: SitemapListingEntry[] = [];
+
+    for (const listing of this.rows.values()) {
+      if (listing.status !== "active" || listing.deletedAt) continue;
+
+      const city = cityById.get(listing.cityId);
+      const locality = localityById.get(listing.localityId);
+      if (!city || !locality) continue;
+
+      entries.push({
+        slug: listing.slug,
+        updatedAt: listing.updatedAt,
+        publishedAt: listing.publishedAt,
+        citySlug: city.slug,
+        cityName: city.name,
+        localitySlug: locality.slug,
+        localityName: locality.name,
+      });
+    }
+
+    return entries.sort(
+      (a, b) =>
+        new Date(b.publishedAt ?? b.updatedAt).getTime() -
+        new Date(a.publishedAt ?? a.updatedAt).getTime(),
     );
   }
 

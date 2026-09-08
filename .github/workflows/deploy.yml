@@ -1,0 +1,119 @@
+name: Deploy
+
+# Continuous deployment for the two Next.js apps (public frontend + managing).
+#
+# This runs only after a commit lands on `main` — i.e. after a pull request has
+# passed the CI workflow and been merged. It never runs on feature branches.
+#
+# It is a no-op until the repository is configured with the secrets listed below,
+# so merging this workflow cannot break anything on its own.
+#
+# Required repository secrets / variables (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN                 - Vercel access token
+#   VERCEL_ORG_ID               - Vercel organisation id
+#   VERCEL_PROJECT_ID_FRONTEND  - Vercel project id for /frontend
+#   VERCEL_PROJECT_ID_MANAGING  - Vercel project id for /managing
+#   NEXT_PUBLIC_SITE_URL        - https://www.roombazar.com   (Actions *variable*)
+#   NEXT_PUBLIC_API_URL         - public URL of the NestJS backend
+#   NEXT_PUBLIC_IMAGE_HOST      - listing image host (matches next.config.ts)
+#
+# The NestJS backend is deployed separately (its host is not Vercel); document
+# that pipeline here once the target is chosen.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Check deploy config
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.check.outputs.frontend }}
+      managing: ${{ steps.check.outputs.managing }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          FRONTEND_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+          MANAGING_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_MANAGING }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$FRONTEND_PROJECT" ]; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "frontend=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::VERCEL_TOKEN / VERCEL_PROJECT_ID_FRONTEND not set — skipping frontend deploy."
+          fi
+          if [ -n "$TOKEN" ] && [ -n "$MANAGING_PROJECT" ]; then
+            echo "managing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "managing=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::VERCEL_TOKEN / VERCEL_PROJECT_ID_MANAGING not set — skipping managing deploy."
+          fi
+
+  frontend:
+    name: Deploy frontend
+    needs: guard
+    if: needs.guard.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+      NEXT_PUBLIC_IMAGE_HOST: ${{ vars.NEXT_PUBLIC_IMAGE_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Build
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+  managing:
+    name: Deploy managing app
+    needs: guard
+    if: needs.guard.outputs.managing == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: managing
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_MANAGING }}
+      NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: managing/package-lock.json
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Build
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"

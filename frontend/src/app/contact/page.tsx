@@ -5,6 +5,7 @@ import { LegalPage } from "@/components/common/legalpage";
 export const metadata: Metadata = {
   title: "Contact us",
   description: "How to reach the RoomBazar team.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function Page() {

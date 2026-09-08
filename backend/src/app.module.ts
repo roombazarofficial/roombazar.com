@@ -13,6 +13,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { ListingsModule } from "./modules/listings/listings.module";
 import { SearchModule } from "./modules/search/search.module";
+import { SitemapModule } from "./modules/sitemap/sitemap.module";
 import { GeographyModule } from "./modules/geography/geography.module";
 import { UsersModule } from "./modules/users/users.module";
 import { ConversationsModule } from "./modules/conversations/conversations.module";
@@ -36,6 +37,7 @@ import { SuperAdminModule } from "./modules/superadmin/superadmin.module";
     HealthModule,
     ListingsModule,
     SearchModule,
+    SitemapModule,
     GeographyModule,
     UsersModule,
     ConversationsModule,

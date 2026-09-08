@@ -1,7 +1,6 @@
 import type { Listing } from "@/types/listing";
 import type { Locality } from "@/types/locality";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://roombazar.com";
+import { siteUrl } from "@/lib/seo/site";
 
 /**
  * JSON-LD for listing detail pages.
@@ -174,14 +173,9 @@ export function SiteStructuredData() {
         name: "RoomBazar",
         publisher: { "@id": `${siteUrl}/#organization` },
         inLanguage: "en-IN",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${siteUrl}/rooms?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
+        // No SearchAction: the site has structured browse pages (city / locality)
+        // but no public free-text search URL, and Google requires the target URL
+        // template to actually resolve to a results page.
       },
     ],
   };

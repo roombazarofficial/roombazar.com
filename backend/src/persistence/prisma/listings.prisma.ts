@@ -7,6 +7,7 @@ import type {
   ListingAdminCriteria,
   ListingsRepository,
   Page,
+  SitemapListingEntry,
 } from "src/persistence/ports/listings.repository";
 import { PrismaService } from "./prisma.service";
 import { listingInclude, toDomainListing, isValidObjectId } from "./mappers";
@@ -463,6 +464,36 @@ export class PrismaListingsRepository implements ListingsRepository {
     });
 
     return rows.map(toDomainListing);
+  }
+
+  async listSitemapEntries(): Promise<SitemapListingEntry[]> {
+    const rows = await this.prisma.listing.findMany({
+      where: {
+        status: "active",
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+        publishedAt: true,
+        city: { select: { slug: true, name: true } },
+        locality: { select: { slug: true, name: true } },
+      },
+      orderBy: { publishedAt: "desc" },
+      // A hard ceiling so a runaway table can never produce an unbounded XML
+      // document. Sitemaps are capped at 50k URLs by the protocol anyway.
+      take: 45_000,
+    });
+
+    return rows.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+      publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
+      citySlug: row.city.slug,
+      cityName: row.city.name,
+      localitySlug: row.locality.slug,
+      localityName: row.locality.name,
+    }));
   }
 
   async findActiveInCity(cityId: string): Promise<Listing[]> {

@@ -26,6 +26,20 @@ export interface Page<T> {
   totalPages: number;
 }
 
+/**
+ * The minimal projection the public XML sitemap needs. Deliberately lean: no
+ * photos, amenities or lister joins — the sitemap only emits URLs and dates.
+ */
+export interface SitemapListingEntry {
+  slug: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  citySlug: string;
+  cityName: string;
+  localitySlug: string;
+  localityName: string;
+}
+
 export interface ListingAdminCriteria {
   statuses?: ListingStatus[];
   ownerId?: string;
@@ -52,6 +66,9 @@ export interface ListingsRepository {
   setStatus(id: string, status: ListingStatus): Promise<Listing>;
 
   incrementViewCount(id: string): Promise<void>;
+
+  /** Every publicly indexable listing, projected for the XML sitemap. */
+  listSitemapEntries(): Promise<SitemapListingEntry[]>;
 
   countActiveByOwner(ownerId: string): Promise<number>;
 

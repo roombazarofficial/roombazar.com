@@ -34,3 +34,20 @@ Repository administrators must create a GitHub branch ruleset for `main` with:
 
 The workflow validates branches and pull requests, but GitHub branch protection
 is what actually prevents a direct push to `main`.
+
+## Deployment
+
+`.github/workflows/deploy.yml` runs on every push to `main` (i.e. after a PR is
+merged) and on manual dispatch. It deploys the public frontend and the managing
+app to Vercel using the Vercel CLI.
+
+It is inert until these are configured under
+**Settings → Secrets and variables → Actions**:
+
+| Kind | Name |
+| --- | --- |
+| Secret | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_FRONTEND`, `VERCEL_PROJECT_ID_MANAGING` |
+| Variable | `NEXT_PUBLIC_SITE_URL` (`https://www.roombazar.com`), `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_IMAGE_HOST` |
+
+Each deploy job is skipped (not failed) when its project id is absent. The
+NestJS backend is hosted elsewhere and is deployed by its own pipeline.

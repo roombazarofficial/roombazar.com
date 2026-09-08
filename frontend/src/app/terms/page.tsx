@@ -5,6 +5,7 @@ import { LegalPage } from "@/components/common/legalpage";
 export const metadata: Metadata = {
   title: "Terms of use",
   description: "The rules for using RoomBazar, and the limits of our role.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function Page() {
