@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo/site";
-import { getSitemapEntries } from "@/lib/api/listings";
+import { getSitemapEntries, type SitemapEntry } from "@/lib/api/listings";
 
 /**
  * The sitemap is built entirely from real, active listings. City and locality
@@ -9,8 +9,18 @@ import { getSitemapEntries } from "@/lib/api/listings";
  *
  * Excluded by construction: auth pages, dashboard, admin, the post wizard, and
  * any listing that is not `active` (expired / taken / suspended / draft).
+ *
+ * If the backend feed cannot be reached the render is allowed to throw: a 5xx
+ * sitemap makes Google retry, whereas silently emitting only the static pages
+ * would tell Google the whole site is ~8 URLs.
+ *
+ * `force-dynamic` keeps this off the build's static-generation path, so a
+ * backend blip during a deploy cannot fail the whole frontend build. The
+ * backend call itself is still cached for 15 min (revalidate on the fetch in
+ * `getSitemapEntries`), so normal crawler traffic does not hit the API every
+ * time.
  */
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -26,7 +36,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/privacy`, changeFrequency: "yearly", priority: 0.2, lastModified: now },
   ];
 
-  const entries = await getSitemapEntries().catch(() => []);
+  let entries: SitemapEntry[];
+  try {
+    entries = await getSitemapEntries();
+  } catch (error) {
+    console.error(
+      "[sitemap] could not load listing entries from the backend feed:",
+      error,
+    );
+    // Re-throw: fail the sitemap render rather than publish a listing-less one.
+    throw error;
+  }
 
   // Newest listing timestamp per city / locality, so `lastmod` on those pages is
   // a real signal rather than "now" on every crawl.

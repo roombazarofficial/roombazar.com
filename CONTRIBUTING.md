@@ -37,17 +37,38 @@ is what actually prevents a direct push to `main`.
 
 ## Deployment
 
+### Production topology
+
+| App | Host | URL |
+| --- | --- | --- |
+| Backend (NestJS) | separate host (Render / Railway / etc.) | `https://api.roombazar.com`, global prefix `/api` |
+| Frontend (Next.js) | Vercel | `https://www.roombazar.com` |
+| Managing (Next.js) | Vercel | `https://manage.roombazar.com` |
+
+The frontend and backend are **separate deployments**. The frontend has no
+`app/api` and no rewrites; it reaches the backend at `NEXT_PUBLIC_API_URL`
+(`https://api.roombazar.com`) over HTTP, server-side and client-side. A path like
+`https://www.roombazar.com/api/...` does not exist and returns the 404 page —
+that is expected.
+
+### CD
+
 `.github/workflows/deploy.yml` runs on every push to `main` (i.e. after a PR is
-merged) and on manual dispatch. It deploys the public frontend and the managing
-app to Vercel using the Vercel CLI.
+merged) and on manual dispatch. It deploys **all three apps**, in order: backend
+first (via a deploy-hook URL), then frontend and managing to Vercel. The frontend
+never deploys while a backend deploy is failing — this ordering is what the Phase 2
+sitemap incident required (frontend shipped a call to `/api/sitemap/listings`
+before that route existed in the deployed backend).
 
 It is inert until these are configured under
-**Settings → Secrets and variables → Actions**:
+**Settings → Secrets and variables → Actions** — each job is *skipped*, not
+failed, when its config is absent:
 
-| Kind | Name |
-| --- | --- |
-| Secret | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_FRONTEND`, `VERCEL_PROJECT_ID_MANAGING` |
-| Variable | `NEXT_PUBLIC_SITE_URL` (`https://www.roombazar.com`), `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_IMAGE_HOST` |
+| Kind | Name | For |
+| --- | --- | --- |
+| Secret | `BACKEND_DEPLOY_HOOK_URL` | backend |
+| Secret | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_FRONTEND`, `VERCEL_PROJECT_ID_MANAGING` | frontend + managing |
+| Variable | `NEXT_PUBLIC_SITE_URL` (`https://www.roombazar.com`), `NEXT_PUBLIC_API_URL` (`https://api.roombazar.com`), `NEXT_PUBLIC_IMAGE_HOST` | frontend + managing builds |
 
-Each deploy job is skipped (not failed) when its project id is absent. The
-NestJS backend is hosted elsewhere and is deployed by its own pipeline.
+Until `BACKEND_DEPLOY_HOOK_URL` is set, **anything that changes `backend/` must be
+redeployed manually** on the backend host after merging.
