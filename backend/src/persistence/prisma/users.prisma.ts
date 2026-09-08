@@ -28,7 +28,9 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    const row = await this.prisma.user.findUnique({
+    // `findFirst`, not `findUnique`: `phone` is no longer a unique field
+    // (see the schema comment). Callers must not assume the phone is unique.
+    const row = await this.prisma.user.findFirst({
       where: { phone },
       include: userInclude,
     });

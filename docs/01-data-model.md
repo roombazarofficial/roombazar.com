@@ -26,14 +26,23 @@ notification digests only.
 | Field | Type | Notes |
 | --- | --- | --- |
 | id | uuid | |
-| phone | text unique | E.164, e.g. `+919876543210` |
+| phone | text? | Optional secondary contact. **Not unique** — see note below |
 | phoneVerifiedAt | timestamptz? | Null until OTP completes |
-| email | text? unique | Optional, separately verified |
+| email | text unique | Identity. Required, verified by emailed code |
 | name | text | Display name, required at first listing or first message |
 | avatarKey | text? | Object key in R2 |
 | role | enum | `USER`, `MODERATOR`, `ADMIN` |
 | trustLevel | enum | `NEW`, `VERIFIED`, `TRUSTED`, `RESTRICTED` — see trust doc |
 | createdAt / updatedAt / deletedAt | timestamptz | |
+
+> **Note on `phone` uniqueness.** The original design (above) made phone the identity and
+> `@unique`. The implementation moved to email + password as the identity, with phone as an
+> optional field collected later. `phone` is deliberately **not** `@unique`: on MongoDB a
+> plain unique index over an optional field treats `null` and missing as the same key, so a
+> second account without a phone number breaks the index build. If "one account per phone"
+> becomes a real requirement, it needs a *partial* unique index
+> (`partialFilterExpression: { phone: { $type: "string" } }`) plus `P2002` handling on the
+> profile-update path — managed outside `prisma db push`.
 
 We store the phone number itself, not only a hash — the product needs to reveal it to a
 counterparty on mutual consent. It is encrypted at rest at the column level and never
