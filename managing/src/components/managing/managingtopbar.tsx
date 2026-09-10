@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { getAuditLog, type AuditEntry } from "@/lib/api/superadmin";
+import { MobileNav } from "./mobilenav";
 
 export function ManagingTopbar({
   publicSite,
@@ -45,7 +46,8 @@ export function ManagingTopbar({
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur-xs">
-      <div className="flex h-20 items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 items-center gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 lg:px-8">
+        <MobileNav />
         <Link href="/" className="flex shrink-0 items-center gap-2 lg:hidden">
           <Image
             src={logoUrl}

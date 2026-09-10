@@ -6,6 +6,7 @@ import { GEOGRAPHY_REPOSITORY } from "src/persistence/ports/geography.repository
 import { REPORTS_REPOSITORY } from "src/persistence/ports/reports.repository";
 import { SAVED_REPOSITORY } from "src/persistence/ports/saved.repository";
 import { AUTH_REPOSITORY } from "src/persistence/ports/auth.repository";
+import { NOTIFICATIONS_REPOSITORY } from "src/persistence/ports/notifications.repository";
 import { LISTING_DRAFT_REPOSITORY } from "src/persistence/ports/listingdraft.repository";
 import { PrismaService } from "./prisma.service";
 import { PrismaListingDraftRepository } from "./listingdraft.prisma";
@@ -16,6 +17,7 @@ import { PrismaGeographyRepository } from "./geography.prisma";
 import { PrismaReportsRepository } from "./reports.prisma";
 import { PrismaSavedRepository } from "./saved.prisma";
 import { PrismaAuthRepository } from "./auth.prisma";
+import { PrismaNotificationsRepository } from "./notifications.prisma";
 
 @Global()
 @Module({
@@ -28,6 +30,10 @@ import { PrismaAuthRepository } from "./auth.prisma";
     { provide: REPORTS_REPOSITORY, useClass: PrismaReportsRepository },
     { provide: SAVED_REPOSITORY, useClass: PrismaSavedRepository },
     { provide: AUTH_REPOSITORY, useClass: PrismaAuthRepository },
+    {
+      provide: NOTIFICATIONS_REPOSITORY,
+      useClass: PrismaNotificationsRepository,
+    },
     {
       provide: LISTING_DRAFT_REPOSITORY,
       useClass: PrismaListingDraftRepository,
@@ -42,6 +48,7 @@ import { PrismaAuthRepository } from "./auth.prisma";
     REPORTS_REPOSITORY,
     SAVED_REPOSITORY,
     AUTH_REPOSITORY,
+    NOTIFICATIONS_REPOSITORY,
     LISTING_DRAFT_REPOSITORY,
   ],
 })

@@ -69,6 +69,17 @@ const schema = z.object({
   CLOUDINARY_API_KEY: z.preprocess(blankAsAbsent, z.string().optional()),
   CLOUDINARY_API_SECRET: z.preprocess(blankAsAbsent, z.string().optional()),
   CLOUDINARY_URL: z.preprocess(blankAsAbsent, z.string().optional()),
+
+  /*
+    Firebase Admin (Cloud Messaging). All three are optional: with none set the
+    notification system runs in a disabled state and every other feature is
+    unaffected. FIREBASE_PRIVATE_KEY is a PEM block whose newlines are usually
+    stored escaped as "\n" in a dashboard env var — the Firebase service
+    un-escapes them at init, so paste it exactly as the JSON key file has it.
+  */
+  FIREBASE_PROJECT_ID: z.preprocess(blankAsAbsent, z.string().optional()),
+  FIREBASE_CLIENT_EMAIL: z.preprocess(blankAsAbsent, z.string().optional()),
+  FIREBASE_PRIVATE_KEY: z.preprocess(blankAsAbsent, z.string().optional()),
 }).superRefine((env, context) => {
   if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
     context.addIssue({

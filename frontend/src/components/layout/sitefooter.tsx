@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { routes } from "@/lib/constants/routes";
+import { socialProfiles, siteEmail } from "@/lib/seo/site";
 
 interface FooterSection {
   title: string;
@@ -99,7 +100,7 @@ export function SiteFooter() {
             </p>
 
             <a
-              href="mailto:roombazar.official@gmail.com"
+              href={`mailto:${siteEmail}`}
               className="inline-flex items-center gap-2 text-xs font-medium text-ink-muted transition-colors duration-150 hover:text-brand-600"
             >
               <svg
@@ -115,53 +116,51 @@ export function SiteFooter() {
                 <rect width="20" height="16" x="2" y="4" rx="2" />
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
               </svg>
-              <span>roombazar.official@gmail.com</span>
+              <span>{siteEmail}</span>
             </a>
 
             {/* Social Media Links */}
             <div className="pt-2">
               <div className="flex items-center gap-4 text-ink-muted">
-                <a
-                  href="https://www.instagram.com/roombzr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="RoomBazar on Instagram"
-                  className="transition-colors duration-150 hover:text-brand-600"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-5"
+                {socialProfiles.map((profile) => (
+                  <a
+                    key={profile.platform}
+                    href={profile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`RoomBazar on ${profile.platform}`}
+                    className="transition-colors duration-150 hover:text-brand-600"
                   >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                  </svg>
-                </a>
-
-                <a
-                  href="https://www.facebook.com/profile.php?id=61593239100172"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="RoomBazar on Facebook"
-                  className="transition-colors duration-150 hover:text-brand-600"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-5"
-                  >
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                  </svg>
-                </a>
+                    {profile.platform === "Instagram" && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-5"
+                      >
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                      </svg>
+                    )}
+                    {profile.platform === "Facebook" && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-5"
+                      >
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                      </svg>
+                    )}
+                  </a>
+                ))}
               </div>
             </div>
           </div>

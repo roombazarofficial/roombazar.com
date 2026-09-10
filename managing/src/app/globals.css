@@ -68,12 +68,19 @@
   color-scheme: light;
 }
 
+html {
+  /* Guard against any oversized child forcing a horizontal scrollbar. */
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Listing photos arrive over slow connections. Images always declare their

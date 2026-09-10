@@ -57,7 +57,16 @@ Every real RoomBazar room listing contains:
 3. **No Upfront Payments**: RoomBazar strictly advises seekers never to pay advances or token fees online before in-person property visits.
 4. **Moderation & Verification**: Every listing undergoes administrative verification before going live.
 
+## Founders
+RoomBazar was co-founded by three people:
+- **Kushal Pandey** — Co-Founder
+- **Satyam Pandey** — Co-Founder
+- **Sachin Maurya** — Co-Founder
+
 ## Contact & Official Support
 - **Website**: https://www.roombazar.com
+- **About RoomBazar**: https://www.roombazar.com/about
 - **Official Email**: roombazar.official@gmail.com
+- **Instagram**: https://www.instagram.com/roombzr/
+- **Facebook**: https://www.facebook.com/profile.php?id=61593239100172
 - **Sitemap**: https://www.roombazar.com/sitemap.xml

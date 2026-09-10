@@ -101,6 +101,8 @@ model User {
   moderationActions  ModerationAction[]
   auditLogs          AuditLog[]
   sessions           Session[]
+  pushTokens         PushToken[]
+  notificationsSent  NotificationLog[]  @relation("notificationSender")
 
   @@index([trustLevel])
   @@map("users")
@@ -1235,4 +1237,104 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Push notifications (Firebase Cloud Messaging)
+// ---------------------------------------------------------------------------
+
+/// The platform the token was issued on. `web` today; `android` / `ios` are
+/// here so a future Flutter build registers through the same table and the
+/// same send path with no schema change.
+enum DeviceType {
+  web
+  android
+  ios
+}
+
+/// One FCM registration token per browser/device. A user has many: desktop
+/// Chrome, Android Chrome and Edge are three separate rows.
+///
+/// The token is the only sensitive value and it is not a credential — it lets
+/// this server *send* to a device, nothing more. No message content lives here.
+model PushToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @map("user_id") @db.ObjectId
+
+  /// The FCM registration token. Unique so re-registering the same browser
+  /// updates the existing row (and its owner) rather than duplicating it.
+  token String @unique
+
+  /// FCM installation id when the SDK exposes one; helps correlate a token
+  /// rotation with the same physical install.
+  installationId String? @map("installation_id")
+
+  deviceType DeviceType @default(web) @map("device_type")
+  browser    String?
+  userAgent  String? @map("user_agent")
+
+  /// Flipped to false when FCM reports the token unregistered/invalid, so the
+  /// send path stops targeting it without the row being lost for debugging.
+  isActive   Boolean  @default(true) @map("is_active")
+  lastUsedAt DateTime @default(now()) @map("last_used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("push_tokens")
+}
+
+enum NotificationType {
+  CHAT_MESSAGE
+  NEW_ENQUIRY
+  LISTING_APPROVED
+  LISTING_REJECTED
+  LISTING_UPDATE
+  NEW_MATCHING_LISTING
+  SYSTEM_NOTIFICATION
+  MARKETING
+}
+
+enum NotificationTargetType {
+  all
+  user
+  users
+}
+
+/// Audit row for every notification the Super Admin console sends. Automatic
+/// per-event notifications (chat, approvals) are deliberately not logged here —
+/// this table is the record of broadcast/manual sends.
+model NotificationLog {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title String
+  body  String
+  type  NotificationType @default(SYSTEM_NOTIFICATION)
+
+  targetType    NotificationTargetType @map("target_type")
+  targetUserIds String[]               @map("target_user_ids") @db.ObjectId
+  url           String?
+
+  sentById       String @map("sent_by_id") @db.ObjectId
+  recipientCount Int    @default(0) @map("recipient_count")
+  successCount   Int    @default(0) @map("success_count")
+  failureCount   Int    @default(0) @map("failure_count")
+  invalidRemoved Int    @default(0) @map("invalid_removed")
+
+  /// "sent" | "partial" | "failed"
+  status String @default("sent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sentBy User @relation("notificationSender", fields: [sentById], references: [id])
+
+  @@index([createdAt])
+  @@index([sentById])
+  @@index([targetType])
+  @@map("notification_logs")
 }

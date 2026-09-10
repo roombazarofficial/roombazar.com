@@ -23,6 +23,13 @@ const groups = [
     ],
   },
   {
+    heading: "Messaging",
+    items: [
+      { href: "/admin/notifications", label: "Send notification" },
+      { href: "/admin/notifications/history", label: "Notification history" },
+    ],
+  },
+  {
     heading: "Reference data",
     items: [
       { href: "/admin/cities", label: "Cities" },
@@ -35,9 +42,36 @@ const groups = [
 export function AdminSidebar() {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    href === "/admin/notifications"
+      ? pathname === href
+      : pathname.startsWith(href);
+
   return (
-    <nav aria-label="Admin" className="w-56 shrink-0">
-      <div className="space-y-6">
+    <nav aria-label="Admin" className="md:w-56 md:shrink-0">
+      {/* Mobile / tablet: one horizontally-scrollable row of links. */}
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:hidden">
+        {groups.flatMap((group) =>
+          group.items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              className={cn(
+                "shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                isActive(item.href)
+                  ? "border-brand-200 bg-brand-50 text-brand-700"
+                  : "border-line bg-surface text-ink-muted hover:text-ink",
+              )}
+            >
+              {item.label}
+            </Link>
+          )),
+        )}
+      </div>
+
+      {/* Desktop: grouped vertical list. */}
+      <div className="hidden space-y-6 md:block">
         {groups.map((group) => (
           <div key={group.heading}>
             <h2 className="mb-1.5 px-3 text-xs font-medium uppercase tracking-wide text-ink-subtle">
@@ -46,7 +80,7 @@ export function AdminSidebar() {
 
             <ul className="space-y-0.5">
               {group.items.map((item) => {
-                const active = pathname.startsWith(item.href);
+                const active = isActive(item.href);
                 return (
                   <li key={item.href}>
                     <Link

@@ -1,6 +1,6 @@
 import type { Listing } from "@/types/listing";
 import type { Locality } from "@/types/locality";
-import { siteUrl } from "@/lib/seo/site";
+import { siteUrl, socialProfiles, founders, siteEmail } from "@/lib/seo/site";
 
 /**
  * JSON-LD for listing detail pages.
@@ -154,15 +154,18 @@ export function SiteStructuredData() {
         logo: `${siteUrl}/icon.png`,
         description:
           "RoomBazar is a peer-to-peer room rental marketplace in India connecting room seekers directly with property owners with 0% brokerage.",
-        email: "roombazar.official@gmail.com",
-        sameAs: [
-          "https://www.instagram.com/roombzr/",
-          "https://www.facebook.com/profile.php?id=61593239100172",
-        ],
+        email: siteEmail,
+        sameAs: socialProfiles.map((p) => p.url),
+        founder: founders.map((f) => ({
+          "@type": "Person",
+          "@id": `${siteUrl}/#founder-${f.name.toLowerCase().replace(/\s+/g, "-")}`,
+          name: f.name,
+          jobTitle: f.role,
+        })),
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "Customer Support",
-          email: "roombazar.official@gmail.com",
+          email: siteEmail,
           availableLanguage: ["English", "Hindi"],
         },
       },
@@ -182,6 +185,29 @@ export function SiteStructuredData() {
 
   return <JsonLd data={data} />;
 }
+
+/**
+ * JSON-LD for the About page — declares an AboutPage entity that is
+ * explicitly `about` the RoomBazar Organization, strengthening the
+ * entity connection for knowledge-graph extraction.
+ */
+export function AboutPageStructuredData() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${siteUrl}/about/#webpage`,
+    url: `${siteUrl}/about`,
+    name: "About RoomBazar",
+    description:
+      "Learn about RoomBazar, what it does, how it works, and the people behind it.",
+    isPartOf: { "@id": `${siteUrl}/#website` },
+    about: { "@id": `${siteUrl}/#organization` },
+    inLanguage: "en-IN",
+  };
+
+  return <JsonLd data={data} />;
+}
+
 
 export function BreadcrumbStructuredData({
   trail,
