@@ -33,6 +33,7 @@ import {
   type MessageView,
 } from "./conversations.presenter";
 import { ConversationsGateway } from "./conversations.gateway";
+import { NotificationService } from "src/modules/notifications/notifications.service";
 
 @Injectable()
 export class ConversationsService {
@@ -42,6 +43,7 @@ export class ConversationsService {
     @Inject(LISTINGS_REPOSITORY) private readonly listings: ListingsRepository,
     @Inject(USERS_REPOSITORY) private readonly users: UsersRepository,
     private readonly gateway: ConversationsGateway,
+    private readonly notifications: NotificationService,
   ) {}
 
   async listForUser(user: User): Promise<ConversationView[]> {
@@ -192,6 +194,23 @@ export class ConversationsService {
 
     if (advanceRequest || redaction.matched.includes("spelleddigits")) {
     }
+
+    // Push notification to the other participant only — never the sender's own
+    // devices. Fire-and-forget: a notification failure must not fail the send.
+    const recipientId =
+      conversation.seekerId === sender.id
+        ? conversation.listerId
+        : conversation.seekerId;
+
+    this.notifications.notifyUserInBackground(recipientId, {
+      title: `New message from ${sender.name}`,
+      body: "You have a new message on RoomBazar.",
+      data: {
+        type: "CHAT_MESSAGE",
+        chatId: conversationId,
+        url: `/dashboard/inbox/${conversationId}`,
+      },
+    });
 
     return stored;
   }

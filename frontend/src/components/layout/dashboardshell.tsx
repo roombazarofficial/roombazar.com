@@ -1,6 +1,7 @@
 import { SiteHeader } from "./siteheader";
 import { DashboardSidebar } from "./dashboardsidebar";
 import { DashboardMobileNav } from "./dashboardmobilenav";
+import { NotificationCenter } from "@/components/notifications/notificationcenter";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <DashboardMobileNav />
+      <NotificationCenter />
     </div>
   );
 }

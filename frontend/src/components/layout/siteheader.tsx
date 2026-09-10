@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { routes } from "@/lib/constants/routes";
 import { useAuthUi } from "@/store/authuistore";
 import { logout } from "@/lib/api/auth";
+import { unregisterToken } from "@/lib/api/notifications";
+import { getExistingToken, revokeToken } from "@/lib/firebase/messaging";
 
 export function SiteHeader() {
   const router = useRouter();
@@ -95,6 +97,15 @@ export function SiteHeader() {
 
   async function handleLogout() {
     setIsMenuOpen(false);
+    try {
+      // Deactivate this browser's push token first (needs the session), then
+      // drop it locally. Other devices for this user are left untouched.
+      const existing = await getExistingToken();
+      if (existing) await unregisterToken(existing.token);
+      await revokeToken();
+    } catch {
+      /* best effort */
+    }
     try {
       await logout();
     } catch {
@@ -212,9 +223,12 @@ export function SiteHeader() {
                 aria-expanded={isMenuOpen}
               >
                 {user.avatarUrl ? (
-                  <img
+                  <Image
                     src={user.avatarUrl}
                     alt={user.name || "User profile"}
+                    width={36}
+                    height={36}
+                    unoptimized
                     className="size-8 sm:size-9 rounded-full object-cover"
                   />
                 ) : (

@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/layout/siteshell";
-import { BreadcrumbStructuredData } from "@/components/common/structureddata";
+import {
+  BreadcrumbStructuredData,
+  AboutPageStructuredData,
+} from "@/components/common/structureddata";
 import { routes } from "@/lib/constants/routes";
+import { founders, socialProfiles, siteUrl } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
   title: "About RoomBazar — Direct From Owner Room Rental Marketplace",
   description:
-    "Learn about RoomBazar, India's peer-to-peer room rental marketplace connecting seekers directly with property owners with 0% brokerage.",
+    "Learn about RoomBazar, a platform that makes it easier for people to discover and list rooms, flats, and rental spaces — and meet the founders behind it.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About RoomBazar — Direct From Owner Room Rental Marketplace",
+    description:
+      "Learn about RoomBazar, a platform that makes it easier for people to discover and list rooms, flats, and rental spaces — and meet the founders behind it.",
+    url: `${siteUrl}/about`,
+    type: "website",
+  },
 };
 
 export default function AboutPage() {
@@ -20,6 +31,7 @@ export default function AboutPage() {
           { name: "About RoomBazar", path: routes.about },
         ]}
       />
+      <AboutPageStructuredData />
       <div className="bg-white">
         {/* =========================================================================
             HERO SECTION
@@ -202,7 +214,7 @@ export default function AboutPage() {
           {/* =========================================================================
               HOW ROOMBAZAR WORKS (3-STEP FLOW)
               ========================================================================= */}
-          <section className="border-b border-line py-12">
+          <section id="how-it-works" className="border-b border-line py-12">
             <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
               How RoomBazar works
             </h2>
@@ -290,6 +302,92 @@ export default function AboutPage() {
               <p>
                 RoomBazar is starting with rooms, PGs and shared spaces, with a long-term goal of making it easier for people to find the right place in the cities they live and move to.
               </p>
+            </div>
+          </section>
+
+          {/* =========================================================================
+              MEET THE FOUNDERS
+              ========================================================================= */}
+          <section className="border-b border-line py-12">
+            <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              Meet the founders
+            </h2>
+            <p className="mt-3 text-sm text-ink-muted leading-relaxed">
+              RoomBazar was started by three people who wanted to make the room-finding process simpler and more transparent.
+            </p>
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              {founders.map((founder) => (
+                <div
+                  key={founder.name}
+                  className="flex flex-col items-center rounded-xl border border-line bg-[#FFF9F7]/60 p-6 text-center"
+                >
+                  {/* Initials avatar */}
+                  <span className="flex size-14 items-center justify-center rounded-full bg-brand-50 border border-brand-100 text-lg font-bold text-brand-600">
+                    {founder.initials}
+                  </span>
+                  <h3 className="mt-3 text-base font-bold text-ink">
+                    {founder.name}
+                  </h3>
+                  <p className="mt-0.5 text-sm text-ink-muted">
+                    {founder.role}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* =========================================================================
+              FOLLOW ROOMBAZAR — SOCIAL LINKS
+              ========================================================================= */}
+          <section className="border-b border-line py-12">
+            <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              Follow RoomBazar
+            </h2>
+            <p className="mt-3 text-sm text-ink-muted leading-relaxed">
+              Stay updated with new features, city launches, and community tips.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-4">
+              {socialProfiles.map((profile) => (
+                <a
+                  key={profile.platform}
+                  href={profile.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors duration-150 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600"
+                >
+                  {profile.platform === "Instagram" && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="size-4"
+                      aria-hidden="true"
+                    >
+                      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                    </svg>
+                  )}
+                  {profile.platform === "Facebook" && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="size-4"
+                      aria-hidden="true"
+                    >
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                  )}
+                  {profile.platform}
+                </a>
+              ))}
             </div>
           </section>
 

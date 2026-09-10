@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { NotificationsModule } from "src/modules/notifications/notifications.module";
 import { SuperAdminController } from "./superadmin.controller";
 import { ApprovalsController } from "./approvals.controller";
 import { ApprovalsService } from "./approvals.service";
@@ -9,6 +10,7 @@ import { AdminVerificationController } from "./adminverification.controller";
 import { AdminLocalityRequestsController } from "./adminlocalityrequests.controller";
 
 @Module({
+  imports: [NotificationsModule],
   controllers: [
     SuperAdminController,
     ApprovalsController,

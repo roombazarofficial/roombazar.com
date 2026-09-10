@@ -19,11 +19,18 @@ async function request<T>(
 
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as
-      | { code?: string; message?: string }
+      | { code?: string; message?: string; fields?: Record<string, string> }
       | null;
 
+    const fieldDetail = body?.fields
+      ? " — " +
+        Object.entries(body.fields)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("; ")
+      : "";
+
     throw new SuperAdminError(
-      body?.message ?? `Request failed (${response.status})`,
+      (body?.message ?? `Request failed (${response.status})`) + fieldDetail,
       response.status,
       body?.code,
     );
@@ -378,3 +385,81 @@ export const decideLocalityRequest = (
     method: "POST",
     body: JSON.stringify({ decision, note }),
   });
+
+
+// ---------------------------------------------------------------------------
+// Notifications (Firebase Cloud Messaging)
+// ---------------------------------------------------------------------------
+
+export type NotificationType =
+  | "CHAT_MESSAGE"
+  | "NEW_ENQUIRY"
+  | "LISTING_APPROVED"
+  | "LISTING_REJECTED"
+  | "LISTING_UPDATE"
+  | "NEW_MATCHING_LISTING"
+  | "SYSTEM_NOTIFICATION"
+  | "MARKETING";
+
+export interface NotificationStatus {
+  enabled: boolean;
+  reachableUsers: number;
+}
+
+export interface SendNotificationInput {
+  title: string;
+  body: string;
+  type: NotificationType;
+  url?: string;
+  target: "all" | "user" | "users";
+  userIds?: string[];
+  confirmAll?: boolean;
+}
+
+export interface SendNotificationResult {
+  id: string;
+  recipients: number;
+  successful: number;
+  failed: number;
+  invalidTokensRemoved: number;
+  status: string;
+}
+
+export interface NotificationLog {
+  id: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+  targetType: "all" | "user" | "users";
+  targetUserIds: string[];
+  url: string | null;
+  sentById: string;
+  sentByName?: string;
+  recipientCount: number;
+  successCount: number;
+  failureCount: number;
+  invalidRemoved: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface NotificationLogDetail extends NotificationLog {
+  recipients: { id: string; name: string; email: string | null }[];
+}
+
+export const getNotificationStatus = () =>
+  request<NotificationStatus>("/notifications/status");
+
+export const sendNotification = (input: SendNotificationInput) =>
+  request<SendNotificationResult>("/notifications/send", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const getNotificationHistory = (page = 1, pageSize = 20) =>
+  request<Paged<NotificationLog>>(
+    `/notifications/history?page=${page}&pageSize=${pageSize}`,
+  );
+
+export const getNotificationDetail = (id: string) =>
+  request<NotificationLogDetail>(`/notifications/${id}`);

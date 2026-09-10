@@ -27,6 +27,13 @@ const groups = [
     ],
   },
   {
+    heading: "Messaging",
+    items: [
+      { href: "/notifications", label: "Send notification" },
+      { href: "/notifications/history", label: "Notification history" },
+    ],
+  },
+  {
     heading: "Reference data",
     items: [
       { href: "/cities", label: "Cities" },
@@ -61,8 +68,8 @@ export function ManagingSidebar() {
               {group.items.map((item) => {
                 const itemPath = item.href.split("?")[0] ?? item.href;
                 const active =
-                  itemPath === "/"
-                    ? pathname === "/"
+                  itemPath === "/" || itemPath === "/notifications"
+                    ? pathname === itemPath
                     : pathname.startsWith(itemPath);
                 return (
                   <li key={item.href}>
@@ -103,6 +110,7 @@ function NavIcon({ href, active }: { href: string; active: boolean }) {
   if (href.includes("approval") || href.includes("verification") || href.includes("request")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M9 11 11 13 15 9" /><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 3h8M8 17h8" /></svg>;
   if (href.includes("report")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M12 3 2.8 20h18.4L12 3Z" /><path d="M12 9v5M12 17h.01" /></svg>;
   if (href.includes("user")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
+  if (href.includes("notification")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>;
   if (href.includes("audit")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg>;
   if (href.includes("city") || href.includes("localit")) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M4 21V5l8-2 8 2v16M8 8h1M15 8h1M8 12h1M15 12h1M8 16h1M15 16h1" /><path d="M11 21v-4h2v4" /></svg>;
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClass} aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>;

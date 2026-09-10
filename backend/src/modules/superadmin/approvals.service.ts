@@ -23,6 +23,7 @@ import {
   ValidationFailed,
 } from "src/common/errors/domain.errors";
 import { assertTransition, expiryFrom } from "src/modules/listings/listinglifecycle";
+import { NotificationService } from "src/modules/notifications/notifications.service";
 import type { Listing } from "src/domain/listing.entity";
 import type { User } from "src/domain/user.entity";
 
@@ -45,6 +46,7 @@ export class ApprovalsService {
     @Inject(REPORTS_REPOSITORY) private readonly reports: ReportsRepository,
     @Inject(GEOGRAPHY_REPOSITORY)
     private readonly geography: GeographyRepository,
+    private readonly notifications: NotificationService,
   ) {}
 
   /**
@@ -160,6 +162,16 @@ export class ApprovalsService {
 
     await this.record(admin, "approvelisting", listingId, note || "Approved");
 
+    this.notifications.notifyUserInBackground(listing.ownerId, {
+      title: "Your listing is approved",
+      body: `"${listing.title}" is now live on RoomBazar.`,
+      data: {
+        type: "LISTING_APPROVED",
+        listingId,
+        url: `/dashboard/listings/${listingId}`,
+      },
+    });
+
     return approved;
   }
 
@@ -200,6 +212,16 @@ export class ApprovalsService {
     });
 
     await this.record(admin, "rejectlisting", listingId, trimmed);
+
+    this.notifications.notifyUserInBackground(listing.ownerId, {
+      title: "Your listing needs a change",
+      body: `"${listing.title}" was not approved. Open it to see what to fix.`,
+      data: {
+        type: "LISTING_REJECTED",
+        listingId,
+        url: `/dashboard/listings/${listingId}`,
+      },
+    });
 
     return rejected;
   }
