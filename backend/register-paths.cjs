@@ -6,6 +6,6 @@ const tsconfigPaths = require("tsconfig-paths");
 tsconfigPaths.register({
   baseUrl: path.join(__dirname, "dist"),
   paths: {
-    "src/*": ["*"],
+    "src/*": ["src/*", "*"],
   },
 });
