@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "nest start --watch",
-    "start": "node -r ./register-paths.cjs dist/main",
+    "start": "node -r ./register-paths.cjs dist/src/main",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "jest",
