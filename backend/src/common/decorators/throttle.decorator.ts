@@ -17,3 +17,9 @@ export const ThrottleListingCreate = () =>
 
 export const ThrottleWebhook = () =>
   Throttle({ default: { ttl: 60_000, limit: 300 } });
+
+export const ThrottleReview = () =>
+  Throttle({ default: { ttl: 60_000, limit: 6 } });
+
+export const ThrottleFeedback = () =>
+  Throttle({ default: { ttl: 60_000, limit: 6 } });

@@ -20,6 +20,7 @@ export const mockConversations: Conversation[] = [
     lastMessageAt: "2026-08-16T06:20:00Z",
     unreadCount: 2,
     status: "active",
+    inquiryStatus: "sent",
   },
   {
     id: "conv-2",
@@ -36,6 +37,7 @@ export const mockConversations: Conversation[] = [
     lastMessageAt: "2026-08-15T11:02:00Z",
     unreadCount: 0,
     status: "active",
+    inquiryStatus: "responded",
   },
 ];
 

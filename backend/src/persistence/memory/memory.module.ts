@@ -7,7 +7,9 @@ import { REPORTS_REPOSITORY } from "src/persistence/ports/reports.repository";
 import { SAVED_REPOSITORY } from "src/persistence/ports/saved.repository";
 import { AUTH_REPOSITORY } from "src/persistence/ports/auth.repository";
 import { LISTING_DRAFT_REPOSITORY } from "src/persistence/ports/listingdraft.repository";
+import { REVIEWS_REPOSITORY } from "src/persistence/ports/reviews.repository";
 import { MemoryListingDraftRepository } from "./listingdraft.memory";
+import { MemoryReviewsRepository } from "./reviews.memory";
 import { MemoryListingsRepository } from "./listings.memory";
 import { MemoryUsersRepository } from "./users.memory";
 import { MemoryConversationsRepository } from "./conversations.memory";
@@ -30,6 +32,7 @@ import { MemoryAuthRepository } from "./auth.memory";
       provide: LISTING_DRAFT_REPOSITORY,
       useClass: MemoryListingDraftRepository,
     },
+    { provide: REVIEWS_REPOSITORY, useClass: MemoryReviewsRepository },
   ],
   exports: [
     LISTINGS_REPOSITORY,
@@ -40,6 +43,7 @@ import { MemoryAuthRepository } from "./auth.memory";
     SAVED_REPOSITORY,
     AUTH_REPOSITORY,
     LISTING_DRAFT_REPOSITORY,
+    REVIEWS_REPOSITORY,
   ],
 })
 export class MemoryPersistenceModule {}

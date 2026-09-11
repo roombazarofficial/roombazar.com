@@ -8,6 +8,8 @@ import { ListingAmenities } from "@/components/listing/listingamenities";
 import { ListingListerPanel } from "@/components/listing/listinglisterpanel";
 import { PaymentSafetyNotice } from "@/components/listing/paymentsafetynotice";
 import { ListingLocalityMap } from "@/components/listing/listinglocalitymap";
+import { ReviewsSection } from "@/components/reviews/reviewssection";
+import { RecordRecentlyViewed } from "@/components/listing/recordrecentlyviewed";
 import {
   ListingStructuredData,
   BreadcrumbStructuredData,
@@ -84,6 +86,7 @@ export default async function Page({ params }: { params: Params }) {
   return (
     <SiteShell>
       <ListingStructuredData listing={listing} />
+      <RecordRecentlyViewed listing={listing} />
 
       <BreadcrumbStructuredData
         trail={[
@@ -212,6 +215,10 @@ export default async function Page({ params }: { params: Params }) {
             <ListingAmenities amenities={listing.amenities} className="mt-8" />
 
             <ListingLocalityMap listing={listing} className="mt-8" />
+
+            <section className="mt-8 border-t border-line pt-8">
+              <ReviewsSection listingId={listing.id} listingTitle={listing.title} />
+            </section>
 
             <PaymentSafetyNotice className="mt-8" />
           </div>

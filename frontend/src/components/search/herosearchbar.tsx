@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import { LocationPicker } from "./locationpicker";
 import { buildSearchQuery } from "@/lib/utils/querystring";
 import { routes } from "@/lib/constants/routes";
+import { roomTypeLabels, roomTypeOrder } from "@/lib/constants/roomtypes";
 import type { City } from "@/types/city";
+import type { RoomType } from "@/types/listing";
+
+const BUDGET_OPTIONS: { label: string; maxRupees: number | null }[] = [
+  { label: "Any budget", maxRupees: null },
+  { label: "Under ₹5,000", maxRupees: 5000 },
+  { label: "Under ₹10,000", maxRupees: 10000 },
+  { label: "Under ₹15,000", maxRupees: 15000 },
+  { label: "Under ₹25,000", maxRupees: 25000 },
+  { label: "Under ₹40,000", maxRupees: 40000 },
+];
 
 export function HeroSearchBar({ cities }: { cities: City[] }) {
   const router = useRouter();
@@ -13,6 +24,8 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
   const [selectedLocationLabel, setSelectedLocationLabel] = useState("");
   const [citySlug, setCitySlug] = useState("");
   const [moveIn, setMoveIn] = useState("");
+  const [roomType, setRoomType] = useState<RoomType | "">("");
+  const [maxRupees, setMaxRupees] = useState<number | null>(null);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
@@ -21,6 +34,8 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
 
     const query = buildSearchQuery({
       availableFrom: moveIn || null,
+      roomTypes: roomType ? [roomType] : [],
+      maxRentPaise: maxRupees != null ? maxRupees * 100 : null,
     });
 
     const destination = citySlug ? routes.city(citySlug) : routes.rooms;
@@ -31,8 +46,8 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
     <form
       onSubmit={submit}
       className={`
-        relative mx-auto mt-6 w-full max-w-3xl
-        rounded-2xl sm:rounded-full
+        relative mx-auto mt-6 w-full max-w-5xl
+        rounded-2xl
         border border-line bg-white shadow-raised
         transition-all duration-200
         ${isLocationOpen ? "ring-2 ring-brand-500/20 border-brand-300" : "hover:border-line-strong hover:shadow-overlay"}
@@ -46,7 +61,7 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
           className={`
             relative min-w-0 flex-[1.4] px-4 py-3 sm:px-6
             flex flex-col justify-center items-start text-left cursor-pointer
-            rounded-t-2xl sm:rounded-l-full sm:rounded-tr-none
+            rounded-t-2xl sm:rounded-tr-none sm:rounded-l-2xl
             transition-colors duration-150
             ${isLocationOpen ? "bg-brand-50/40" : "hover:bg-surface-muted/60"}
           `}
@@ -75,7 +90,74 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
         <div className="block sm:hidden h-px w-full bg-line" aria-hidden />
 
         {/* =========================================================================
-            2. MOVE-IN DATE SEGMENT
+            2. PROPERTY TYPE SEGMENT
+            ========================================================================= */}
+        <div className="relative min-w-0 flex-1 px-4 py-3 sm:px-6 flex flex-col justify-center items-start text-left hover:bg-surface-muted/60 transition-colors duration-150">
+          <label
+            htmlFor="hero-roomtype"
+            className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-0.5"
+          >
+            Looking for
+          </label>
+          <div className="relative w-full">
+            <select
+              id="hero-roomtype"
+              value={roomType}
+              onChange={(e) => setRoomType(e.target.value as RoomType | "")}
+              className="w-full truncate bg-transparent pr-5 text-sm font-semibold text-ink outline-none cursor-pointer appearance-none"
+            >
+              <option value="">Any type</option>
+              {roomTypeOrder.map((type) => (
+                <option key={type} value={type}>
+                  {roomTypeLabels[type]}
+                </option>
+              ))}
+            </select>
+            <SelectChevron />
+          </div>
+        </div>
+
+        {/* Divider (Desktop) */}
+        <div className="hidden sm:block h-8 w-px bg-line shrink-0" aria-hidden />
+        {/* Divider (Mobile) */}
+        <div className="block sm:hidden h-px w-full bg-line" aria-hidden />
+
+        {/* =========================================================================
+            3. BUDGET SEGMENT
+            ========================================================================= */}
+        <div className="relative min-w-0 flex-1 px-4 py-3 sm:px-6 flex flex-col justify-center items-start text-left hover:bg-surface-muted/60 transition-colors duration-150">
+          <label
+            htmlFor="hero-budget"
+            className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-0.5"
+          >
+            Budget
+          </label>
+          <div className="relative w-full">
+            <select
+              id="hero-budget"
+              value={maxRupees ?? ""}
+              onChange={(e) =>
+                setMaxRupees(e.target.value ? Number(e.target.value) : null)
+              }
+              className="w-full truncate bg-transparent pr-5 text-sm font-semibold text-ink outline-none cursor-pointer appearance-none"
+            >
+              {BUDGET_OPTIONS.map((option) => (
+                <option key={option.label} value={option.maxRupees ?? ""}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <SelectChevron />
+          </div>
+        </div>
+
+        {/* Divider (Desktop) */}
+        <div className="hidden sm:block h-8 w-px bg-line shrink-0" aria-hidden />
+        {/* Divider (Mobile) */}
+        <div className="block sm:hidden h-px w-full bg-line" aria-hidden />
+
+        {/* =========================================================================
+            4. MOVE-IN DATE SEGMENT
             ========================================================================= */}
         <div
           onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
@@ -136,14 +218,14 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
         </div>
 
         {/* =========================================================================
-            3. SEARCH ACTION BUTTON
+            5. SEARCH ACTION BUTTON
             ========================================================================= */}
         <div className="p-2 sm:pr-2.5 flex items-center">
           <button
             type="submit"
             className="
               flex h-11 sm:h-12 w-full sm:w-auto items-center justify-center gap-2
-              rounded-xl sm:rounded-full bg-brand-600 px-7 sm:px-8
+              rounded-xl bg-brand-600 px-7 sm:px-8
               text-sm font-bold text-white shadow-xs
               transition-all duration-150 hover:bg-brand-700 active:scale-[0.98]
               cursor-pointer
@@ -166,5 +248,22 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
         </div>
       </div>
     </form>
+  );
+}
+
+function SelectChevron() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="pointer-events-none absolute right-0 top-1/2 size-3 -translate-y-1/2 text-ink-subtle"
+      aria-hidden
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }

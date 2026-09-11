@@ -6,6 +6,7 @@ import { PopularLocations } from "@/components/home/popularlocations";
 import { SpaceTypeGrid } from "@/components/home/spacetypegrid";
 import { TrustStrip } from "@/components/home/truststrip";
 import { CTABanner } from "@/components/home/ctabanner";
+import { RecentlyViewedSection } from "@/components/home/recentlyviewedsection";
 import { getRecentListings } from "@/lib/api/listings";
 import { getCities } from "@/lib/api/geography";
 import { routes } from "@/lib/constants/routes";
@@ -48,6 +49,9 @@ export default async function Page() {
           <HeroSearchBar cities={cities} />
         </div>
       </section>
+
+      {/* ===== RECENTLY VIEWED (real per-browser history only) ===== */}
+      <RecentlyViewedSection />
 
       {/* ===== SPACE TYPE DISCOVERY ===== */}
       <SpaceTypeGrid />

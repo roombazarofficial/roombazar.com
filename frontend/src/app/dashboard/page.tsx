@@ -1,16 +1,36 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { OwnerListingCard } from "@/components/dashboard/ownerlistingcard";
 import { EmptyState } from "@/components/ui/emptystate";
 import { getMyListings } from "@/lib/api/listings";
 import { getConversations } from "@/lib/api/conversations";
+import { fetchMyReviews } from "@/lib/api/reviews";
 import { routes } from "@/lib/constants/routes";
+import { relativeTime } from "@/lib/format/dates";
+
+const inquiryStatusLabel = {
+  sent: "Sent",
+  viewed: "Viewed",
+  responded: "Responded",
+} as const;
+
+const inquiryStatusTone = {
+  sent: "neutral",
+  viewed: "info",
+  responded: "success",
+} as const;
 
 export default async function Page() {
-  const [listings, conversations] = await Promise.all([
+  const [listings, conversations, myReviews] = await Promise.all([
     getMyListings(),
     getConversations(),
+    fetchMyReviews(),
   ]);
+
+  // Conversations where the current user is the seeker — inquiryStatus is
+  // only populated on that side, so this filters to "things I asked about".
+  const myInquiries = conversations.filter((c) => c.inquiryStatus !== null);
 
   const active = listings.filter((listing) => listing.status === "active");
   const pending = listings.filter(
@@ -100,6 +120,78 @@ export default async function Page() {
         <Stat label="In review" value={String(pending.length)} />
         <Stat label="Total views" value={String(totalViews)} />
       </div>
+
+      {/* My inquiries — only shown when this user has actually contacted owners */}
+      {myInquiries.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-base font-semibold text-ink">
+            My inquiries ({myInquiries.length})
+          </h2>
+          <ul className="space-y-2">
+            {myInquiries.map((conversation) => (
+              <li key={conversation.id}>
+                <Link
+                  href={routes.conversation(conversation.id)}
+                  className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface p-3.5 hover:bg-surface-muted"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">
+                      {conversation.listingTitle}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-ink-muted">
+                      {conversation.lastMessagePreview}
+                    </p>
+                  </div>
+                  <Badge tone={inquiryStatusTone[conversation.inquiryStatus!]}>
+                    {inquiryStatusLabel[conversation.inquiryStatus!]}
+                  </Badge>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* My reviews — only shown when this user has actually reviewed a property */}
+      {myReviews.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-base font-semibold text-ink">
+            My reviews ({myReviews.length})
+          </h2>
+          <ul className="space-y-2">
+            {myReviews.map((review) => (
+              <li
+                key={review.id}
+                className="rounded-card border border-line bg-surface p-3.5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  {review.listingSlug ? (
+                    <Link
+                      href={routes.listing(review.listingSlug)}
+                      className="truncate text-sm font-medium text-ink hover:text-brand-600"
+                    >
+                      {review.listingTitle}
+                    </Link>
+                  ) : (
+                    <p className="truncate text-sm font-medium text-ink">
+                      {review.listingTitle}
+                    </p>
+                  )}
+                  <span className="shrink-0 text-xs font-semibold text-amber-600">
+                    {review.overallRating} ★
+                  </span>
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs text-ink-muted">
+                  {review.body}
+                </p>
+                <p className="mt-1 text-2xs text-ink-subtle">
+                  {relativeTime(review.createdAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Empty State */}
       {listings.length === 0 ? (

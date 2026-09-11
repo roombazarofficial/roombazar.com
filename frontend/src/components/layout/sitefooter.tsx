@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { routes } from "@/lib/constants/routes";
 import { socialProfiles, siteEmail } from "@/lib/seo/site";
+import { PlatformFeedbackWidget } from "@/components/feedback/platformfeedbackwidget";
 
 interface FooterSection {
   title: string;
@@ -205,6 +206,8 @@ export function SiteFooter() {
             <span className="text-ink-subtle">
               Listings are posted directly by verified users; 0% brokerage fee.
             </span>
+            <span className="hidden text-line-strong sm:inline">·</span>
+            <PlatformFeedbackWidget />
           </div>
 
           <div className="flex items-center gap-4 self-start pt-2 sm:self-auto sm:pt-0">

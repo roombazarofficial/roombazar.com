@@ -27,6 +27,13 @@ export interface ConversationView {
   lastMessageAt: string;
   unreadCount: number;
   status: Conversation["status"];
+  /**
+   * Seeker-facing inquiry progress, derived from message activity rather than
+   * a separate tracked field: "sent" until the lister opens it, "viewed" once
+   * they have read it without replying, "responded" once they reply. Only
+   * meaningful from the seeker's side — null when the viewer is the lister.
+   */
+  inquiryStatus: "sent" | "viewed" | "responded" | null;
 }
 
 export function presentMessage(
@@ -57,6 +64,7 @@ export function presentConversation(
   lastMessagePreview: string,
   unreadCount: number,
   counterpartPhone: string | null,
+  inquiryStatus: "sent" | "viewed" | "responded" | null,
 ): ConversationView {
   const isSeeker = conversation.seekerId === viewer.id;
 
@@ -83,5 +91,6 @@ export function presentConversation(
     lastMessageAt: conversation.lastMessageAt,
     unreadCount,
     status: conversation.status,
+    inquiryStatus,
   };
 }

@@ -332,6 +332,11 @@ export class ConversationsService {
     ).length;
     const counterpartPhone = bothRevealed ? counterpart.phone : null;
 
+    const isSeeker = conversation.seekerId === viewer.id;
+    const inquiryStatus = isSeeker
+      ? inquiryStatusFor(visible, conversation.listerId)
+      : null;
+
     return presentConversation(
       conversation,
       viewer,
@@ -340,10 +345,32 @@ export class ConversationsService {
       lastMessagePreview,
       unreadCount,
       counterpartPhone,
+      inquiryStatus,
     );
   }
 }
 
 function dayAgo(): string {
   return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+}
+
+/**
+ * Derives the seeker-facing inquiry status from message activity instead of
+ * a separately tracked field: once the lister has replied it's "responded";
+ * otherwise "viewed" once the lister has opened the seeker's message; "sent"
+ * until then.
+ */
+export function inquiryStatusFor(
+  visibleMessages: Message[],
+  listerId: string,
+): "sent" | "viewed" | "responded" {
+  const listerReplied = visibleMessages.some(
+    (message) => message.senderId === listerId,
+  );
+  if (listerReplied) return "responded";
+
+  const listerViewed = visibleMessages.some(
+    (message) => message.senderId !== listerId && message.readAt !== null,
+  );
+  return listerViewed ? "viewed" : "sent";
 }
