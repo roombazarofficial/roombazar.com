@@ -120,11 +120,56 @@ function browserName(): string {
   return "Web";
 }
 
+/**
+ * A PushSubscription is scoped to the browser/origin, not to our app's user
+ * account — it survives logout, account deletion, even browser restarts.
+ * If one is already sitting on this registration with a different
+ * applicationServerKey than our current VAPID key (e.g. left over from a
+ * previous account, or after a key rotation), PushManager.subscribe() throws
+ * InvalidAccessError instead of replacing it. Drop it first so getToken()
+ * can create a fresh subscription with the current key.
+ */
+async function dropMismatchedSubscription(
+  registration: ServiceWorkerRegistration,
+): Promise<void> {
+  try {
+    const existing = await registration.pushManager.getSubscription();
+    if (!existing) return;
+
+    const currentKey = urlBase64ToUint8Array(vapidKey);
+    const existingKey = existing.options.applicationServerKey
+      ? new Uint8Array(existing.options.applicationServerKey as ArrayBuffer)
+      : null;
+
+    const sameKey =
+      existingKey !== null &&
+      existingKey.length === currentKey.length &&
+      existingKey.every((b, i) => b === currentKey[i]);
+
+    if (!sameKey) {
+      console.warn(
+        "[push] found a stale subscription with a different key — unsubscribing",
+      );
+      await existing.unsubscribe();
+    }
+  } catch (error) {
+    console.warn("[push] could not inspect/clear existing subscription", error);
+  }
+}
+
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(b64);
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+
 async function fetchToken(
   messaging: Messaging,
   registration: ServiceWorkerRegistration,
 ): Promise<string | null> {
   try {
+    await dropMismatchedSubscription(registration);
     const token = await withTimeout(
       getToken(messaging, { vapidKey, serviceWorkerRegistration: registration }),
       20000,

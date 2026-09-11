@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteAccountButton } from "./deleteaccountbutton";
 
 const sections = [
   { href: "/dashboard/settings/account", title: "Account", description: "Your phone number, email and language." },
@@ -42,9 +43,7 @@ export default function Page() {
           deleted.
         </p>
 
-        <button className="mt-3 rounded-control border border-danger/30 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10">
-          Delete my account
-        </button>
+        <DeleteAccountButton />
 
       </div>
 

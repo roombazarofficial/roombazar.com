@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { createInterface } from "node:readline";
 import { Readable } from "node:stream";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 const sourceUrl =
@@ -11,7 +10,7 @@ const sourceUrl =
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is required");
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+const prisma = new PrismaClient();
 
 type Place = {
   name: string;
@@ -145,7 +144,6 @@ async function main() {
         for (let index = 0; index < places.length; index += 500) {
           const result = await prisma.locality.createMany({
             data: places.slice(index, index + 500),
-            skipDuplicates: true,
           });
           insertedPlaces += result.count;
         }

@@ -8,6 +8,7 @@ import { SAVED_REPOSITORY } from "src/persistence/ports/saved.repository";
 import { AUTH_REPOSITORY } from "src/persistence/ports/auth.repository";
 import { NOTIFICATIONS_REPOSITORY } from "src/persistence/ports/notifications.repository";
 import { LISTING_DRAFT_REPOSITORY } from "src/persistence/ports/listingdraft.repository";
+import { REVIEWS_REPOSITORY } from "src/persistence/ports/reviews.repository";
 import { PrismaService } from "./prisma.service";
 import { PrismaListingDraftRepository } from "./listingdraft.prisma";
 import { PrismaListingsRepository } from "./listings.prisma";
@@ -18,6 +19,7 @@ import { PrismaReportsRepository } from "./reports.prisma";
 import { PrismaSavedRepository } from "./saved.prisma";
 import { PrismaAuthRepository } from "./auth.prisma";
 import { PrismaNotificationsRepository } from "./notifications.prisma";
+import { PrismaReviewsRepository } from "./reviews.prisma";
 
 @Global()
 @Module({
@@ -38,6 +40,7 @@ import { PrismaNotificationsRepository } from "./notifications.prisma";
       provide: LISTING_DRAFT_REPOSITORY,
       useClass: PrismaListingDraftRepository,
     },
+    { provide: REVIEWS_REPOSITORY, useClass: PrismaReviewsRepository },
   ],
   exports: [
     PrismaService,
@@ -50,6 +53,7 @@ import { PrismaNotificationsRepository } from "./notifications.prisma";
     AUTH_REPOSITORY,
     NOTIFICATIONS_REPOSITORY,
     LISTING_DRAFT_REPOSITORY,
+    REVIEWS_REPOSITORY,
   ],
 })
 export class PrismaPersistenceModule {}

@@ -178,6 +178,13 @@ export class PrismaUsersRepository implements UsersRepository {
         where: { createdById: id, status: { in: ["active", "paused"] } },
         data: { status: "expired", deletedAt: new Date() },
       });
+
+      /*
+        Push tokens are browser subscriptions tied to this account. Left
+        behind, they get silently targeted by future notification sends and
+        can collide with a new account created later in the same browser.
+      */
+      await tx.pushToken.deleteMany({ where: { userId: id } });
     });
   }
 }

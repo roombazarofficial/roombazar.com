@@ -12,6 +12,24 @@ import { formatRupees } from "@/lib/format/rupees";
 import { routes } from "@/lib/constants/routes";
 import type { Conversation } from "@/types/conversation";
 
+const inquiryStatusLabel: Record<
+  NonNullable<Conversation["inquiryStatus"]>,
+  string
+> = {
+  sent: "Sent",
+  viewed: "Viewed",
+  responded: "Responded",
+};
+
+const inquiryStatusTone: Record<
+  NonNullable<Conversation["inquiryStatus"]>,
+  "neutral" | "info" | "success"
+> = {
+  sent: "neutral",
+  viewed: "info",
+  responded: "success",
+};
+
 export function InboxList({ initial }: { initial: Conversation[] }) {
   const [conversations, setConversations] = useState(initial);
 
@@ -47,6 +65,11 @@ export function InboxList({ initial }: { initial: Conversation[] }) {
               <div className="flex items-center gap-2">
                 <p className="truncate text-sm font-medium text-ink">{conversation.counterpartName}</p>
                 {conversation.unreadCount > 0 && <Badge tone="brand">{conversation.unreadCount} new</Badge>}
+                {conversation.inquiryStatus && (
+                  <Badge tone={inquiryStatusTone[conversation.inquiryStatus]}>
+                    {inquiryStatusLabel[conversation.inquiryStatus]}
+                  </Badge>
+                )}
               </div>
               <p className="mt-0.5 truncate text-xs text-ink-muted">
                 {conversation.listingTitle} · {formatRupees(conversation.listingRentPaise)}/month

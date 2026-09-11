@@ -173,6 +173,24 @@ export function ListingCard({
             {roomTypeLabel}
           </span>
 
+          {/* Verified host badge (top-left, below type) */}
+          {listing.listerVerified && (
+            <span
+              title="Host identity verified by RoomBazar"
+              className="absolute left-2 top-8 flex items-center gap-1 rounded-full border border-success/30 bg-success-soft px-2 py-0.5 text-[10px] font-bold text-success shadow-card"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="size-2.5"
+                aria-hidden
+              >
+                <path d="M12 1 3 5v6c0 5.25 3.75 10.15 9 11 5.25-.85 9-5.75 9-11V5l-9-4Zm-1.4 14.6-3.6-3.6 1.4-1.4 2.2 2.2 5.2-5.2 1.4 1.4-6.6 6.6Z" />
+              </svg>
+              Verified
+            </span>
+          )}
+
           {/* Photo count badge (bottom-right) */}
           {listing.photoCount > 1 && (
             <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white">
@@ -405,12 +423,15 @@ export function ListingCard({
             </div>
           </form>
         ) : (
-          <div className="py-2 text-center">
+          <div className="py-2 text-center" role="status" aria-live="polite">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-success-soft text-success text-2xl">
               ✓
             </div>
             <p className="mt-3 text-sm text-ink font-medium">
-              You can now continue chatting with the host in your Inbox.
+              Nice! Your message has been sent.
+            </p>
+            <p className="mt-1 text-xs text-ink-muted">
+              You&apos;re one step closer to finding your place. Continue chatting with the host in your Inbox.
             </p>
           </div>
         )}

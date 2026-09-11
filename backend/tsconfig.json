@@ -24,6 +24,6 @@
     "forceConsistentCasingInFileNames": true,
     "paths": { "src/*": ["src/*"] }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "prisma/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }
