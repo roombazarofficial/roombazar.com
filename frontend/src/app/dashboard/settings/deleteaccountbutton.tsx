@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { routes } from "@/lib/constants/routes";
 import { useAuthUi } from "@/store/authuistore";
-import { deleteAccountClient } from "@/lib/api/users";
+import { deleteAccountClient } from "@/lib/api/users.client";
 import { unregisterToken } from "@/lib/api/notifications";
 import { getExistingToken, revokeToken } from "@/lib/firebase/messaging";
 
