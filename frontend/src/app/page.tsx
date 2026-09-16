@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { SiteShell } from "@/components/layout/siteshell";
 import { ListingCard } from "@/components/listing/listingcard";
 import { HeroSearchBar } from "@/components/search/herosearchbar";
@@ -33,15 +34,30 @@ export default async function Page() {
   return (
     <SiteShell>
       {/* ===== HERO SECTION ===== */}
-      <section className="relative border-b border-line bg-gradient-to-b from-brand-50/50 via-white to-white">
-        <div className="mx-auto max-w-7xl px-4 pt-10 pb-12 text-center sm:pt-14 sm:pb-16">
+      <section className="relative isolate overflow-hidden rounded-b-[2.5rem] sm:rounded-b-[3rem]">
+        {/* Banner photo background */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/images/hero/rbbanner.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[center_60%]"
+          />
+          {/* Dark scrim so the heading + search bar stay legible over the photo */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/55" />
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-14 text-center sm:pt-16 sm:pb-20">
           {/* Controlled, Balanced Heading */}
-          <h1 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-[2.75rem] leading-[1.2]">
-            Find a place that <span className="text-brand-600">feels like home</span>
+          <h1 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-4xl lg:text-[2.75rem] leading-[1.2]">
+            Find a place that <span className="text-brand-300">feels like home</span>
           </h1>
 
           {/* Supporting Text */}
-          <p className="mx-auto mt-3 max-w-lg text-sm text-ink-muted sm:text-base leading-relaxed">
+          <p className="mx-auto mt-3 max-w-lg text-sm text-white/85 drop-shadow-sm sm:text-base leading-relaxed">
             Browse rooms, flats, PGs, and commercial spaces — connect directly with owners.
           </p>
 
