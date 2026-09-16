@@ -4,6 +4,7 @@ import { SiteStructuredData } from "@/components/common/structureddata";
 import { AuthModal } from "@/components/auth/authmodal";
 import { SignInLauncher } from "@/components/auth/signinlauncher";
 import { WelcomeOfferPopup } from "@/components/common/welcomeofferpopup";
+import { NotificationCenter } from "@/components/notifications/notificationcenter";
 import { siteUrl, siteName, siteDescription } from "@/lib/seo/site";
 import { AuthProvider } from "@/providers/authprovider";
 import { SmoothScrollProvider } from "@/providers/smoothscroll";
@@ -77,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-IN" className={inter.variable}>
+    <html lang="en-IN" className={inter.variable} data-scroll-behavior="smooth">
       <body className={inter.className}>
         <AuthProvider>
           <SmoothScrollProvider>
@@ -98,6 +99,7 @@ export default function RootLayout({
             <SignInLauncher />
             <AuthModal />
             <WelcomeOfferPopup />
+            <NotificationCenter />
           </SmoothScrollProvider>
         </AuthProvider>
       </body>

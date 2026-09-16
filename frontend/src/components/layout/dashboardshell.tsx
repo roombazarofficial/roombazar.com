@@ -1,8 +1,10 @@
 import { SiteHeader } from "./siteheader";
 import { DashboardSidebar } from "./dashboardsidebar";
 import { DashboardMobileNav } from "./dashboardmobilenav";
-import { NotificationCenter } from "@/components/notifications/notificationcenter";
 
+// NotificationCenter is mounted once in the root layout, not here, so the
+// permission auto-prompt and foreground toasts also work on public pages
+// (landing page included), not just inside /dashboard.
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-surface-muted">
@@ -14,7 +16,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <DashboardMobileNav />
-      <NotificationCenter />
     </div>
   );
 }
