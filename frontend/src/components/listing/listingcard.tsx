@@ -121,7 +121,7 @@ export function ListingCard({
     <>
       <article
         className={cn(
-          "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-surface",
+          "group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface",
           "shadow-card transition-all duration-250 hover:-translate-y-1 hover:shadow-card-hover hover:border-line-strong",
           className,
         )}

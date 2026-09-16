@@ -9,9 +9,12 @@ import { onForegroundMessage } from "@/lib/firebase/messaging";
 import { usePushNotifications } from "./usepushnotifications";
 
 /**
- * Mounted once inside the dashboard shell. Three jobs:
+ * Mounted once in the root layout, so it runs on every page — landing page
+ * included, not just /dashboard. Three jobs:
  *  - re-register this browser's push token when permission is already granted
- *  - show the soft "Enable notifications" prompt (never auto-requests)
+ *  - auto-fire the native permission popup once per sign-in (see
+ *    usePushNotifications), with a soft "Enable notifications" card as a
+ *    fallback for browsers that silently ignore an ungestured request
  *  - render foreground messages as an in-app toast instead of a duplicate
  *    browser notification
  */

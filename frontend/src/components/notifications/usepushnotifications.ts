@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
 import {
   currentPermission,
@@ -38,9 +38,13 @@ export interface PushState {
 /**
  * Owns web-push state for the signed-in user's current browser.
  *
- * Never requests permission on load. If permission was already granted (e.g.
- * on a previous visit) the device is silently re-registered so a rotated token
- * stays current.
+ * As soon as a signed-in visitor's permission is still undecided, this
+ * auto-triggers the browser's native permission popup once (no button click
+ * required) — see the auto-prompt effect below. If permission was already
+ * granted (e.g. on a previous visit) the device is silently re-registered so a
+ * rotated token stays current. The soft card (`showPrompt`) is a fallback for
+ * browsers that silently ignore a permission request not triggered by a user
+ * gesture.
  */
 export function usePushNotifications(enabled: boolean): PushState {
   const [permission, setPermission] = useState<PermissionState>("unsupported");
@@ -119,12 +123,27 @@ export function usePushNotifications(enabled: boolean): PushState {
     setDismissed(true);
   }, []);
 
+  // Auto-fire the native permission popup once per sign-in, on whatever page
+  // the visitor happens to be on (landing page included) — no click needed.
+  // Guarded with a ref, not state, so it can never re-fire from its own
+  // permission/registered updates; it only runs again after a fresh mount
+  // (e.g. a new login).
+  const autoPrompted = useRef(false);
+  useEffect(() => {
+    if (!enabled || !available) return;
+    if (currentPermission() !== "default") return;
+    if (autoPrompted.current) return;
+    autoPrompted.current = true;
+    void enable();
+  }, [enabled, available, enable]);
+
   const showPrompt =
     enabled &&
     available &&
     permission === "default" &&
     !dismissed &&
-    !registered;
+    !registered &&
+    !busy;
 
   return {
     available,

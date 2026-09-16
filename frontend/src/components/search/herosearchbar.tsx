@@ -47,7 +47,7 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
       onSubmit={submit}
       className={`
         relative mx-auto mt-6 w-full max-w-5xl
-        rounded-2xl
+        rounded-[1.75rem] sm:rounded-full
         border border-line bg-white shadow-raised
         transition-all duration-200
         ${isLocationOpen ? "ring-2 ring-brand-500/20 border-brand-300" : "hover:border-line-strong hover:shadow-overlay"}
@@ -59,9 +59,9 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
             ========================================================================= */}
         <div
           className={`
-            relative min-w-0 flex-[1.4] px-4 py-3 sm:px-6
+            relative min-w-0 flex-[1.4] px-4 py-3 sm:px-6 sm:pl-7
             flex flex-col justify-center items-start text-left cursor-pointer
-            rounded-t-2xl sm:rounded-tr-none sm:rounded-l-2xl
+            rounded-t-[1.75rem] sm:rounded-tr-none sm:rounded-l-full
             transition-colors duration-150
             ${isLocationOpen ? "bg-brand-50/40" : "hover:bg-surface-muted/60"}
           `}
@@ -220,12 +220,12 @@ export function HeroSearchBar({ cities }: { cities: City[] }) {
         {/* =========================================================================
             5. SEARCH ACTION BUTTON
             ========================================================================= */}
-        <div className="p-2 sm:pr-2.5 flex items-center">
+        <div className="p-2 pb-3 sm:pb-2 sm:pr-2.5 flex items-center">
           <button
             type="submit"
             className="
               flex h-11 sm:h-12 w-full sm:w-auto items-center justify-center gap-2
-              rounded-xl bg-brand-600 px-7 sm:px-8
+              rounded-full bg-brand-600 px-7 sm:px-8
               text-sm font-bold text-white shadow-xs
               transition-all duration-150 hover:bg-brand-700 active:scale-[0.98]
               cursor-pointer
